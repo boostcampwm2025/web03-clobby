@@ -1,10 +1,7 @@
-import { Module } from "@nestjs/common";
-import { SettingController } from "./setting.controller";
-
+import { Module } from '@nestjs/common';
+import { SettingController } from './setting.controller';
 
 @Module({
-  controllers : [
-    SettingController
-  ]
+  controllers: [SettingController],
 })
-export class SettingModule{};
+export class SettingModule {}

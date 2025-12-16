@@ -1,1 +1,1 @@
-export * from "./make-hash";
+export * from './make-hash';

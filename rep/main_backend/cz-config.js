@@ -7,7 +7,10 @@ module.exports = {
       value: '🎨 Style',
       name: '🎨 Style:\tAdd or update code format (not updation production, UI,UX code)',
     },
-    { value: '🤖 Refactor', name: '🤖 Refactor:\tCode change that neither fixes a bug nor adds a feature' },
+    {
+      value: '🤖 Refactor',
+      name: '🤖 Refactor:\tCode change that neither fixes a bug nor adds a feature',
+    },
     {
       value: '✅ Test',
       name: '✅ Test:\tCode change related with tests cases',
@@ -16,11 +19,11 @@ module.exports = {
       value: '🚚 Chore',
       name: '🚚 Chore:\tChanges to the build process or auxiliary tools\n\t\tand libraries such as documentation generation',
     },
-		{
+    {
       value: '✂️ Remove',
       name: '✂️ Remove:\tRemove files ',
     },
-		{
+    {
       value: '🔧 Rename',
       name: '🔧 Rename:\tmove file or rename folder names',
     },
@@ -29,4 +32,4 @@ module.exports = {
   allowBreakingChanges: ['feat', 'fix'],
   skipQuestions: ['body'],
   subjectLimit: 100,
-}
+};

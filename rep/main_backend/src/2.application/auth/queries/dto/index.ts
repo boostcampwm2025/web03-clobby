@@ -1,1 +1,1 @@
-export * from "./payload.res";
+export * from './payload.res';

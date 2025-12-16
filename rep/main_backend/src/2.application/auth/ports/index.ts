@@ -1,1 +1,1 @@
-export * from "./token-issue";
+export * from './token-issue';

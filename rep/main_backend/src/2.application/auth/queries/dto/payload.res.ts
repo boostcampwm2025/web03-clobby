@@ -1,8 +1,6 @@
-
-
 export type PayloadRes = {
-  user_id : string;
-  email : string;
-  nickname : string;
-  access_token : string;
+  user_id: string;
+  email: string;
+  nickname: string;
+  access_token: string;
 };

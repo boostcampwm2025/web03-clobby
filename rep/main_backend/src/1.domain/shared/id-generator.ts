@@ -1,6 +1,3 @@
-
-
-
 export interface IdGenerator {
-  generate() : string;
-};
+  generate(): string;
+}

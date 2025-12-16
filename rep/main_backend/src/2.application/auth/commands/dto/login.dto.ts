@@ -1,14 +1,12 @@
-
-
 export type LoginUserDto = {
-  email : string;
+  email: string;
 };
 
 export type LoginNormalUserDto = LoginUserDto & {
-  password : string;
+  password: string;
 };
 
 export type LoginOauthUserDto = LoginUserDto & {
-  provider : string;
-  provider_id : string;
+  provider: string;
+  provider_id: string;
 };
