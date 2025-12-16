@@ -26,22 +26,21 @@ jobs:
       # 현재 브런치를 이 프로세스에 적용합니다.
       - name: Checkout backend
         uses: actions/checkout@v5
+
+      # pnpm을 사용할 수 있도록pnpm을 설정한다.
+      - name: pnpm 사용을 위한 세팅
+        uses: pnpm/action-setup@v4
+        with: 
+          version: 10
       
       # nodejs를 설정합니다.
       # pnpm-lock.yaml이 이 전역 cache를 참고하도록 한다.
       - name: nodejs 설정
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: "pnpm"
           cache-dependency-path: ./rep/main_backend/pnpm-lock.yaml 
-      
-      # pnpm을 사용할 수 있게 한다. -> 보통은 corepack으로 각각의 로컬에 적용
-      - name: pnpm 활성화 
-        run: |
-          corepack enable
-          corepack prepare pnpm@latest --activate
-          pnpm -v
 
       # pnpm을 이용해서 설치합니다. ( pnpm-lock.yaml을 사용 )
       - name: backend package 설치
