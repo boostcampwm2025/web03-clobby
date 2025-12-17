@@ -15,8 +15,10 @@ const geistMono = Geist_Mono({
 
 const suit = localFont({
   src: './fonts/SUIT-Variable.woff2',
+  src: './fonts/SUIT-Variable.woff2',
   display: 'swap',
   variable: '--font-suit',
+  weight: '100 900',
   weight: '100 900',
 });
 
@@ -41,6 +43,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
+      <body className={`${suit.variable} ${cafe24.variable} antialiased`}>
       <body className={`${suit.variable} ${cafe24.variable} antialiased`}>
         {children}
       </body>
