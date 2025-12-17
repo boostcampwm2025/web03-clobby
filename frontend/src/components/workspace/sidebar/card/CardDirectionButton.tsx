@@ -18,8 +18,8 @@ export default function CardDirectionButton({
       onClick={onClick}
       className={`text-md font-md flex-1 rounded-md border py-2 transition ${
         isActive
-          ? 'border-green-500 bg-[#EBFDB6] text-green-900'
-          : 'border-gray-500 bg-white text-gray-700 hover:bg-gray-50'
+          ? 'border-lime-500 bg-[#EBFDB6] text-lime-900'
+          : 'border-gray-300 bg-white text-gray-400 hover:bg-gray-50'
       }`}
     >
       {label}
