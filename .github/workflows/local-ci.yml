@@ -62,7 +62,7 @@ jobs:
   # 프론트엔드 테스트 진행
 
   # 빌드 후 -> 빌드 된 컨테이너 테스트  
-  docker-build-and-intergration-test:
+  docker-build-and-integration-test:
     name: Docker image 빌드 후 통합테스트
     runs-on: ubuntu-22.04
     needs: 

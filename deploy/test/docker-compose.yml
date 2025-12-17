@@ -1,7 +1,7 @@
 services:
   main-backend-app-1:
     container_name: main-backend-app-1
-    image: "${MAIN_BACKEND_IMG}:${MAIN_BACKEND_TAG}"
+    image: "${MAIN_BACKEND_IMG}:latest"
     env_file:
       - ./.env.backend
     networks:
@@ -10,7 +10,7 @@ services:
 
   main-backend-app-2:
     container_name: main-backend-app-2
-    image: "${MAIN_BACKEND_IMG}:${MAIN_BACKEND_TAG}"
+    image: "${MAIN_BACKEND_IMG}:latest"
     env_file:
       - ./.env.backend
     networks:
@@ -18,7 +18,7 @@ services:
 
   main-backend-app-3:
     container_name: main-backend-app-3
-    image: "${MAIN_BACKEND_IMG}:${MAIN_BACKEND_TAG}"
+    image: "${MAIN_BACKEND_IMG}:latest"
     env_file:
       - ./.env.backend
     networks:
@@ -42,7 +42,7 @@ services:
   # frontend 빌드 
   frontend:
     container_name: frontend
-    image: "${FRONTEND_IMG}:${FRONTEND_TAG}"
+    image: "${FRONTEND_IMG}:latest"
     # 환경 변수가 있다면
     # env_file:
     #   - ./.env.frontend
