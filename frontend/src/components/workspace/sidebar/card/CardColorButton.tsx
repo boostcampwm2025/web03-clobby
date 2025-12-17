@@ -17,7 +17,7 @@ export default function CardColorButton({
     <button
       onClick={onClick}
       className={`h-8 w-8 rounded-full border transition hover:scale-120 ${
-        isActive ? 'ring-2 ring-lime-500 ring-offset-1' : 'border-gray-200'
+        isActive ? 'ring-2 ring-lime-600 ring-offset-1' : 'border-neutral-200'
       }`}
       style={{ backgroundColor: color }}
     />

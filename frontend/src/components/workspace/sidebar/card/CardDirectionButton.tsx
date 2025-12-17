@@ -16,10 +16,10 @@ export default function CardDirectionButton({
   return (
     <button
       onClick={onClick}
-      className={`text-md font-md flex-1 rounded-md border py-2 transition ${
+      className={`flex-1 rounded-md border py-2 text-lg transition ${
         isActive
-          ? 'border-lime-500 bg-[#EBFDB6] text-lime-900'
-          : 'border-gray-300 bg-white text-gray-400 hover:bg-gray-50'
+          ? 'border-0 bg-lime-100 text-lime-600'
+          : 'border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50'
       }`}
     >
       {label}
