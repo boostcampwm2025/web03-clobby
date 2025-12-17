@@ -14,15 +14,15 @@ export default function CardBorderItem({
   return (
     <div className="flex cursor-pointer flex-col items-center gap-1 hover:opacity-80">
       <div
-        className={`flex h-16 w-16 items-center justify-center rounded-lg border-2 bg-gray-100 transition ${
-          isSelected ? 'border-lime-500 bg-white' : 'border-transparent'
+        className={`flex h-16 w-16 items-center justify-center rounded-lg border-2 bg-neutral-200 transition ${
+          isSelected ? 'border-lime-600 bg-white' : 'border-transparent'
         }`}
       >
         {!isSelected && (
           <div className="h-full w-full rounded bg-white opacity-50" />
         )}
       </div>
-      <span className="text-sm text-gray-600">{label}</span>
+      <span className="text-lg text-neutral-500">{label}</span>
     </div>
   );
 }

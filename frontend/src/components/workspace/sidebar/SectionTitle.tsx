@@ -7,5 +7,7 @@ interface SectionTitleProps {
 }
 
 export default function SectionTitle({ title }: SectionTitleProps) {
-  return <h3 className="text-md mb-3 font-bold text-gray-500">{title}</h3>;
+  return (
+    <h3 className="mb-3 text-sm font-semibold text-neutral-500">{title}</h3>
+  );
 }

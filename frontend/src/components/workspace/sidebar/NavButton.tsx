@@ -23,14 +23,16 @@ export default function NavButton({
       className={`group relative flex w-full flex-col items-center justify-center gap-1 py-4 transition ${
         isActive
           ? 'text-lime-600'
-          : 'text-gray-500 hover:bg-lime-50 hover:text-gray-900'
+          : 'text-neutral-500 hover:bg-lime-50 hover:text-neutral-900'
       }`}
     >
       {/* NavButton Icon 부분 */}
       <div className="relative h-12 w-12">
         <div
           className={`h-full w-full transition-colors duration-200 ${
-            isActive ? 'bg-lime-600' : 'bg-gray-600 group-hover:bg-gray-900'
+            isActive
+              ? 'bg-lime-600'
+              : 'bg-neutral-500 group-hover:bg-neutral-900'
           }`}
           style={{
             maskImage: `url(${icon})`,
@@ -48,7 +50,7 @@ export default function NavButton({
       </div>
 
       {/* NavButton Label 부분 */}
-      <span className="text-x font-medium">{label}</span>
+      <span className="text-lg">{label}</span>
     </button>
   );
 }
