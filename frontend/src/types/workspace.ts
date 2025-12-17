@@ -40,6 +40,10 @@ export interface TextItem extends BaseItem {
   textDecoration: string;
   align: TextAlign;
   wrap: string;
+  lineHeight?: number;
+  letterSpacing?: number;
+  stroke?: string;
+  strokeWidth?: number;
 }
 
 // 이미지
