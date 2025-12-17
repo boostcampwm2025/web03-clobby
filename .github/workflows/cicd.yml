@@ -182,12 +182,6 @@ jobs:
         working-directory: ./test/intergration-build-test
         run: ./frontend-intergration-test.sh ${{ vars.TEST_URL }}
 
-      # docker 내리기
-      - name: docker 내림
-        if: always()
-        working-directory: ./deploy/test
-        run: docker compose --env-file compose.env -f docker-compose.yml down
-
       # 테스트 실패시 에러 로깅 확인
       - name: 디버그 로그 수집
         if: failure()
@@ -206,6 +200,11 @@ jobs:
           docker logs main-backend-app-2 --tail=200 || true
           docker logs main-backend-app-3 --tail=200 || true
 
+      # docker 내리기
+      - name: docker 내림
+        if: always()
+        working-directory: ./deploy/test
+        run: docker compose --env-file compose.env -f docker-compose.yml down
 
   # 테스트 서버로 전송
   deploy-staging-server:
