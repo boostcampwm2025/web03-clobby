@@ -33,7 +33,7 @@ export type UserProfileProps = {
   id: number;
   user_id: string;
   profile_path: string;
-  meme_type: string;
+  mime_type: string;
   created_at?: Date;
   updated_at?: Date;
 };
@@ -157,14 +157,14 @@ const memeTypeList: Array<string> = [
   'image/svg+xml',
   'image/webp',
 ]; // 가능한 meme type들
-export function memeTypeVo(meme_type: UserProfileProps['meme_type']) {
+export function memeTypeVo(mime_type: UserProfileProps['mime_type']) {
   const name: string = 'meme_type';
 
-  baseVo({ name, value: meme_type, type: 'string' });
-  meme_type = meme_type.trim().toLowerCase();
+  baseVo({ name, value: mime_type, type: 'string' });
+  mime_type = mime_type.trim().toLowerCase();
 
-  if (!memeTypeList.includes(meme_type))
+  if (!memeTypeList.includes(mime_type))
     throw new NotAllowMemeType(memeTypeList);
 
-  return meme_type;
+  return mime_type;
 }

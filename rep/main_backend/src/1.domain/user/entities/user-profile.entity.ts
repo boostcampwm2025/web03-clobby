@@ -10,7 +10,7 @@ export class UserProfile {
   private readonly id: UserProfileProps['id'];
   private readonly user_id: UserProfileProps['user_id'];
   private readonly profile_path: UserProfileProps['profile_path'];
-  private readonly meme_type: UserProfileProps['meme_type'];
+  private readonly mime_type: UserProfileProps['mime_type'];
   private readonly created_at: Exclude<
     UserProfileProps['created_at'],
     undefined
@@ -24,14 +24,14 @@ export class UserProfile {
     id,
     user_id,
     profile_path,
-    meme_type,
+    mime_type,
     created_at = new Date(),
     updated_at = new Date(),
   }: UserProfileProps) {
     this.id = idVo(id);
     this.user_id = userIdVo(user_id);
     this.profile_path = profilePathVo(profile_path);
-    this.meme_type = memeTypeVo(meme_type);
+    this.mime_type = memeTypeVo(mime_type);
     this.created_at =
       created_at && created_at instanceof Date ? created_at : new Date();
     this.updated_at =
@@ -49,8 +49,8 @@ export class UserProfile {
   public getProfilePath(): UserProfileProps['profile_path'] {
     return this.profile_path;
   }
-  public getMemeType(): UserProfileProps['meme_type'] {
-    return this.meme_type;
+  public getMemeType(): UserProfileProps['mime_type'] {
+    return this.mime_type;
   }
   public getCreatedAt(): Exclude<UserProfileProps['created_at'], undefined> {
     return this.created_at;
@@ -64,7 +64,7 @@ export class UserProfile {
       id: this.id,
       user_id: this.user_id,
       profile_path: this.profile_path,
-      meme_type: this.meme_type,
+      mime_type: this.mime_type,
       created_at: this.created_at,
       updated_at: this.updated_at,
     };

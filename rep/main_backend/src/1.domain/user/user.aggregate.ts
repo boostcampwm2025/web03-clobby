@@ -20,7 +20,7 @@ export type ConnectOauthInput = Required<
 // user_profile 관련해서 생성할때 필요한 타입 정리
 export type UpsertProfileInput = Pick<
   UserProfileProps,
-  'user_id' | 'profile_path' | 'meme_type'
+  'user_id' | 'profile_path' | 'mime_type'
 >;
 
 // 각 entity 진입점
@@ -89,7 +89,7 @@ export class UserAggregate {
       id: 1,
       user_id: this.getUserId(),
       profile_path: input.profile_path,
-      meme_type: input.meme_type,
+      mime_type: input.mime_type,
     });
 
     return new UserAggregate({
