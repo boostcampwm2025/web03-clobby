@@ -27,7 +27,7 @@ export default function NavButton({
       }`}
     >
       {/* NavButton Icon 부분 */}
-      <div className="relative h-8 w-8">
+      <div className="relative h-12 w-12">
         <div
           className={`h-full w-full transition-colors duration-200 ${
             isActive ? 'bg-lime-600' : 'bg-gray-600 group-hover:bg-gray-900'
