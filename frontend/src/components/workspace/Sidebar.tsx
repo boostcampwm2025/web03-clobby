@@ -8,9 +8,8 @@ import { TextItem, ImageItem, VideoItem } from '@/types/Workspace';
 
 import NavButton from './sidebar/NavButton';
 import CardPanel from './sidebar/card/CardPanel';
-import ImagePanel from './sidebar/image/ImagePanel';
 
-type TabType = 'card' | 'text' | 'image' | 'video' | null;
+type TabType = 'card' | 'text' | 'image' | 'video';
 
 export default function Sidebar() {
   const [activeTab, setActiveTab] = useState<TabType>('card');
@@ -42,6 +41,8 @@ export default function Sidebar() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [cardData]);
 
+  // TODO : 각 아이템 추가 핸들러 구현
+
   return (
     <aside className="z-1 flex h-full border-r border-neutral-200 bg-white shadow-sm">
       {/* 좌측 네비게이션 */}
@@ -51,28 +52,31 @@ export default function Sidebar() {
             icon="/icons/sidebar/cardIcon.svg"
             label="카드"
             isActive={activeTab === 'card'}
-            onClick={() => toggleTab('card')}
+            onClick={() => setActiveTab('card')}
           />
           <NavButton
             icon="/icons/sidebar/textIcon.svg"
             label="텍스트"
             isActive={activeTab === 'text'}
-            onClick={() => toggleTab('text')}
-            onDoubleClick={() => {
-              handleAddText();
+            onClick={() => {
+              setActiveTab('text');
             }}
           />
           <NavButton
             icon="/icons/sidebar/imageIcon.svg"
             label="이미지"
             isActive={activeTab === 'image'}
-            onClick={() => toggleTab('image')}
+            onClick={() => {
+              setActiveTab('image');
+            }}
           />
           <NavButton
             icon="/icons/sidebar/videoIcon.svg"
             label="동영상"
             isActive={activeTab === 'video'}
-            onClick={() => toggleTab('video')}
+            onClick={() => {
+              setActiveTab('video');
+            }}
           />
         </div>
 
@@ -118,11 +122,9 @@ export default function Sidebar() {
 
       {/* 사이드바 상세 패널 */}
       {activeTab === 'card' && <CardPanel />}
-      {activeTab === 'text' && <TextPanel />}
       {/* TODO : 상세 패널 추가 */}
       {/* {activeTab === 'text' && <TextPanel />} */}
-      {activeTab === 'image' && <ImagePanel />}
-      {activeTab === 'image' && <ImagePanel />}
+      {/* {activeTab === 'image' && <ImagePanel />} */}
       {/* {activeTab === 'video' && <VideoPanel />} */}
     </aside>
   );
