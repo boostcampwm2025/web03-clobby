@@ -4,14 +4,12 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { v4 as uuidv4 } from 'uuid';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
-import { TextItem, ImageItem, VideoItem } from '@/types/workspace';
+import { TextItem, ImageItem, VideoItem } from '@/types/Workspace';
 
 import NavButton from './sidebar/NavButton';
 import CardPanel from './sidebar/card/CardPanel';
-import TextPanel from './sidebar/TextPanel';
 
-type TabType = 'card' | 'text' | 'image' | 'video' | null;
-type TabType = 'card' | 'text' | 'image' | 'video' | null;
+type TabType = 'card' | 'text' | 'image' | 'video';
 
 export default function Sidebar() {
   const [activeTab, setActiveTab] = useState<TabType>('card');
@@ -43,10 +41,6 @@ export default function Sidebar() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [cardData]);
 
-  const toggleTab = (tab: TabType) => {
-    setActiveTab((prev) => (prev === tab ? null : tab));
-  };
-
   // TODO : 각 아이템 추가 핸들러 구현
 
   return (
@@ -58,29 +52,31 @@ export default function Sidebar() {
             icon="/icons/sidebar/cardIcon.svg"
             label="카드"
             isActive={activeTab === 'card'}
-            onClick={() => toggleTab('card')}
+            onClick={() => setActiveTab('card')}
           />
           <NavButton
             icon="/icons/sidebar/textIcon.svg"
             label="텍스트"
             isActive={activeTab === 'text'}
-            onClick={() => toggleTab('text')}
-            onClick={() => toggleTab('text')}
-            onDoubleClick={() => {
-              handleAddText();
+            onClick={() => {
+              setActiveTab('text');
             }}
           />
           <NavButton
             icon="/icons/sidebar/imageIcon.svg"
             label="이미지"
             isActive={activeTab === 'image'}
-            onClick={() => toggleTab('image')}
+            onClick={() => {
+              setActiveTab('image');
+            }}
           />
           <NavButton
             icon="/icons/sidebar/videoIcon.svg"
             label="동영상"
             isActive={activeTab === 'video'}
-            onClick={() => toggleTab('video')}
+            onClick={() => {
+              setActiveTab('video');
+            }}
           />
         </div>
 
@@ -126,11 +122,9 @@ export default function Sidebar() {
 
       {/* 사이드바 상세 패널 */}
       {activeTab === 'card' && <CardPanel />}
-      {activeTab === 'text' && <TextPanel />}
       {/* TODO : 상세 패널 추가 */}
       {/* {activeTab === 'text' && <TextPanel />} */}
-      {activeTab === 'image' && <ImagePanel />}
-      {activeTab === 'image' && <ImagePanel />}
+      {/* {activeTab === 'image' && <ImagePanel />} */}
       {/* {activeTab === 'video' && <VideoPanel />} */}
     </aside>
   );
