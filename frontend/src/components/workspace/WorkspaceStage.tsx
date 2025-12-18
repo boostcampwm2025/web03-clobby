@@ -9,13 +9,19 @@ import RenderItem from './items/RenderItem';
 
 export default function WorkspaceStage() {
   // Store 상태 및 액션
-  const { cardData, selectedId, selectItem, updateItem, zoom, removeItem } =
-    useWorkspaceStore();
+  const {
+    cardData,
+    selectedId,
+    selectItem,
+    updateItem,
+    zoom,
+    removeItem,
+    setEditingNode,
+  } = useWorkspaceStore();
 
   // 접근 Ref 설정 (stage : 워크스페이스 / transformer : 선택 및 변형 도구)
   const stageRef = useRef<Konva.Stage | null>(null);
   const transformerRef = useRef<Konva.Transformer | null>(null);
-
   // Hydration 방지용
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -74,7 +80,9 @@ export default function WorkspaceStage() {
   }, [selectedId, removeItem]);
 
   // 선택 해제
-  const handleCheckDeselect = (e: any) => {
+  const handleCheckDeselect = (
+    e: Konva.KonvaEventObject<MouseEvent | TouchEvent>,
+  ) => {
     // 선택 대상이 스테이지인 경우(하단 워크스페이스가 bg-rect)
     const clickedOnEmpty =
       e.target === e.target.getStage() || e.target.hasName('bg-rect');
@@ -82,6 +90,7 @@ export default function WorkspaceStage() {
     // 선택 해제
     if (clickedOnEmpty) {
       selectItem(null);
+      setEditingNode(null);
     }
   };
 
@@ -131,6 +140,7 @@ export default function WorkspaceStage() {
               if (newBox.width < 5 || newBox.height < 5) {
                 return oldBox;
               }
+
               return newBox;
             }}
           />
