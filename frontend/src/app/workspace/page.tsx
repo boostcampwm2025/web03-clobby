@@ -26,11 +26,11 @@ export default function WorkspacePage() {
   return (
     <div className="flex h-screen w-full flex-row overflow-hidden">
       <Sidebar />
-      <div className="absolute top-4 left-1/2 z-50 -translate-x-1/2">
-        <ToolbarManager />
-      </div>
+      <div className="relative flex min-w-0 flex-1 flex-col">
+        <div className="absolute top-4 left-1/2 z-50 -translate-x-1/2">
+          <ToolbarManager />
+        </div>
 
-      <div className="flex min-w-0 flex-1 flex-col">
         {/* 워크스페이스 영역*/}
         <main className="relative flex flex-1 items-center justify-center overflow-hidden bg-neutral-200">
           <WorkspaceStage />

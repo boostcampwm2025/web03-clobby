@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import Konva from 'konva';
 import { Stage, Layer, Rect, Transformer } from 'react-konva';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
