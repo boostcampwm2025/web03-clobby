@@ -1,6 +1,5 @@
 import { create } from 'zustand';
-import { CardData, WorkspaceItem } from '@/types/workspace';
-import Konva from 'konva';
+import { CardData, WorkspaceItem } from '@/types/Workspace';
 
 // State 타입 정의
 interface WorkspaceState {
