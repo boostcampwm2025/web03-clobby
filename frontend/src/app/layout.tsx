@@ -42,7 +42,6 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={`${suit.variable} ${cafe24.variable} antialiased`}>
-      <body className={`${suit.variable} ${cafe24.variable} antialiased`}>
         {children}
       </body>
     </html>
