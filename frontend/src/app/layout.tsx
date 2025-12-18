@@ -41,7 +41,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-    <html lang="ko">
       <body
         className={`${suit.variable} ${cafe24.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
