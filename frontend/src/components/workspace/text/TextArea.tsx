@@ -84,6 +84,8 @@ export default function TextArea({
     const handleInput = () => {
       textarea.style.height = 'auto';
       textarea.style.height = `${textarea.scrollHeight}px`;
+
+      onChange(textarea.value);
     };
 
     const handleOutsideClick = (e: MouseEvent) => {

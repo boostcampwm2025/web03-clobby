@@ -22,6 +22,9 @@ export default function WorkspaceStage() {
   // 접근 Ref 설정 (stage : 워크스페이스 / transformer : 선택 및 변형 도구)
   const stageRef = useRef<Konva.Stage | null>(null);
   const transformerRef = useRef<Konva.Transformer | null>(null);
+
+  const selectedItem = cardData.items.find((item) => item.id === selectedId);
+  const isTextSelected = selectedItem?.type === 'text';
   // Hydration 방지용
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -135,12 +138,31 @@ export default function WorkspaceStage() {
           {/* 선택,변형 */}
           <Transformer
             ref={transformerRef}
-            // 박스 크기 제한
+            enabledAnchors={
+              isTextSelected
+                ? ['middle-left', 'middle-right']
+                : [
+                    'top-left',
+                    'top-right',
+                    'bottom-left',
+                    'bottom-right',
+                    'top-center',
+                    'bottom-center',
+                    'middle-left',
+                    'middle-right',
+                  ]
+            }
+            anchorSize={10}
+            anchorCornerRadius={5}
+            anchorStrokeWidth={1.5}
+            anchorStroke="#65a30d"
+            borderStroke="#65a30d"
+            borderStrokeWidth={1.5}
+            rotationSnaps={[0, 90, 180, 270]}
+            rotationSnapTolerance={10}
+            keepRatio={false}
             boundBoxFunc={(oldBox, newBox) => {
-              if (newBox.width < 5 || newBox.height < 5) {
-                return oldBox;
-              }
-
+              newBox.width = Math.max(30, newBox.width);
               return newBox;
             }}
           />

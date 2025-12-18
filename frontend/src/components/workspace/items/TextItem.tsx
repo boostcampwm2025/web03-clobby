@@ -37,6 +37,28 @@ export default function TextItem({ item, onSelect, onChange }: TextItemProps) {
           y: e.target.y(),
         });
       }}
+      // 박스 늘릴때 텍스트 늘어짐 보정
+      onTransform={(e) => {
+        const node = e.target;
+        const scaleX = node.scaleX();
+        const newWidth = Math.max(30, node.width() * scaleX);
+        //
+        node.setAttrs({
+          width: newWidth,
+          scaleX: 1,
+          scaleY: 1,
+        });
+      }}
+      onTransformEnd={(e) => {
+        const node = e.target;
+        node.height();
+        onChange({
+          x: node.x(),
+          y: node.y(),
+          width: node.width(),
+          rotation: node.rotation(),
+        });
+      }}
     />
   );
 }
