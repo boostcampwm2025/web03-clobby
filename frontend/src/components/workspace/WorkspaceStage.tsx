@@ -14,7 +14,7 @@ export default function WorkspaceStage() {
 
   // 접근 Ref 설정 (stage : 워크스페이스 / transformer : 선택 및 변형 도구)
   const stageRef = useRef<Konva.Stage | null>(null);
-  const transformerRef = useRef<any>(null);
+  const transformerRef = useRef<Konva.Transformer | null>(null);
 
   // Hydration 방지용
   const [mounted, setMounted] = useState(false);
@@ -40,10 +40,10 @@ export default function WorkspaceStage() {
         // 찾으면 transformer node 배열 추가 후 화면 갱신
         // 못찾으면 빈 배열
         if (selectedNode) {
-          transformerRef.current.nodes([selectedNode]);
-          transformerRef.current.getLayer().batchDraw();
+          transformerRef.current?.nodes([selectedNode]);
+          transformerRef.current?.getLayer()?.batchDraw();
         } else {
-          transformerRef.current.nodes([]);
+          transformerRef.current?.nodes([]);
         }
       } else {
         // 선택된게 없으면 빈배열
