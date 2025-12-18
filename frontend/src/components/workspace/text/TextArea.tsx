@@ -29,7 +29,7 @@ export default function TextArea({
 
     textarea.style.position = 'absolute';
     textarea.style.left = `${absPos.x}px`;
-    textarea.style.top = `${absPos.y}px`;
+    textarea.style.top = `${absPos.y + 1}px`;
 
     // 크기
     textarea.style.width = `${textNode.width() * stageScale}px`;
