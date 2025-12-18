@@ -44,9 +44,9 @@ export default function Sidebar() {
   // TODO : 각 아이템 추가 핸들러 구현
 
   return (
-    <aside className="z-1 flex h-full border-r border-gray-200 bg-white shadow-sm">
+    <aside className="z-1 flex h-full border-r border-neutral-200 bg-white shadow-sm">
       {/* 좌측 네비게이션 */}
-      <nav className="flex w-30 flex-col items-center justify-between border-r border-gray-100 py-4">
+      <nav className="flex w-30 flex-col items-center justify-between border-r border-neutral-200 py-4">
         <div className="flex w-full flex-col gap-2">
           <NavButton
             icon="/icons/sidebar/cardIcon.svg"
@@ -92,7 +92,9 @@ export default function Sidebar() {
             >
               <div
                 className={`h-8 w-8 transition-colors duration-200 ${
-                  isSaved ? 'bg-white' : 'bg-gray-400 group-hover:bg-lime-600'
+                  isSaved
+                    ? 'bg-white'
+                    : 'bg-neutral-400 group-hover:bg-lime-600'
                 }`}
                 style={{
                   maskImage: `url(/icons/sidebar/checkIcon.svg)`,
@@ -108,8 +110,8 @@ export default function Sidebar() {
             </div>
 
             <span
-              className={`text-md font-bold transition-colors ${
-                isSaved ? 'text-lime-600' : 'text-gray-500'
+              className={`text-sm font-semibold transition-colors ${
+                isSaved ? 'text-lime-600' : 'text-neutral-500'
               }`}
             >
               {isSaved ? '저장됨' : '완료'}
