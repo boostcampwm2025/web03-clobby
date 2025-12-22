@@ -4,7 +4,7 @@ import { NotAllowBackgroundColor, NotAllowStatusValue } from "@error/domain/card
 
 
 const statusTypes = ['published', 'draft', 'archived'] as const;
-type StatusProps = typeof statusTypes[number];
+export type StatusProps = typeof statusTypes[number];
 
 export type CardProps = {
   card_id : string;
@@ -113,8 +113,8 @@ export function workspaceHeightVo( workspace_height : CardProps["workspace_heigh
 // background_color을 검증
 const backgroundColorRegxp : Array<RegExp> = [
   /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/,
-  /^rgb\(\d{1,3},\d{1,3},\d{1,3}\)$/,
-  /^rgba\(\d{1,3},\d{1,3},\d{1,3},(0(\.\d+)?|1(\.0+)?)\)$/
+  /^rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)$/,
+  /^rgba\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*(0(\.\d+)?|1(\.0+)?)\s*\)$/
 ];
 export function backgroundColorVo( background_color : CardProps["background_color"] ) : string {
   const name : string = "background_color";

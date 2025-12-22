@@ -6,6 +6,7 @@ import {
   type UserProps,
 } from '@domain/user/user.vo';
 
+
 // User entity로 쓰일 객체
 export class User {
   private readonly user_id: UserProps['user_id'];
