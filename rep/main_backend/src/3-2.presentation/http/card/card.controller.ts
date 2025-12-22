@@ -7,7 +7,7 @@ import { CreateCardValidate } from "./card.validate";
 import { CreateCardDto } from "@app/card/commands/dto";
 
 
-@Controller("/api/cards")
+@Controller("api/cards")
 export class CardController {
   constructor(
     private readonly cardService : CardService
