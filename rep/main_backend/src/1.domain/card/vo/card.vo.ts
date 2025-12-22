@@ -3,7 +3,7 @@ import { baseVo } from "@domain/shared";
 import { NotAllowBackgroundColor, NotAllowStatusValue } from "@error/domain/card/card.error";
 
 
-const statusTypes = ['published', 'draft', 'archived'] as const;
+export const statusTypes = ['published', 'draft', 'archived'] as const;
 export type StatusProps = typeof statusTypes[number];
 
 export type CardProps = {

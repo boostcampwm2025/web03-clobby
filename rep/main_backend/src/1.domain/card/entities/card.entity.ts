@@ -2,7 +2,6 @@ import { userIdVo } from "@domain/user/user.vo";
 import { backgroundColorVo, cardIdVo, CardProps, categoryIdVo, statusVo, thumbnailPathVo, titleVo, workspaceHeightVo, workspaceWidthVo } from "@domain/card/vo";
 
 
-
 export class Card {
   private readonly card_id : CardProps["card_id"];
   private readonly user_id : CardProps["user_id"];
@@ -49,7 +48,7 @@ export class Card {
   getUpdatedAt(): Exclude<CardProps['updated_at'], undefined> {return this.updated_at;};
   getDeletedAt(): CardProps["deleted_at"] { return this.deleted_at; };
 
-  getData() : CardProps {
+  getData() : Required<Omit<CardProps, "deleted_at">> | Record<"deleted_at", CardProps["deleted_at"]> {
     return {
       card_id : this.card_id,
       user_id : this.user_id,
