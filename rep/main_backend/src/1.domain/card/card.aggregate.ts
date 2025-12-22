@@ -172,9 +172,7 @@ export class CardAggregate {
   public getCard(): Card {
     return this.card;
   }
-  public getCardData():
-    | Required<Omit<CardProps, 'deleted_at'>>
-    | Record<'deleted_at', CardProps['deleted_at']> {
+  public getCardData(): Required<CardProps> {
     return this.card.getData();
   }
   public getCardItems(): readonly CardItem[] {

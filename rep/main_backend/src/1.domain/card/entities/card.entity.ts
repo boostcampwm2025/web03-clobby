@@ -94,9 +94,8 @@ export class Card {
     return this.deleted_at;
   }
 
-  getData():
-    | Required<Omit<CardProps, 'deleted_at'>>
-    | Record<'deleted_at', CardProps['deleted_at']> {
+  getData(): Required<CardProps>
+    {
     return {
       card_id: this.card_id,
       user_id: this.user_id,
@@ -109,7 +108,7 @@ export class Card {
       background_color: this.background_color,
       created_at: this.created_at,
       updated_at: this.updated_at,
-      deleted_at: this.deleted_at,
+      deleted_at : this.deleted_at || new Date()
     };
   }
 }

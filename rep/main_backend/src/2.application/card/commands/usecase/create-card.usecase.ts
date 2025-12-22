@@ -4,10 +4,11 @@ import { InsertValueToDb } from "@app/ports/db/db.outbound";
 import { CardAggregate } from "@domain/card/card.aggregate";
 import { CardProps, CardStateProps } from "@domain/card/vo";
 import { NotCreateCardStateError } from "@error/application/card/card.error";
+import { Injectable } from "@nestjs/common";
 
 
 export type InsertCardAndCardStateDataProps = {
-  card : Required<Omit<CardProps, "deleted_at">> | Record<"deleted_at", Date | undefined>;
+  card : Required<CardProps>;
   cardState : CardStateProps;
 };
 
@@ -17,6 +18,7 @@ type CreateCardUsecaseProps<T> = {
 };
 
 // card를 생성할 때 사용하는 usecase
+@Injectable()
 export class CreateCardUsecase<T> {
   private readonly cardIdGenrator : CreateCardUsecaseProps<T>["cardIdGenrator"];
   private readonly insertCardAndCardStateToDb : CreateCardUsecaseProps<T>["insertCardAndCardStateToDb"];
@@ -46,7 +48,7 @@ export class CreateCardUsecase<T> {
      });
 
     // 2. 데이터 저장 ( card + card_stat )
-    const card : Required<Omit<CardProps, "deleted_at">> | Record<"deleted_at", Date | undefined> = cardAggregate.getCard().getData();
+    const card : Required<CardProps> = cardAggregate.getCard().getData();
     const cardState : CardStateProps | undefined = cardAggregate.getCardState()?.getData();
     if ( !cardState ) throw new NotCreateCardStateError();
     const insertCardAndCardStateData : InsertCardAndCardStateDataProps = {
@@ -57,6 +59,6 @@ export class CreateCardUsecase<T> {
 
     // 3. card_id 반환
     return cardAggregate.getCard().getCardId();
-  }
+  };
 
 };
