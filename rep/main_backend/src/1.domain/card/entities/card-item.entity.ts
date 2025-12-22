@@ -1,7 +1,6 @@
 import { cardIdVo, cardItemIsLockedVo, cardItemIsVisibleVo, cardItemNameVo, cardItemOpacityVo, cardItemPositionVo, CardItemProps, cardItemRotationVo, cardItemScaleVo, cardItemSizeVo, cardItemTypeVo, cardItemZindexVo, itemIdVo } from "../vo";
 
 
-
 export class CardItem {
   private readonly item_id : CardItemProps["item_id"];
   private readonly card_id : CardItemProps["card_id"];
