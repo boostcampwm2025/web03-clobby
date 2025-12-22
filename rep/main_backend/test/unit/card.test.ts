@@ -1,8 +1,464 @@
-import { CardItem } from "../../src/1.domain/card/entities";
-import { CardItemTypeProps } from "../../src/1.domain/card/vo";
+import { Card, CardItem } from "../../src/1.domain/card/entities";
+import { CardItemTypeProps, StatusProps } from "../../src/1.domain/card/vo";
 
 
 describe("domain 레이어에 card와 관련된 단위테스트", () => {
+  const now = new Date();
+
+  // 정합성에 사용할 card에 대한 레이어 테스트
+  type TestCase1Props = {
+    card_id: string | undefined;
+    user_id: string | undefined;
+    category_id: number | undefined;
+    thumbnail_path: string | undefined;
+    status: any;
+    title: string | undefined;
+    workspace_width: number | undefined;
+    workspace_height: number | undefined;
+    background_color: string | undefined;
+    created_at?: Date | undefined;
+    updated_at?: Date | undefined; 
+    deleted_at?: Date | undefined;
+    ok : boolean
+  };
+
+  const TestCase1 : Array<TestCase1Props> = [
+    {
+      card_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      user_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      category_id : 1,
+      thumbnail_path : "thumbnail.png",
+      status : "archived",
+      title : "나의 취미는",
+      workspace_height : 100,
+      workspace_width : 100,
+      background_color : "#ffcc00",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : true
+    },
+    {
+      card_id : undefined,
+      user_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      category_id : 1,
+      thumbnail_path : "thumbnail.png",
+      status : "archived",
+      title : "나의 취미는",
+      workspace_height : 100,
+      workspace_width : 100,
+      background_color : "#ffcc00",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : false
+    },    
+    {
+      card_id : '     018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0    ',
+      user_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      category_id : 1,
+      thumbnail_path : "thumbnail.png",
+      status : "archived",
+      title : "나의 취미는",
+      workspace_height : 100,
+      workspace_width : 100,
+      background_color : "#ffcc00",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : true
+    },
+    {
+      card_id : '550e8400-e29b-41d4-a716-446655440000',
+      user_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      category_id : 1,
+      thumbnail_path : "thumbnail.png",
+      status : "archived",
+      title : "나의 취미는",
+      workspace_height : 100,
+      workspace_width : 100,
+      background_color : "#ffcc00",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : false
+    },
+    {
+      card_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      user_id : undefined,
+      category_id : 1,
+      thumbnail_path : "thumbnail.png",
+      status : "archived",
+      title : "나의 취미는",
+      workspace_height : 100,
+      workspace_width : 100,
+      background_color : "#ffcc00",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : false
+    },
+    {
+      card_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      user_id : '      018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0     ',
+      category_id : 1,
+      thumbnail_path : "thumbnail.png",
+      status : "archived",
+      title : "나의 취미는",
+      workspace_height : 100,
+      workspace_width : 100,
+      background_color : "#ffcc00",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : true
+    },
+    {
+      card_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      user_id : '550e8400-e29b-41d4-a716-446655440000',
+      category_id : 1,
+      thumbnail_path : "thumbnail.png",
+      status : "archived",
+      title : "나의 취미는",
+      workspace_height : 100,
+      workspace_width : 100,
+      background_color : "#ffcc00",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : false
+    },
+    {
+      card_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      user_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      category_id : 0,
+      thumbnail_path : "thumbnail.png",
+      status : "archived",
+      title : "나의 취미는",
+      workspace_height : 100,
+      workspace_width : 100,
+      background_color : "#ffcc00",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : true
+    },
+    {
+      card_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      user_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      category_id : -1,
+      thumbnail_path : "thumbnail.png",
+      status : "archived",
+      title : "나의 취미는",
+      workspace_height : 100,
+      workspace_width : 100,
+      background_color : "#ffcc00",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : false
+    },
+    {
+      card_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      user_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      category_id : 1,
+      thumbnail_path : Array(2048).fill("a").join(""),
+      status : "archived",
+      title : "나의 취미는",
+      workspace_height : 100,
+      workspace_width : 100,
+      background_color : "#ffcc00",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : true
+    },
+    {
+      card_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      user_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      category_id : 1,
+      thumbnail_path : Array(2049).fill("a").join(""),
+      status : "archived",
+      title : "나의 취미는",
+      workspace_height : 100,
+      workspace_width : 100,
+      background_color : "#ffcc00",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : false
+    },
+    {
+      card_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      user_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      category_id : 1,
+      thumbnail_path : "thumbnail.png",
+      status : "draft",
+      title : "나의 취미는",
+      workspace_height : 100,
+      workspace_width : 100,
+      background_color : "#ffcc00",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : true
+    },
+    {
+      card_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      user_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      category_id : 1,
+      thumbnail_path : "thumbnail.png",
+      status : "published",
+      title : "나의 취미는",
+      workspace_height : 100,
+      workspace_width : 100,
+      background_color : "#ffcc00",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : true
+    },
+    {
+      card_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      user_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      category_id : 1,
+      thumbnail_path : "thumbnail.png",
+      status : "another",
+      title : "나의 취미는",
+      workspace_height : 100,
+      workspace_width : 100,
+      background_color : "#ffcc00",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : false
+    },
+    {
+      card_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      user_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      category_id : 1,
+      thumbnail_path : "thumbnail.png",
+      status : "  Archived",
+      title : "나의 취미는",
+      workspace_height : 100,
+      workspace_width : 100,
+      background_color : "#ffcc00",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : true
+    },
+    {
+      card_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      user_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      category_id : 1,
+      thumbnail_path : "thumbnail.png",
+      status : "archived",
+      title : Array(255).fill("a").join(""),
+      workspace_height : 100,
+      workspace_width : 100,
+      background_color : "#ffcc00",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : true
+    },
+    {
+      card_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      user_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      category_id : 1,
+      thumbnail_path : "thumbnail.png",
+      status : "archived",
+      title : Array(256).fill("a").join(""),
+      workspace_height : 100,
+      workspace_width : 100,
+      background_color : "#ffcc00",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : false
+    },
+    {
+      card_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      user_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      category_id : 1,
+      thumbnail_path : "thumbnail.png",
+      status : "archived",
+      title : "나의 취미는",
+      workspace_height : 0,
+      workspace_width : 100,
+      background_color : "#ffcc00",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : true
+    },
+    {
+      card_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      user_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      category_id : 1,
+      thumbnail_path : "thumbnail.png",
+      status : "archived",
+      title : "나의 취미는",
+      workspace_height : -1,
+      workspace_width : 100,
+      background_color : "#ffcc00",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : false
+    },
+    {
+      card_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      user_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      category_id : 1,
+      thumbnail_path : "thumbnail.png",
+      status : "archived",
+      title : "나의 취미는",
+      workspace_height : undefined,
+      workspace_width : 100,
+      background_color : "#ffcc00",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : false
+    },
+    {
+      card_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      user_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      category_id : 1,
+      thumbnail_path : "thumbnail.png",
+      status : "archived",
+      title : "나의 취미는",
+      workspace_height : 100,
+      workspace_width : 0,
+      background_color : "#ffcc00",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : true
+    },
+    {
+      card_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      user_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      category_id : 1,
+      thumbnail_path : "thumbnail.png",
+      status : "archived",
+      title : "나의 취미는",
+      workspace_height : 100,
+      workspace_width : -1,
+      background_color : "#ffcc00",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : false
+    },
+    {
+      card_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      user_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      category_id : 1,
+      thumbnail_path : "thumbnail.png",
+      status : "archived",
+      title : "나의 취미는",
+      workspace_height : 100,
+      workspace_width : undefined,
+      background_color : "#ffcc00",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : false
+    },
+    {
+      card_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      user_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      category_id : 1,
+      thumbnail_path : "thumbnail.png",
+      status : "archived",
+      title : "나의 취미는",
+      workspace_height : 100,
+      workspace_width : 100,
+      background_color : "rgb(255, 128, 0)",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : true
+    },
+    {
+      card_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      user_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      category_id : 1,
+      thumbnail_path : "thumbnail.png",
+      status : "archived",
+      title : "나의 취미는",
+      workspace_height : 100,
+      workspace_width : 100,
+      background_color : "rgba(34, 12, 200, 0.5)",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : true
+    },
+    {
+      card_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      user_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      category_id : 1,
+      thumbnail_path : "thumbnail.png",
+      status : "archived",
+      title : "나의 취미는",
+      workspace_height : 100,
+      workspace_width : 100,
+      background_color : undefined,
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : false
+    },
+    {
+      card_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      user_id : '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',
+      category_id : 1,
+      thumbnail_path : "thumbnail.png",
+      status : "archived",
+      title : "나의 취미는",
+      workspace_height : 100,
+      workspace_width : 100,
+      background_color : "basda",
+      created_at : now,
+      updated_at : now,
+      deleted_at : now,
+      ok : false
+    },
+  ];
+  test.each(TestCase1)("card entity에 정합성 테스트", ({ card_id, user_id, category_id, thumbnail_path, status, title, workspace_height, workspace_width, background_color, created_at, updated_at, deleted_at, ok }) => {
+    const test1 = () => {
+      card_id = card_id as string;
+      user_id = user_id as string;
+      category_id = category_id as number;
+      title = title as string;
+      workspace_height = workspace_height as number;
+      workspace_width = workspace_width as number;
+      background_color = background_color as string;
+
+      return new Card({ card_id, user_id, category_id, thumbnail_path, title, status, workspace_height, workspace_width, background_color, created_at, updated_at, deleted_at });
+    };
+
+    if ( ok ) {
+      const t1 = test1();
+      expect(t1.getCardId()).toBe(card_id?.trim());
+      expect(t1.getUserId()).toBe(user_id?.trim());
+      expect(t1.getCategoryId()).toBe(category_id);
+      expect(t1.getThumbnailPath()).toBe(thumbnail_path?.trim());
+      expect(t1.getTitle()).toBe(title?.trim());
+      expect(t1.getStatus()).toBe(status?.trim().toLowerCase());
+      expect(t1.getWorkSpaceWidth()).toBe(workspace_width);
+      expect(t1.getWorkSpaceHeight()).toBe(workspace_height);
+      expect(t1.getBackgroundColor()).toBe(background_color?.trim());
+    } else {
+      expect(test1).toThrow();
+    }
+
+  });
+
 
   // 정합성에 사용할 card에 레이어 테스트
   type TestCase2Props = {
@@ -28,7 +484,6 @@ describe("domain 레이어에 card와 관련된 단위테스트", () => {
       ok : boolean;
   };
 
-  const now = new Date();
   const TestCase2 : Array<TestCase2Props> = [
     {    
       item_id: '018e9a48-3c8a-7b20-bc9d-9f5b8e9f88c0',

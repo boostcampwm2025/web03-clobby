@@ -51,8 +51,8 @@ export function thumbnailPathVo(
   baseVo({ name, value: thumbnail_path, type: 'string' });
   thumbnail_path = thumbnail_path.trim();
 
-  const length: number = 255;
-  if (thumbnail_path.length > 255)
+  const length: number = 2048;
+  if (thumbnail_path.length > length)
     throw new NotAllowMaxLengthText({ name, length });
 
   return thumbnail_path;
@@ -63,7 +63,7 @@ export function statusVo(status: CardProps['status']): StatusProps {
   const name: string = 'status';
 
   baseVo({ name, value: status, type: 'string' });
-  status = status.trim() as any;
+  status = status.trim().toLowerCase() as any;
 
   if (!statusTypes.includes(status)) throw new NotAllowStatusValue();
 
