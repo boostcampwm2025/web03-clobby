@@ -5,7 +5,7 @@ import { IdGenerator } from "@domain/shared";
 import { CardItemAssetProps, CardItemProps } from "@domain/card/vo";
 import { NotAllowCreateCardItemNotUploadInfo, NotCreateCardItemData } from "@error/application/card/card.error";
 import { DeleteValueToDb, InsertValueToDb } from "@app/ports/db/db.outbound";
-import { GetUploadUrlFromDisk } from "@/2.application/ports/disk/disk.inbound";
+import { GetMultiPartVerGroupIdFromDisk, GetUploadUrlFromDisk } from "@/2.application/ports/disk/disk.inbound";
 
 
 type UploadCardItemUsecaseProps<T, ET> = {
@@ -13,7 +13,8 @@ type UploadCardItemUsecaseProps<T, ET> = {
   insertCardItemToDb : InsertValueToDb<T>;
   insertCardItemAndCardItemAssetToDb : InsertValueToDb<T>;
   deleteCardItemAndCardItemAssetToDb : DeleteValueToDb<T>;
-  getUploadUrlFromDisk : GetUploadUrlFromDisk<ET>
+  getUploadUrlFromDisk : GetUploadUrlFromDisk<ET>;
+  getMultiVerGroupIdFromDisk : GetMultiPartVerGroupIdFromDisk<ET>;
 };
 
 export type InsertCardItemAndAssetDataProps = {
@@ -28,15 +29,17 @@ export class UploadingCardItemUsecase<T, ET> {
   private readonly insertCardItemAndCardItemAssetToDb : UploadCardItemUsecaseProps<T, ET>["insertCardItemAndCardItemAssetToDb"];
   private readonly deleteCardItemAndCardItemAssetToDb : UploadCardItemUsecaseProps<T, ET>["deleteCardItemAndCardItemAssetToDb"];
   private readonly getUploadUrlFromDisk : UploadCardItemUsecaseProps<T, ET>["getUploadUrlFromDisk"];
+  private readonly getMultiVerGroupIdFromDisk : UploadCardItemUsecaseProps<T, ET>["getMultiVerGroupIdFromDisk"];
 
   constructor({
-    itemIdGenerator, insertCardItemToDb, insertCardItemAndCardItemAssetToDb, deleteCardItemAndCardItemAssetToDb, getUploadUrlFromDisk
+    itemIdGenerator, insertCardItemToDb, insertCardItemAndCardItemAssetToDb, deleteCardItemAndCardItemAssetToDb, getUploadUrlFromDisk, getMultiVerGroupIdFromDisk
   } : UploadCardItemUsecaseProps<T, ET>) {
     this.itemIdGenerator = itemIdGenerator;
     this.insertCardItemToDb = insertCardItemToDb;
     this.insertCardItemAndCardItemAssetToDb = insertCardItemAndCardItemAssetToDb;
     this.deleteCardItemAndCardItemAssetToDb = deleteCardItemAndCardItemAssetToDb;
     this.getUploadUrlFromDisk = getUploadUrlFromDisk;
+    this.getMultiVerGroupIdFromDisk = getMultiVerGroupIdFromDisk;
   };
 
   async execute(dto : CreateCardItemDataDto) : Promise<AfterCreateCardItemDataInfo> {
@@ -139,7 +142,7 @@ export class UploadingCardItemUsecase<T, ET> {
           const upload_url : string = await this.getUploadUrlFromDisk.getUrl({ pathName : [
             cardItem.card_id, 
             cardItem.item_id, 
-            cardAsset.key_name
+            dto.file_info.path
           ], mime_type : cardAsset.mime_type });
 
           // 4. item_id, presigned_url 반환
@@ -148,9 +151,17 @@ export class UploadingCardItemUsecase<T, ET> {
           return returnDto;
         } else {
           // 3. upload_id, part_size 
-          
+          const upload_id : string = await this.getMultiVerGroupIdFromDisk.getMultiId({ pathName : [
+            cardItem.card_id, 
+            cardItem.item_id, 
+            dto.file_info.path
+          ], mime_type : cardAsset.mime_type });
+
           // 4. item_id, upload_id, part_size 반환
-          
+          const returnDto : AfterCreateCardItemDataInfo = {
+            item_id : cardItem.item_id, big : { upload_id, part_size : 10 }
+          };
+          return returnDto;
         }
       } catch (err) {
         // 문제가 발생하면 db에서 데이터 제거

@@ -2,11 +2,13 @@ import { Global, Module } from "@nestjs/common";
 import { S3_DISK } from "../disk.constants";
 import { ConfigService } from "@nestjs/config";
 import { S3Client } from "@aws-sdk/client-s3";
+import { GetPresignedUrlFromS3Bucket } from "./adapters/disk.inbound";
 
 
 @Global()
 @Module({
   providers : [
+    ConfigService,
     {
       provide : S3_DISK,
       useFactory : (
@@ -26,10 +28,12 @@ import { S3Client } from "@aws-sdk/client-s3";
       inject : [
         ConfigService
       ]
-    }
+    },
+    GetPresignedUrlFromS3Bucket,
   ],
   exports : [
-    S3_DISK
+    S3_DISK,
+    GetPresignedUrlFromS3Bucket,
   ]
 })
 export class S3DiskModule {};
