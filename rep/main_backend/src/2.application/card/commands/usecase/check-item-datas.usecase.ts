@@ -5,7 +5,10 @@ import { SelectDataFromDb } from "@app/ports/db/db.inbound";
 import { NotAllowUpdateDataToCache, NotAllowUpdateDataToDb, NotAllowUploadDataToCheck, NotFoundCardItemAssetKeyName } from "@error/application/card/card.error";
 import { CheckUploadDatasFromDisk } from "@app/ports/disk/disk.inbound";
 import { UpdateValueToDb } from "@app/ports/db/db.outbound";
-import { UpdateDataToCache } from "@app/ports/cache/cache.outbound";
+import { InsertDataToCache, UpdateDataToCache } from "@app/ports/cache/cache.outbound";
+import { CardItemAssetProps } from "@domain/card/vo";
+import { InsertCardAssetDataProps } from "./uploading-card-item.usecase";
+import { PathMapping } from "@domain/shared";
 
 
 type CheckCarItemDatasUsecaseValues = {
@@ -19,6 +22,8 @@ type CheckCardItemDatasUsecaseProps<T, ET, DT> = {
   usecaseValues : CheckCarItemDatasUsecaseValues;
   selectCardAssetFromCache : SelectDataFromCache<T>; // cache 
   selectCardAssetFromDb : SelectDataFromDb<ET>;  // db
+  insertCardAssetToCache : InsertDataToCache<T>; // 데이터가 없을때 저장할 캐싱
+  pathMapping : PathMapping // path를 만들어준다. 
   checkUploadFromDisk : CheckUploadDatasFromDisk<DT>;
   updateCardAssetToDb : UpdateValueToDb<ET>; // db upadate
   updateCardAssetToCache : UpdateDataToCache<T>; // cache update
@@ -30,16 +35,20 @@ export class CheckCardItemDatasUsecase<T, ET, DT> {
   private readonly usecaseValues : CheckCardItemDatasUsecaseProps<T, ET, DT>["usecaseValues"];
   private readonly selectCardAssetFromCache : CheckCardItemDatasUsecaseProps<T, ET, DT>["selectCardAssetFromCache"];
   private readonly selectCardAssetFromDb : CheckCardItemDatasUsecaseProps<T, ET, DT>["selectCardAssetFromDb"];
+  private readonly insertCardAssetToCache : CheckCardItemDatasUsecaseProps<T, ET, DT>["insertCardAssetToCache"];
+  private readonly pathMapping : CheckCardItemDatasUsecaseProps<T, ET, DT>["pathMapping"];
   private readonly checkUploadFromDisk : CheckCardItemDatasUsecaseProps<T, ET, DT>["checkUploadFromDisk"];
   private readonly updateCardAssetToDb : CheckCardItemDatasUsecaseProps<T, ET, DT>["updateCardAssetToDb"];
   private readonly updateCardAssetToCache : CheckCardItemDatasUsecaseProps<T, ET, DT>["updateCardAssetToCache"];
 
   constructor({ 
-    usecaseValues, selectCardAssetFromCache, selectCardAssetFromDb, checkUploadFromDisk, updateCardAssetToDb, updateCardAssetToCache
+    usecaseValues, selectCardAssetFromCache, selectCardAssetFromDb, insertCardAssetToCache, pathMapping, checkUploadFromDisk, updateCardAssetToDb, updateCardAssetToCache
   } : CheckCardItemDatasUsecaseProps<T, ET, DT>) {
     this.usecaseValues = usecaseValues;
     this.selectCardAssetFromCache = selectCardAssetFromCache;
     this.selectCardAssetFromDb = selectCardAssetFromDb;
+    this.insertCardAssetToCache = insertCardAssetToCache;
+    this.pathMapping = pathMapping;
     this.checkUploadFromDisk = checkUploadFromDisk;
     this.updateCardAssetToDb = updateCardAssetToDb;
     this.updateCardAssetToCache = updateCardAssetToCache;
@@ -47,19 +56,37 @@ export class CheckCardItemDatasUsecase<T, ET, DT> {
 
   async execute( dto : CheckCardItemDatasUrlProps ) : Promise<void> {
 
-    // 1. key_name 찾기
+    // 1. 데이터 찾기 ( cache 확인 -> db 확인 )
     let filePath : string | undefined;
+    let cardAsset : Required<CardItemAssetProps> | undefined;
+
     const namespace : string = `${this.usecaseValues.cardAssetNamespace}:${dto.card_id}:${dto.item_id}`.trim();
-    filePath = await this.selectCardAssetFromCache.select({ 
+    cardAsset = await this.selectCardAssetFromCache.select({ 
       namespace,
       keyName : this.usecaseValues.itemIdKeyName
     });
-    if ( !filePath ) {
-      filePath = await this.selectCardAssetFromDb.select({ attributeName : this.usecaseValues.itemIdAttribute, attributeValue : dto.item_id });
-      // cache에 asset 정보 저장
 
-      if (!filePath) throw new NotFoundCardItemAssetKeyName();
+    // cache에 없다면 db에서 찾기 + cache 저장
+    if ( !cardAsset ) {
+      cardAsset = await this.selectCardAssetFromDb.select({ attributeName : this.usecaseValues.itemIdAttribute, attributeValue : dto.item_id });
+      if ( !cardAsset ) throw new NotFoundCardItemAssetKeyName();
+      
+      // asset 캐시 정보 저장
+      const insertAsset : InsertCardAssetDataProps = {
+        cardAsset, upload_id : dto.upload_id
+      }
+      await this.insertCardAssetToCache.insert(insertAsset);
     }
+
+    // file의 주소 생성
+    filePath = this.pathMapping.mapping(
+      [
+        cardAsset.card_id,
+        cardAsset.item_id,
+        cardAsset.key_name
+      ]
+    );
+    if (!filePath) throw new NotFoundCardItemAssetKeyName(); 
 
     // 2. 검증 
     const checked : boolean = await this.checkUploadFromDisk.checks({ pathName : filePath, upload_id : dto.upload_id, tags : dto.tags }); // 여기 안에서 문제가 발생하면 어디가 문제 였는지 이야기 해주면 될 것 같다. 

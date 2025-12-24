@@ -22,21 +22,25 @@ export class InsertCardItemAssetInitDataToRedis extends InsertDataToCache<RedisC
 
     const namespace : string = `${CACHE_CARD_NAMESPACE_NAME.CACHE_CARD_ITEM_ASSET}:${cardAssetEntity.card_id}:${cardAssetEntity.item_id}`;
 
-    await cache
-    .multi()
-    .hSet(namespace, {
+    const upload_id = entity.upload_id;
+    
+    const tx = cache.multi();
+
+    tx.hSet(namespace, {
       [CACHE_CARD_ITEM_ASSET_KEY_NAME.CARD_ID]: String(cardAssetEntity.card_id),
       [CACHE_CARD_ITEM_ASSET_KEY_NAME.ITEM_ID]: String(cardAssetEntity.item_id),
       [CACHE_CARD_ITEM_ASSET_KEY_NAME.KEY_NAME]: String(cardAssetEntity.key_name),
       [CACHE_CARD_ITEM_ASSET_KEY_NAME.MIME_TYPE]: String(cardAssetEntity.mime_type),
       [CACHE_CARD_ITEM_ASSET_KEY_NAME.SIZE]: String(cardAssetEntity.size),
-      [CACHE_CARD_ITEM_ASSET_KEY_NAME.STATUS]: String(cardAssetEntity.status),
-      [CACHE_CARD_ITEM_ASSET_KEY_NAME.UPLOAD_ID]: String(entity.upload_id),
+      [CACHE_CARD_ITEM_ASSET_KEY_NAME.STATUS]: String(cardAssetEntity.status)
     })
-    .expire(namespace, 60 * 60) // 1h 동안 저장
-    .exec();
 
-    return true;
+    if ( upload_id ) tx.hSet(namespace, CACHE_CARD_ITEM_ASSET_KEY_NAME.UPLOAD_ID, upload_id);
+    tx.expire(namespace, 60 * 60) // 1h 동안 저장
+
+    const res = await tx.exec();
+
+    return res !== null && true;
   };
 
 };
