@@ -5,7 +5,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { S3_DISK } from "../../disk.constants";
 import { ConfigService } from "@nestjs/config";
 import path from "path";
-import { GetUrlTypes } from "@app/card/commands/dto";
+import { GetUrlTypes } from "@app/card/queries/dto";
 
 
 @Injectable()
@@ -42,6 +42,7 @@ export class GetPresignedUrlFromS3Bucket extends GetUploadUrlFromDisk<S3Client> 
   }
 };
 
+// upload_id 를 가져오고 그에 따라서 
 @Injectable()
 export class GetMultipartUploadIdFromS3Bucket extends GetMultiPartVerGroupIdFromDisk<S3Client> {
 
@@ -67,6 +68,7 @@ export class GetMultipartUploadIdFromS3Bucket extends GetMultiPartVerGroupIdFrom
   };
 };
 
+// upload_id에 따라서 presigned_url을 제공
 @Injectable()
 export class GetPresignedUrlsFromS3Bucket extends GetMultiPartUploadUrlFromDisk<S3Client> {
 

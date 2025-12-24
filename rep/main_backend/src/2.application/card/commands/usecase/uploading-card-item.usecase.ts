@@ -14,10 +14,10 @@ type UploadCardItemUsecaseProps<T, ET, DT> = {
   itemIdGenerator : IdGenerator;
   insertCardItemToDb : InsertValueToDb<T>; // card_item 정보만 저장할 infra 함수
   insertCardItemAndCardItemAssetToDb : InsertValueToDb<T>; // card_item, card_asset 정보를 저장할 수 있는 infra 함수
-  deleteCardItemAndCardItemAssetToDb : DeleteValueToDb<T>;
-  getUploadUrlFromDisk : GetUploadUrlFromDisk<ET>;
+  deleteCardItemAndCardItemAssetToDb : DeleteValueToDb<T>; // card_item, card_asset 정보 제거
+  getUploadUrlFromDisk : GetUploadUrlFromDisk<ET>; 
   getMultiVerGroupIdFromDisk : GetMultiPartVerGroupIdFromDisk<ET>;
-  insertCardItemAssetToCache : InsertDataToCache<DT>;
+  insertCardItemAssetToCache : InsertDataToCache<DT>; // cache에 해당 card_item asset 추가
 };
 
 // db에 저장할때 사용하는 데이터 타입

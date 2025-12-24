@@ -303,6 +303,7 @@ export class InsertCardItemAndCardAssetDataToMysql extends InsertValueToDb<Pool>
 };
 
 // card_item, asset 제거 함수
+@Injectable()
 export class DeleteCardItemAndCardAssetDataToMysql extends DeleteValueToDb<Pool> {
 
   constructor(
