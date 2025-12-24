@@ -1,4 +1,4 @@
-import { InsertValueToDb } from "@app/ports/db/db.outbound";
+import { DeleteValueToDb, InsertValueToDb } from "@app/ports/db/db.outbound";
 import { Inject, Injectable } from "@nestjs/common";
 import { ResultSetHeader, type Pool } from "mysql2/promise";
 import { DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME, DB_CARD_ITEMS_ATTRIBUTE_NAME, DB_CARD_STATS_ATTRIBUTE_NAME, DB_CARDS_ATTRIBUTE_NAME, DB_TABLE_NAME, MYSQL_DB } from "../../db.constants";
@@ -272,7 +272,7 @@ export class InsertCardItemAndCardAssetDataToMysql extends InsertValueToDb<Pool>
       // insert zero인 경우를 보호하는 것이 좋기는 하다. 
       if ( !cardItemResult?.affectedRows ) throw new NotInsertDatabaseError("card_item");
       if ( !cardItemAssetResult?.affectedRows ) throw new NotInsertDatabaseError("card_item_asset");
-      
+
       await connection.commit();
 
       return cardItemResult && cardItemResult.affectedRows && cardItemAssetResult && cardItemAssetResult.affectedRows ? true : false;
@@ -300,4 +300,63 @@ export class InsertCardItemAndCardAssetDataToMysql extends InsertValueToDb<Pool>
     return insertChecked;
   };
 
+};
+
+// card_item, asset 제거 함수
+export class DeleteCardItemAndCardAssetDataToMysql extends DeleteValueToDb<Pool> {
+
+  constructor(
+    @Inject(MYSQL_DB) db : Pool
+  ) { super(db); };
+
+  private async deleteData({
+    db, uniqueValue
+  }: {
+    db : Pool, uniqueValue : string
+  }) : Promise<boolean> {
+
+    const connection = await db.getConnection();
+
+    try {
+
+      await connection.beginTransaction();
+
+      const cardItemTable : string = DB_TABLE_NAME.CARD_ITEMS;
+
+      const cardItemSql : string = `
+      DELETE FROM \`${cardItemTable}\`
+      WHERE \`${DB_CARD_ITEMS_ATTRIBUTE_NAME.ITEM_ID}\` = ?
+      `;
+
+      const [ deleteCardItemChekced ] = await connection.query<ResultSetHeader>(cardItemSql, [ uniqueValue ]);
+
+      const cardItemAssetTable : string = DB_TABLE_NAME.CARD_ITEM_ASSETS;
+
+      const cardItemAssetSql : string = `
+      DELETE FROM \`${cardItemAssetTable}\`
+      WHERE \`${DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME.ITEM_ID}\` = ?
+      `;
+
+      const [ deleteCardItemAssetChecked ] = await connection.query<ResultSetHeader>(cardItemAssetSql, [ uniqueValue ]);
+
+      await connection.commit();
+
+      return deleteCardItemChekced && deleteCardItemAssetChecked ? true : false;
+    } catch (err) {
+      if ( connection ) await connection.rollback();
+      throw new DatabaseError(err);
+    } finally {
+      if ( connection ) connection.release();
+    };
+
+  };
+
+  async delete({ uniqueValue, addOption }: { uniqueValue: string; addOption: undefined; }): Promise<boolean> {
+    
+    const db : Pool = this.db;
+
+    const deleteChecked : boolean = await this.deleteData({ db, uniqueValue });
+
+    return deleteChecked;
+  };
 };
