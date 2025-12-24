@@ -56,6 +56,8 @@ export class CheckCardItemDatasUsecase<T, ET, DT> {
     });
     if ( !filePath ) {
       filePath = await this.selectCardAssetFromDb.select({ attributeName : this.usecaseValues.itemIdAttribute, attributeValue : dto.item_id });
+      // cache에 asset 정보 저장
+
       if (!filePath) throw new NotFoundCardItemAssetKeyName();
     }
 

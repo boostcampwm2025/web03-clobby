@@ -4,6 +4,9 @@ import { SelectDataFromCache } from "@app/ports/cache/cache.inbound";
 import { SelectDataFromDb } from "@app/ports/db/db.inbound";
 import { NotFoundCardItemAssetKeyName } from "@error/application/card/card.error";
 import { GetMultiPartUploadUrlFromDisk } from "@app/ports/disk/disk.inbound";
+import { CardItemAssetProps } from "@domain/card/vo";
+import { InsertDataToCache } from "@/2.application/ports/cache/cache.outbound";
+import { InsertCardAssetDataProps } from "../../commands/usecase";
 
 
 type GetMultipartDataUrlUsecaseValues = {
@@ -17,7 +20,8 @@ type GetMultipartDataUrlUsecaseProps<T, ET, DT> = {
   usecaseValues : GetMultipartDataUrlUsecaseValues;
   selectCardAssetFromCache : SelectDataFromCache<T>; // cache 부터 찾고
   selectCardAssetFromDb : SelectDataFromDb<ET>;  // 없으면 db
-  getUploadUrlsFromDisk : GetMultiPartUploadUrlFromDisk<DT>;
+  getUploadUrlsFromDisk : GetMultiPartUploadUrlFromDisk<DT>; // url들 가져오는거
+  insertCardAssetToCache : InsertDataToCache<ET>;
 };
 
 // upload_id를 발급 받았을때 그를 바탕으로 데이터를 가져오고 싶을때 사용
@@ -28,14 +32,16 @@ export class GetMultipartDataUrlUsecase<T, ET, DT> {
   private readonly selectCardAssetFromCache : GetMultipartDataUrlUsecaseProps<T, ET, DT>["selectCardAssetFromCache"];
   private readonly selectCardAssetFromDb : GetMultipartDataUrlUsecaseProps<T, ET, DT>["selectCardAssetFromDb"];
   private readonly getUploadUrlsFromDisk : GetMultipartDataUrlUsecaseProps<T, ET, DT>["getUploadUrlsFromDisk"];
+  private readonly insertCardAssetToCache : GetMultipartDataUrlUsecaseProps<T, ET, DT>["insertCardAssetToCache"];
 
   constructor ({
-    usecaseValues, selectCardAssetFromCache, selectCardAssetFromDb, getUploadUrlsFromDisk
+    usecaseValues, selectCardAssetFromCache, selectCardAssetFromDb, getUploadUrlsFromDisk, insertCardAssetToCache
   } : GetMultipartDataUrlUsecaseProps<T, ET, DT>) {
     this.usecaseValues = usecaseValues;
     this.selectCardAssetFromCache = selectCardAssetFromCache;
     this.selectCardAssetFromDb = selectCardAssetFromDb;
     this.getUploadUrlsFromDisk = getUploadUrlsFromDisk;
+    this.insertCardAssetToCache = insertCardAssetToCache;
   }
 
   async execute( dto : UploadMultipartDataDto ) : Promise<MultiPartResponseDataDto> {
@@ -47,8 +53,20 @@ export class GetMultipartDataUrlUsecase<T, ET, DT> {
       namespace,
       keyName : this.usecaseValues.itemIdKeyName
     });
+
+    // cache에 없다면 db에서 찾기 + cache 저장
     if ( !filePath ) {
-      filePath = await this.selectCardAssetFromDb.select({ attributeName : this.usecaseValues.itemIdAttribute, attributeValue : dto.item_id });
+      const cardAsset : Required<CardItemAssetProps> = await this.selectCardAssetFromDb.select({ attributeName : this.usecaseValues.itemIdAttribute, attributeValue : dto.item_id });
+      if ( !cardAsset ) throw new NotFoundCardItemAssetKeyName();
+
+      filePath = `${cardAsset.card_id}/${cardAsset.item_id}/${cardAsset.key_name}`.trim(); // 원래 저장했던 file_path 성립
+      
+      // asset 캐시 정보 저장
+      const insertAsset : InsertCardAssetDataProps = {
+        cardAsset, upload_id : dto.upload_id
+      }
+      await this.insertCardAssetToCache.insert(insertAsset);
+
       if (!filePath) throw new NotFoundCardItemAssetKeyName();
     }
 
