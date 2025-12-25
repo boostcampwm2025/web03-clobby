@@ -7,7 +7,7 @@ import { NotUpdateCardItemData } from "@error/domain/card/card.error";
 import { SelectDataFromCache } from "@app/ports/cache/cache.inbound";
 import { SelectDataFromDb } from "@app/ports/db/db.inbound";
 import { InsertCardAssetDataProps } from "./uploading-card-item.usecase";
-import { NotAllowUpdateCardItemDataToCacheOrDb, NotCreateCardItemData, NotFoundCardItemAssetKeyName } from "@error/application/card/card.error";
+import { NotAllowCardItemMimeTypeValue, NotAllowUpdateCardItemDataToCacheOrDb, NotCreateCardItemData, NotFoundCardItemAssetKeyName } from "@error/application/card/card.error";
 import { InsertDataToCache, UpdateDataToCache } from "@app/ports/cache/cache.outbound";
 import { GetMultiPartVerGroupIdFromDisk, GetUploadUrlFromDisk } from "@app/ports/disk/disk.inbound";
 import { UpdateValueToDb } from "@app/ports/db/db.outbound";
@@ -108,6 +108,8 @@ export class UpdateCardItemDataUsecase<T, ET, DT> {
     }
 
     // 추가로 기존의 type이 같은지 확인하는 로직 추가 -> mime_type을 활용해야 한다. 
+    const originType : string | undefined = checkCardAsset.mime_type.split("/").at(0)?.trim(); // mime_type에 앞에만 
+    if ( cardAsset.mime_type !== originType ) throw new NotAllowCardItemMimeTypeValue();
 
     // 3. 해당 item key_name에 해당하는 url 데이터 주기 -> 최대한 생성과 비슷하게 맞추어서 재활용 하기 
     try {
@@ -122,6 +124,7 @@ export class UpdateCardItemDataUsecase<T, ET, DT> {
 
         // 4. db, cache 데이터 업데이트
         const updateValue : UpdateCardItemAssetValueProps = {
+          item_id : cardAsset.item_id,
           status : "uploading",
           size : cardAsset.size,
           key_name : cardAsset.key_name,
@@ -146,6 +149,7 @@ export class UpdateCardItemDataUsecase<T, ET, DT> {
 
         // 4. db, cache 데이터 업데이트 + upload_id
         const updateValue : UpdateCardItemAssetValueProps = {
+          item_id : cardAsset.item_id,
           status : "uploading",
           size : cardAsset.size,
           key_name : cardAsset.key_name,

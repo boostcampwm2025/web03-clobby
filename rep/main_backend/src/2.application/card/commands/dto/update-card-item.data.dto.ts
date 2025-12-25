@@ -11,6 +11,7 @@ export type UpdateCardItemInfoProps = {
 };
 
 export type UpdateCardItemAssetValueProps = {
+  item_id : string;
   key_name : string | undefined;
   mime_type : 'image/apng' | 'image/avif' | 'image/gif' | 'image/jpeg' | 'image/png' | 'image/svg+xml' | 'image/webp' | 'video/mp4' | 'video/webm' | 'video/ogg' | undefined;
   size : number | undefined;

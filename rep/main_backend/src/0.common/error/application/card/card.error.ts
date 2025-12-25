@@ -80,3 +80,12 @@ export class NotAllowUpdateCardItemDataToCacheOrDb extends BaseError {
     });
   };
 };
+
+export class NotAllowCardItemMimeTypeValue extends BaseError {
+  constructor() {
+    super({
+      message: '다른 타입에 데이터로 변경하려고 합니다.',
+      status: 500,
+    });
+  };
+};

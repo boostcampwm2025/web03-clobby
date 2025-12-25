@@ -6,6 +6,7 @@ import { InsertCardAndCardStateDataProps, InsertCardItemAndAssetDataProps } from
 import { DatabaseError } from "@error/infra/infra.error";
 import { CardItemProps } from "@domain/card/vo";
 import { NotFoundRefereceError, NotInsertDatabaseError } from "@error/infra/card/card.error";
+import { UpdateCardItemAssetValueProps } from "@app/card/commands/dto";
 
 
 @Injectable()
@@ -405,5 +406,72 @@ export class UpdateCardItemAssetDataToMysql extends UpdateValueToDb<Pool> {
 
     return updateChecked;
   };
+
+};
+
+// card_item_asset에 각 값을 변경시키는 로직
+@Injectable()
+export class UpdateCardItemAssetEntityToMySql extends UpdateValueToDb<Pool> {
+
+  constructor(
+    @Inject(MYSQL_DB) db : Pool
+  ) { super(db); };
+
+  private async updateData({
+    db, tableName, uniqueName, uniqueValue, updateValue
+  } : {
+    db : Pool, tableName : string, uniqueName : string, uniqueValue : string, updateValue :  UpdateCardItemAssetValueProps
+  }) : Promise<boolean> {
+
+
+    const colNameMapping  = {
+      key_name: DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME.KEY_NAME,
+      mime_type: DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME.MIME_TYPE,
+      size: DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME.SIZE,
+      status: DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME.STATUS
+    } as const;
+
+    type UpdateKey = keyof typeof colNameMapping;
+    const updateValueKeys = Object.keys(updateValue) as Array<UpdateKey> ; //key들을 받아올 수 있다. 
+
+    const colNames : Array<string> = [];
+    const colValues : Array<string | number> = [];
+
+    // update용 key중에서 값이 있으면 col에 넣어서 수정하기 
+    updateValueKeys.forEach(( updateValueKey : UpdateKey ) => {
+
+      const updateV = updateValue[updateValueKey];
+
+      if ( updateV !== undefined ) {
+        colNames.push( colNameMapping[updateValueKey] ); // 업데이트할 열 이름
+        colValues.push(updateV); // 업데이트할 값 
+      }
+    });
+
+    if ( colNames.length === 0 ) return true;
+
+    colValues.push(uniqueValue); // 마지막에는 item_id 추가 
+
+    const setColNames = colNames.map(colName => `\`${colName}\` = ?`).join(",\n");
+    const sql : string = 
+    `UPDATE \`${tableName}\`\n` +
+    `SET\n${setColNames}\n` +
+    `WHERE \`${uniqueName}\` = UUID_TO_BIN(?, true)`;
+
+    const [ result ] = await db.query<ResultSetHeader>(sql, colValues);
+
+    return result && result.affectedRows ? true : false;
+  }
+
+  async update({ uniqueValue, updateColName, updateValue }: { uniqueValue: string; updateColName: string; updateValue: UpdateCardItemAssetValueProps; }): Promise<boolean> {
+    
+    const db = this.db;
+    const tableName : string = DB_TABLE_NAME.CARD_ITEM_ASSETS;
+    const uniqueName: string = DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME.ITEM_ID;
+
+    const updated : boolean = await this.updateData({ db, tableName, uniqueName, uniqueValue, updateValue }); // 값 업데이트 확인
+
+    return updated;
+  }
 
 };
