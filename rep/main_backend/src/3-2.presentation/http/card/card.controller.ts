@@ -1,10 +1,10 @@
-import { Body, Controller, HttpCode, Param, Post, Req, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, HttpCode, Param, Patch, Post, Req, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common";
 import { JwtGuard } from "../auth/guards";
 import { type Request } from "express";
 import { CardService } from "./card.service";
 import { Payload } from "@app/auth/commands/dto";
-import { CheckEtagsValidate, CheckEtagValidate, CreateCardItemValidate, CreateCardValidate, GetPresignedUrlsValidate } from "./card.validate";
-import { AfterCreateCardItemDataInfo, CheckCardItemDatasUrlProps, CheckCardItemDataUrlProps, CreateCardDto, CreateCardItemDataDto } from "@app/card/commands/dto";
+import { CheckEtagsValidate, CheckEtagValidate, CreateCardItemValidate, CreateCardValidate, GetPresignedUrlsValidate, UpdateCardItemFileValdate } from "./card.validate";
+import { AfterCreateCardItemDataInfo, CheckCardItemDatasUrlProps, CheckCardItemDataUrlProps, CreateCardDto, CreateCardItemDataDto, UpdateCardItemInfoProps } from "@app/card/commands/dto";
 import { MultiPartResponseDataDto, UploadMultipartDataDto } from "@app/card/queries/dto";
 
 
@@ -115,10 +115,22 @@ export class CardController {
     return { "message" : "ok" };
   };
 
-  // file에 내용만 update할때 사용하는 거
-  @Post(":card_id/items/:item_id/file")
-  async updateCardItemFileController() {
-    
+  // file에 내용만 update할때 사용하는 거 - 기존에 값을 덮어 쓴다 라는 의미가 강해서 Put으로 하기로 하였다. 
+  @Patch(":card_id/items/:item_id/file")
+  @UsePipes(new ValidationPipe({
+    transform : true,
+    whitelist : true
+  }))
+  async updateCardItemFileController(
+    @Body() dto : UpdateCardItemFileValdate,
+    @Param("card_id") card_id : string,
+    @Param("item_id") item_id : string
+  ) : Promise<AfterCreateCardItemDataInfo> {
+    const payloadDto : UpdateCardItemInfoProps = {
+      ...dto, card_id, item_id
+    };
+    const res = await this.cardService.updateCardItemFileService(payloadDto);
+    return res;
   }
 
 };

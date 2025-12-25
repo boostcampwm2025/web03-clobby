@@ -4,7 +4,7 @@
 export type UpdateCardItemInfoProps = {
   item_id : string;
   card_id : string;
-  type : 'text' | 'image' | 'video';
+  type : 'image' | 'video';
   path : string;
   mime_type : 'image/apng' | 'image/avif' | 'image/gif' | 'image/jpeg' | 'image/png' | 'image/svg+xml' | 'image/webp' | 'video/mp4' | 'video/webm' | 'video/ogg';
   size : number;

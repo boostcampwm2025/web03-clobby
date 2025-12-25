@@ -186,3 +186,27 @@ export class CheckEtagsValidate {
   @Type(() => CheckEtagItemsValidate)
   tags : Array<CheckEtagItemsValidate>;
 };
+
+export class UpdateCardItemFileValdate { 
+
+  @IsNotEmpty()
+  @IsIn(['image', 'video'])
+  type : 'image' | 'video';
+
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(1500)
+  path : string;
+  
+  @IsNotEmpty()
+  @IsIn([ 'image/apng', 'image/avif', 'image/gif', 'image/jpeg', 'image/png', 'image/svg+xml', 'image/webp', 'video/mp4', 'video/webm', 'video/ogg' ])
+  mime_type : 'image/apng' | 'image/avif' | 'image/gif' | 'image/jpeg' | 'image/png' | 'image/svg+xml' | 'image/webp' | 'video/mp4' | 'video/webm' | 'video/ogg';
+  
+  @Type(() => Number)
+  @IsNotEmpty()
+  @IsNumber()
+  @Min(0)
+  @Max(100 * 1024 * 1024) 
+  size : number;
+
+};

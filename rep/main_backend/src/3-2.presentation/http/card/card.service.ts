@@ -1,6 +1,6 @@
-import { CheckCardItemDatasUsecase, CheckCardItemDataUsecase, CreateCardUsecase, UploadingCardItemUsecase } from "@app/card/commands/usecase";
+import { CheckCardItemDatasUsecase, CheckCardItemDataUsecase, CreateCardUsecase, UpdateCardItemDataUsecase, UploadingCardItemUsecase } from "@app/card/commands/usecase";
 import { MultiPartResponseDataDto, UploadMultipartDataDto } from "@app/card/queries/dto";
-import { AfterCreateCardItemDataInfo, CheckCardItemDatasUrlProps, CheckCardItemDataUrlProps, CreateCardDto, CreateCardItemDataDto } from "@app/card/commands/dto";
+import { AfterCreateCardItemDataInfo, CheckCardItemDatasUrlProps, CheckCardItemDataUrlProps, CreateCardDto, CreateCardItemDataDto, UpdateCardItemInfoProps } from "@app/card/commands/dto";
 import { HttpException, Injectable } from "@nestjs/common";
 import { GetMultipartDataUrlUsecase } from "@app/card/queries/usecase";
 
@@ -12,7 +12,8 @@ export class CardService {
     private readonly createCardItemUsecase : UploadingCardItemUsecase<any, any, any>,
     private readonly getMultiPartDataUrlusecase : GetMultipartDataUrlUsecase<any, any, any>,
     private readonly checkEtagUsecase : CheckCardItemDataUsecase<any, any, any>,
-    private readonly checkEtagsUsecase : CheckCardItemDatasUsecase<any, any, any>
+    private readonly checkEtagsUsecase : CheckCardItemDatasUsecase<any, any, any>,
+    private readonly updateCardItemFileUsecase : UpdateCardItemDataUsecase<any, any, any>
   ) {}
 
   // card 생성과 관련된 service
@@ -105,6 +106,25 @@ export class CardService {
         },
       ); 
     }
+  };
+
+  // file에 update를 담당하는 service
+  async updateCardItemFileService( dto : UpdateCardItemInfoProps ) : Promise<AfterCreateCardItemDataInfo> {
+    try {
+      const res : AfterCreateCardItemDataInfo = await this.updateCardItemFileUsecase.execute(dto);
+      return res;
+    } catch (err) {
+      throw new HttpException(
+        {
+          message: err.message || err,
+          status: err.status || 500,
+        },
+        err.status || 500,
+        {
+          cause: err,
+        },
+      ); 
+    };
   };
 
 };
