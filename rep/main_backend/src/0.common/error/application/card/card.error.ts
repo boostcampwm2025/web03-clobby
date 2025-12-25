@@ -71,3 +71,12 @@ export class NotAllowUpdateDataToCache extends BaseError {
     });
   };
 };
+
+export class NotAllowUpdateCardItemDataToCacheOrDb extends BaseError {
+  constructor() {
+    super({
+      message: 'db또는 cache에 card_item_data에 데이터를 수정하지 못했습니다.',
+      status: 500,
+    });
+  };
+};

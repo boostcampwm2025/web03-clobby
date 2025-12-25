@@ -80,3 +80,21 @@ export class NotAllowCreateCardItemCheckType extends BaseError {
     });
   }
 }
+
+export class NotAllowCardItemSizeMaxValue extends BaseError {
+  constructor(size : number) {
+    super({
+      message: `카드에 들어갈 수 있는 최대 크기는 ${size} 입니다.`,
+      status: 500,
+    });
+  }
+}
+
+export class NotUpdateCardItemData extends BaseError {
+  constructor() {
+    super({
+      message: "카드에 정보가 업데이트 되지 않았습니다.",
+      status: 500,
+    });
+  }
+}

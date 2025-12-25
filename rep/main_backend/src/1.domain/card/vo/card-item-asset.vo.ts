@@ -4,7 +4,7 @@ import {
   NotAllowMinValue,
 } from '@error/domain/user/user.error';
 import { baseVo } from '@domain/shared';
-import { NotAllowStatusValue } from '@error/domain/card/card.error';
+import { NotAllowCardItemSizeMaxValue, NotAllowStatusValue } from '@error/domain/card/card.error';
 
 export const cardItemAssetStatusList = [
   'uploading',
@@ -75,6 +75,10 @@ export function cardItemAssetSizeVo(size: CardItemAssetProps['size']): number {
 
   const min: number = 0;
   if (size < min) throw new NotAllowMinValue({ name, min });
+
+  // size 허용치
+  const maxSize : number = 100 * 1024 * 1024;
+  if ( size > maxSize ) throw new NotAllowCardItemSizeMaxValue(maxSize);
 
   return size;
 }
