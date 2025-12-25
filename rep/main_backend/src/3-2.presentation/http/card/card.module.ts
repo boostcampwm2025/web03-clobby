@@ -2,11 +2,11 @@ import { Module } from "@nestjs/common";
 import { CardController } from "./card.controller";
 import { AuthModule } from "../auth/auth.module";
 import { CardService } from "./card.service";
-import { CreateCardUsecase, UploadingCardItemUsecase } from "@app/card/commands/usecase";
-import { CARD_ITEM_ASSET_NAMESPACE, CARD_ITEM_ID_ATTRIBUTE_NAME, CARD_ITEM_ID_KEY_NAME, CardIdGenerator, CardItemPathMapping } from "./card.interface";
-import { DeleteCardItemAndCardAssetDataToMysql, InsertCardAndCardStateDataToMysql, InsertCardItemAndCardAssetDataToMysql, InsertCardItemDataToMysql } from "@infra/db/mysql/card/card.outbound";
-import { GetMultipartUploadIdFromS3Bucket, GetPresignedUrlFromS3Bucket, GetPresignedUrlsFromS3Bucket } from "@infra/disk/s3/adapters/disk.inbound";
-import { InsertCardItemAssetInitDataToRedis } from "@infra/cache/redis/card/card.outbound";
+import { CheckCardItemDataUsecase, CreateCardUsecase, UploadingCardItemUsecase } from "@app/card/commands/usecase";
+import { CARD_ITEM_ASSET_NAMESPACE, CARD_ITEM_ID_ATTRIBUTE_NAME, CARD_ITEM_ID_KEY_NAME, CARD_ITEM_STATUS_ATTRIBUTE_NAME, CARD_ITEM_STATUS_KEY_NAME, CardIdGenerator, CardItemPathMapping } from "./card.interface";
+import { DeleteCardItemAndCardAssetDataToMysql, InsertCardAndCardStateDataToMysql, InsertCardItemAndCardAssetDataToMysql, InsertCardItemDataToMysql, UpdateCardItemAssetDataToMysql } from "@infra/db/mysql/card/card.outbound";
+import { CheckPresignedUrlFromAwsS3, GetMultipartUploadIdFromS3Bucket, GetPresignedUrlFromS3Bucket, GetPresignedUrlsFromS3Bucket } from "@infra/disk/s3/adapters/disk.inbound";
+import { InsertCardItemAssetInitDataToRedis, UpdateCardItemAssetDataToRedis } from "@infra/cache/redis/card/card.outbound";
 import { GetMultipartDataUrlUsecase } from "@app/card/queries/usecase";
 import { CACHE_CARD_ITEM_ASSET_KEY_NAME, CACHE_CARD_NAMESPACE_NAME } from "@infra/cache/cache.constants";
 import { DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME } from "@infra/db/db.constants";
@@ -38,6 +38,14 @@ import { SelectCardItemAssetFromMysql } from "@infra/db/mysql/card/card.inbound"
     {
       provide : CARD_ITEM_ID_ATTRIBUTE_NAME,
       useValue : DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME.ITEM_ID
+    },
+    {
+      provide : CARD_ITEM_STATUS_ATTRIBUTE_NAME,
+      useValue : DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME.STATUS
+    },
+    {
+      provide : CARD_ITEM_STATUS_KEY_NAME,
+      useValue : CACHE_CARD_ITEM_ASSET_KEY_NAME.STATUS
     },
 
     // card를 생성할때 사용하는 모듈
@@ -112,7 +120,46 @@ import { SelectCardItemAssetFromMysql } from "@infra/db/mysql/card/card.inbound"
         GetPresignedUrlsFromS3Bucket,
         InsertCardItemAssetInitDataToRedis
       ]
-    }
+    },
+
+    // card_item에 데이터가 제대로 업로드가 되었는지 확인하는 로직
+    {
+      provide : CheckCardItemDataUsecase,
+      useFactory : (
+        cardAssetNamespace : string,
+        itemIdKeyName : string,
+        itemIdAttribute : string,  
+        statusColName : string,
+        statusKeyName : string,
+        selectCardAssetFromCache : SelectCardItemAssetFromRedis,
+        selectCardAssetFromDb : SelectCardItemAssetFromMysql,
+        insertCardAssetToCache : InsertCardItemAssetInitDataToRedis,
+        pathMapping : CardItemPathMapping,
+        checkUploadFromDisk : CheckPresignedUrlFromAwsS3,
+        updateCardAssetToDb : UpdateCardItemAssetDataToMysql,
+        updateCardAssetToCache : UpdateCardItemAssetDataToRedis
+      ) => {
+        return new CheckCardItemDataUsecase({
+          usecaseValues : {
+            cardAssetNamespace, itemIdKeyName, itemIdAttribute, statusColName, statusKeyName
+          }, selectCardAssetFromCache, selectCardAssetFromDb, insertCardAssetToCache, pathMapping, checkUploadFromDisk, updateCardAssetToDb, updateCardAssetToCache
+        })
+      },
+      inject : [
+        CARD_ITEM_ASSET_NAMESPACE,
+        CARD_ITEM_ID_KEY_NAME,
+        CARD_ITEM_ID_ATTRIBUTE_NAME,
+        CARD_ITEM_STATUS_ATTRIBUTE_NAME,
+        CARD_ITEM_STATUS_KEY_NAME,
+        SelectCardItemAssetFromRedis,
+        SelectCardItemAssetFromMysql,
+        InsertCardItemAssetInitDataToRedis,
+        CardItemPathMapping,
+        CheckPresignedUrlFromAwsS3,
+        UpdateCardItemAssetDataToMysql,
+        UpdateCardItemAssetDataToRedis
+      ]
+    },
     
 
   ],

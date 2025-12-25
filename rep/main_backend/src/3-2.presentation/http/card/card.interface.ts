@@ -8,8 +8,12 @@ import { v7 as uuidV7 } from "uuid";
 export const CARD_ITEM_ASSET_NAMESPACE = Symbol("CARD_ITEM_ASSET_NAMESPACE");
 // redis에서 사용하는 card_id key_name에 대한 심볼화
 export const CARD_ITEM_ID_KEY_NAME = Symbol("CARD_ITEM_ID_KEY_NAME");
-// redis에서 사용하는 card_item_attribte에 대한 심볼화
+// mysql에서 사용하는 card_item_attribte에 대한 심볼화
 export const CARD_ITEM_ID_ATTRIBUTE_NAME = Symbol("CARD_ITEM_ID_ATTRIBUTE_NAME");
+// db에서 status colName에 사용하는 심볼 객체
+export const CARD_ITEM_STATUS_ATTRIBUTE_NAME = Symbol("CARD_ITEM_STATUS_ATTRIBUTE_NAME");
+// redis에서 status keyname에 사용하는 심볼 객체
+export const CARD_ITEM_STATUS_KEY_NAME = Symbol("CARD_ITEM_STATUS_KEY_NAME");
 
 @Injectable()
 export class CardIdGenerator implements IdGenerator {

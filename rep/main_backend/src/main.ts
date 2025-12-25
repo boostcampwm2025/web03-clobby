@@ -8,6 +8,27 @@ async function bootstrap() {
   const config = app.get(ConfigService);
 
   // cors 설정
+  const origin : Array<string> = config
+  .get<string>("NODE_ALLOWED_ORIGIN", "http://localhost:3000")
+  .split(",")
+  .map(host => host.trim());
+
+  const methods : Array<string> = config
+  .get<string>("NODE_ALLOWED_METHODS" ,"GET,POST")
+  .split(",")
+  .map(method => method.trim());
+
+  const allowedHeaders : Array<string> = config
+  .get<string>("NODE_ALLOWED_HEADERS", "Content-Type, Accept, Authorization")
+  .split(",")
+  .map(header => header.trim());
+
+  const credentials : boolean = config
+  .get<string>("NODE_ALLOWED_CREDENTIALS", "false").trim() === "true"
+
+  app.enableCors({
+    origin, methods, allowedHeaders, credentials
+  });
 
   // port, host 설정
   const port: number = config.get<number>('NODE_PORT', 8080);
