@@ -3,8 +3,8 @@ import { JwtGuard } from "../auth/guards";
 import { type Request } from "express";
 import { CardService } from "./card.service";
 import { Payload } from "@app/auth/commands/dto";
-import { CheckEtagValidate, CreateCardItemValidate, CreateCardValidate, GetPresignedUrlsValidate } from "./card.validate";
-import { AfterCreateCardItemDataInfo, CheckCardItemDataUrlProps, CreateCardDto, CreateCardItemDataDto } from "@app/card/commands/dto";
+import { CheckEtagsValidate, CheckEtagValidate, CreateCardItemValidate, CreateCardValidate, GetPresignedUrlsValidate } from "./card.validate";
+import { AfterCreateCardItemDataInfo, CheckCardItemDatasUrlProps, CheckCardItemDataUrlProps, CreateCardDto, CreateCardItemDataDto } from "@app/card/commands/dto";
 import { MultiPartResponseDataDto, UploadMultipartDataDto } from "@app/card/queries/dto";
 
 
@@ -75,6 +75,7 @@ export class CardController {
     return presigned_urls
   }
 
+  // 10mb 이하일 경우 이를 이용해서 검증
   @Post(":card_id/items/:item_id/check")
   @UseGuards(JwtGuard)
   @UsePipes(new ValidationPipe({
@@ -91,6 +92,26 @@ export class CardController {
       card_id, item_id, etag : dto.etag
     };
     await this.cardService.checkEtagService(payloadDto);
+    return { "message" : "ok" };
+  };
+
+  // 10mb 이상일 경우 이를 이용해서 검증
+  @Post(":card_id/items/:item_id/checks")
+  @UseGuards(JwtGuard)
+  @UsePipes(new ValidationPipe({
+    transform : true,
+    whitelist : true
+  }))
+  @HttpCode(200)
+  async checkEtagsController(
+    @Body() dto : CheckEtagsValidate,
+    @Param("card_id") card_id : string,
+    @Param("item_id") item_id : string
+  ) : Promise<Record<string, string>> {
+    const payloadDto : CheckCardItemDatasUrlProps = {
+      ...dto, card_id, item_id
+    };
+    await this.cardService.checkEtagsService(payloadDto);
     return { "message" : "ok" };
   };
 

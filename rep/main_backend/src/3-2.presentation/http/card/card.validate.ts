@@ -159,3 +159,30 @@ export class CheckEtagValidate {
   etag : string;
 
 };
+
+class CheckEtagItemsValidate {
+  
+  @Type(() => Number)
+  @IsNotEmpty()
+  @IsInt()
+  @Min(1)
+  @Max(10000)
+  part_number : number;
+
+  @IsNotEmpty()
+  @IsString()
+  etag : string;
+};
+
+export class CheckEtagsValidate { 
+
+  @IsNotEmpty()
+  @IsString()
+  upload_id : string;
+
+  @IsArray()
+  @ArrayNotEmpty()
+  @ValidateNested({ each : true })
+  @Type(() => CheckEtagItemsValidate)
+  tags : Array<CheckEtagItemsValidate>;
+};

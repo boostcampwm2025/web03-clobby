@@ -1,6 +1,6 @@
-import { CheckCardItemDataUsecase, CreateCardUsecase, UploadingCardItemUsecase } from "@app/card/commands/usecase";
+import { CheckCardItemDatasUsecase, CheckCardItemDataUsecase, CreateCardUsecase, UploadingCardItemUsecase } from "@app/card/commands/usecase";
 import { MultiPartResponseDataDto, UploadMultipartDataDto } from "@app/card/queries/dto";
-import { AfterCreateCardItemDataInfo, CheckCardItemDataUrlProps, CreateCardDto, CreateCardItemDataDto } from "@app/card/commands/dto";
+import { AfterCreateCardItemDataInfo, CheckCardItemDatasUrlProps, CheckCardItemDataUrlProps, CreateCardDto, CreateCardItemDataDto } from "@app/card/commands/dto";
 import { HttpException, Injectable } from "@nestjs/common";
 import { GetMultipartDataUrlUsecase } from "@app/card/queries/usecase";
 
@@ -12,6 +12,7 @@ export class CardService {
     private readonly createCardItemUsecase : UploadingCardItemUsecase<any, any, any>,
     private readonly getMultiPartDataUrlusecase : GetMultipartDataUrlUsecase<any, any, any>,
     private readonly checkEtagUsecase : CheckCardItemDataUsecase<any, any, any>,
+    private readonly checkEtagsUsecase : CheckCardItemDatasUsecase<any, any, any>
   ) {}
 
   // card 생성과 관련된 service
@@ -85,7 +86,25 @@ export class CardService {
           cause: err,
         },
       );       
+    };
+  };
+
+  // tags를 검증하는 방법
+  async checkEtagsService( dto : CheckCardItemDatasUrlProps ) : Promise<void> {
+    try {
+      await this.checkEtagsUsecase.execute(dto);
+    } catch (err) {
+      throw new HttpException(
+        {
+          message: err.message || err,
+          status: err.status || 500,
+        },
+        err.status || 500,
+        {
+          cause: err,
+        },
+      ); 
     }
-  }
+  };
 
 };
