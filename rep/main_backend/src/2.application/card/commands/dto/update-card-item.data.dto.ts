@@ -18,3 +18,27 @@ export type UpdateCardItemAssetValueProps = {
   status : 'uploading' | 'ready' | 'failed' | undefined;
   upload_id : string | undefined;
 };
+
+type MiniSizeFileType = {
+  upload_url : string;
+};
+
+type BigSizeFileType = {
+  upload_id : string; 
+  part_size : number;
+};
+
+type ChangeFileType = {
+  upload_id : string;
+  complete_part_number : Array<number>;
+};  
+
+export type AfterUpdateCardItemDataInfo = {
+  item_id : string;
+
+  mini? : MiniSizeFileType;
+
+  big? : BigSizeFileType;
+  
+  change? : ChangeFileType;
+};

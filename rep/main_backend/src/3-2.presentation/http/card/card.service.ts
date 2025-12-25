@@ -1,6 +1,6 @@
 import { CheckCardItemDatasUsecase, CheckCardItemDataUsecase, CreateCardUsecase, UpdateCardItemDataUsecase, UploadingCardItemUsecase } from "@app/card/commands/usecase";
 import { MultiPartResponseDataDto, UploadMultipartDataDto } from "@app/card/queries/dto";
-import { AfterCreateCardItemDataInfo, CheckCardItemDatasUrlProps, CheckCardItemDataUrlProps, CreateCardDto, CreateCardItemDataDto, UpdateCardItemInfoProps } from "@app/card/commands/dto";
+import { AfterCreateCardItemDataInfo, AfterUpdateCardItemDataInfo, CheckCardItemDatasUrlProps, CheckCardItemDataUrlProps, CreateCardDto, CreateCardItemDataDto, UpdateCardItemInfoProps } from "@app/card/commands/dto";
 import { HttpException, Injectable } from "@nestjs/common";
 import { GetMultipartDataUrlUsecase } from "@app/card/queries/usecase";
 
@@ -109,9 +109,9 @@ export class CardService {
   };
 
   // file에 update를 담당하는 service
-  async updateCardItemFileService( dto : UpdateCardItemInfoProps ) : Promise<AfterCreateCardItemDataInfo> {
+  async updateCardItemFileService( dto : UpdateCardItemInfoProps ) : Promise<AfterUpdateCardItemDataInfo> {
     try {
-      const res : AfterCreateCardItemDataInfo = await this.updateCardItemFileUsecase.execute(dto);
+      const res : AfterUpdateCardItemDataInfo = await this.updateCardItemFileUsecase.execute(dto);
       return res;
     } catch (err) {
       throw new HttpException(

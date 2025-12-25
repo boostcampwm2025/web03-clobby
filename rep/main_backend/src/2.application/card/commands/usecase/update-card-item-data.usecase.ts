@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { AfterCreateCardItemDataInfo, UpdateCardItemAssetValueProps, UpdateCardItemInfoProps } from "../dto";
+import { AfterCreateCardItemDataInfo, AfterUpdateCardItemDataInfo, UpdateCardItemAssetValueProps, UpdateCardItemInfoProps } from "../dto";
 import { CardAggregate } from "@domain/card/card.aggregate";
 import { Card, CardItemAsset } from "@domain/card/entities";
 import { CardItemAssetProps } from "@domain/card/vo";
@@ -55,7 +55,7 @@ export class UpdateCardItemDataUsecase<T, ET, DT> {
     this.updateCardAssetToCache = updateCardAssetToCache;
   }
 
-  async execute( dto : UpdateCardItemInfoProps ) : Promise<AfterCreateCardItemDataInfo> {
+  async execute( dto : UpdateCardItemInfoProps ) : Promise<AfterUpdateCardItemDataInfo> {
 
     // 1. 정합성 체크
     const cardAggregate = new CardAggregate({ 
@@ -136,10 +136,19 @@ export class UpdateCardItemDataUsecase<T, ET, DT> {
         if ( !dbUpdated || !cacheUpdated ) throw new NotAllowUpdateCardItemDataToCacheOrDb();
 
         // 5. item_id, presigned_url 반환
-        const returnDto : AfterCreateCardItemDataInfo = {
+        const returnDto : AfterUpdateCardItemDataInfo = {
           item_id : checkCardAsset.item_id , mini : {upload_url}};
         return returnDto;
       } else {
+        // 만약 같은 파일이라면?? 이부분에서 어떻게 추가를 할지 고민이다. -> 내생각에는 완료 목록도 같이 준다면 좋을 것 같다. 
+
+        // 3. 업데이트 완료된 파일 목록을 준다. 
+
+        // 4. 수정 없이 반환 -> 이미 uploading이기도 하고 모든게 그대로 이게 때문이다. -> 시간은 늘릴지 고민이다. 
+
+
+        // 같은 파일이 아니면 새로운걸로 간주해서 변경하면 그만이다. 
+
         // 3. upload_id, part_size 
         const upload_id : string = await this.getMultiVerGroupIdFromDisk.getMultiId({ pathName : [
           checkCardAsset.card_id, 
@@ -161,7 +170,7 @@ export class UpdateCardItemDataUsecase<T, ET, DT> {
         if ( !dbUpdated || !cacheUpdated ) throw new NotAllowUpdateCardItemDataToCacheOrDb();
 
         // 5. item_id, upload_id, part_size 반환
-        const returnDto : AfterCreateCardItemDataInfo = {
+        const returnDto : AfterUpdateCardItemDataInfo = {
           item_id : checkCardAsset.item_id, big : { upload_id, part_size : 10 * 1024 * 1024 }
         };
         return returnDto;

@@ -4,7 +4,7 @@ import { type Request } from "express";
 import { CardService } from "./card.service";
 import { Payload } from "@app/auth/commands/dto";
 import { CheckEtagsValidate, CheckEtagValidate, CreateCardItemValidate, CreateCardValidate, GetPresignedUrlsValidate, UpdateCardItemFileValdate } from "./card.validate";
-import { AfterCreateCardItemDataInfo, CheckCardItemDatasUrlProps, CheckCardItemDataUrlProps, CreateCardDto, CreateCardItemDataDto, UpdateCardItemInfoProps } from "@app/card/commands/dto";
+import { AfterCreateCardItemDataInfo, AfterUpdateCardItemDataInfo, CheckCardItemDatasUrlProps, CheckCardItemDataUrlProps, CreateCardDto, CreateCardItemDataDto, UpdateCardItemInfoProps } from "@app/card/commands/dto";
 import { MultiPartResponseDataDto, UploadMultipartDataDto } from "@app/card/queries/dto";
 
 
@@ -116,7 +116,9 @@ export class CardController {
   };
 
   // file에 내용만 update할때 사용하는 거 - 기존에 값을 덮어 쓴다 라는 의미가 강해서 Put으로 하기로 하였다. 
+  // 만약 10mb 이상이라면 같은 파일이면 기존의 것을 이어서 받을 수 있도록 하는건 어떨지?
   @Patch(":card_id/items/:item_id/file")
+  // @UseGuards(JwtGuard)
   @UsePipes(new ValidationPipe({
     transform : true,
     whitelist : true
@@ -125,7 +127,7 @@ export class CardController {
     @Body() dto : UpdateCardItemFileValdate,
     @Param("card_id") card_id : string,
     @Param("item_id") item_id : string
-  ) : Promise<AfterCreateCardItemDataInfo> {
+  ) : Promise<AfterUpdateCardItemDataInfo> {
     const payloadDto : UpdateCardItemInfoProps = {
       ...dto, card_id, item_id
     };
