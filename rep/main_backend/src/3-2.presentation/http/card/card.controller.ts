@@ -91,7 +91,7 @@ export class CardController {
       card_id, item_id, etag : dto.etag
     };
     await this.cardService.checkEtagService(payloadDto);
-    return { "status" : "ok" };
+    return { "message" : "ok" };
   };
 
 };

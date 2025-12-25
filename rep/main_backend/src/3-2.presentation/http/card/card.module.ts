@@ -2,10 +2,10 @@ import { Module } from "@nestjs/common";
 import { CardController } from "./card.controller";
 import { AuthModule } from "../auth/auth.module";
 import { CardService } from "./card.service";
-import { CheckCardItemDataUsecase, CreateCardUsecase, UploadingCardItemUsecase } from "@app/card/commands/usecase";
+import { CheckCardItemDatasUsecase, CheckCardItemDataUsecase, CreateCardUsecase, UploadingCardItemUsecase } from "@app/card/commands/usecase";
 import { CARD_ITEM_ASSET_NAMESPACE, CARD_ITEM_ID_ATTRIBUTE_NAME, CARD_ITEM_ID_KEY_NAME, CARD_ITEM_STATUS_ATTRIBUTE_NAME, CARD_ITEM_STATUS_KEY_NAME, CardIdGenerator, CardItemPathMapping } from "./card.interface";
 import { DeleteCardItemAndCardAssetDataToMysql, InsertCardAndCardStateDataToMysql, InsertCardItemAndCardAssetDataToMysql, InsertCardItemDataToMysql, UpdateCardItemAssetDataToMysql } from "@infra/db/mysql/card/card.outbound";
-import { CheckPresignedUrlFromAwsS3, GetMultipartUploadIdFromS3Bucket, GetPresignedUrlFromS3Bucket, GetPresignedUrlsFromS3Bucket } from "@infra/disk/s3/adapters/disk.inbound";
+import { CheckPresignedUrlFromAwsS3, CheckUploadDatasFromAwsS3, GetMultipartUploadIdFromS3Bucket, GetPresignedUrlFromS3Bucket, GetPresignedUrlsFromS3Bucket } from "@infra/disk/s3/adapters/disk.inbound";
 import { InsertCardItemAssetInitDataToRedis, UpdateCardItemAssetDataToRedis } from "@infra/cache/redis/card/card.outbound";
 import { GetMultipartDataUrlUsecase } from "@app/card/queries/usecase";
 import { CACHE_CARD_ITEM_ASSET_KEY_NAME, CACHE_CARD_NAMESPACE_NAME } from "@infra/cache/cache.constants";
@@ -91,7 +91,7 @@ import { SelectCardItemAssetFromMysql } from "@infra/db/mysql/card/card.inbound"
       ]
     },
 
-    // card에 item에 upload_id에서 presigned_url을 받을때 
+    // card에 item에 upload_id에서 presigned_url을 받을때 (10mb 이상)
     {
       provide : GetMultipartDataUrlUsecase,
       useFactory : (
@@ -156,6 +156,45 @@ import { SelectCardItemAssetFromMysql } from "@infra/db/mysql/card/card.inbound"
         InsertCardItemAssetInitDataToRedis,
         CardItemPathMapping,
         CheckPresignedUrlFromAwsS3,
+        UpdateCardItemAssetDataToMysql,
+        UpdateCardItemAssetDataToRedis
+      ]
+    },
+
+    // 10mb 이상의 파일에 경우 이를 통해서 확인
+    {
+      provide : CheckCardItemDatasUsecase,
+      useFactory : (
+        cardAssetNamespace : string,
+        itemIdKeyName : string,
+        itemIdAttribute : string,  
+        statusColName : string,
+        statusKeyName : string,
+        selectCardAssetFromCache : SelectCardItemAssetFromRedis,
+        selectCardAssetFromDb : SelectCardItemAssetFromMysql,
+        insertCardAssetToCache : InsertCardItemAssetInitDataToRedis,
+        pathMapping : CardItemPathMapping,
+        checkUploadFromDisk : CheckUploadDatasFromAwsS3,
+        updateCardAssetToDb : UpdateCardItemAssetDataToMysql,
+        updateCardAssetToCache : UpdateCardItemAssetDataToRedis 
+      ) => {
+        return new CheckCardItemDatasUsecase({
+          usecaseValues : {
+            cardAssetNamespace, itemIdKeyName, itemIdAttribute, statusColName, statusKeyName
+          }, selectCardAssetFromCache, selectCardAssetFromDb, insertCardAssetToCache, pathMapping, checkUploadFromDisk, updateCardAssetToDb, updateCardAssetToCache
+        })
+      },
+      inject : [
+        CARD_ITEM_ASSET_NAMESPACE,
+        CARD_ITEM_ID_KEY_NAME,
+        CARD_ITEM_ID_ATTRIBUTE_NAME,
+        CARD_ITEM_STATUS_ATTRIBUTE_NAME,
+        CARD_ITEM_STATUS_KEY_NAME,
+        SelectCardItemAssetFromRedis,
+        SelectCardItemAssetFromMysql,
+        InsertCardItemAssetInitDataToRedis,
+        CardItemPathMapping,
+        CheckUploadDatasFromAwsS3,
         UpdateCardItemAssetDataToMysql,
         UpdateCardItemAssetDataToRedis
       ]
