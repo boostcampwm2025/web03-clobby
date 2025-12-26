@@ -38,6 +38,10 @@ async function bootstrap() {
   // port, host 설정
   const port: number = config.get<number>('NODE_PORT', 8080);
   const host: string = config.get<string>('NODE_HOST', 'localhost');
+
+  // 종료 훅을 반드시 호출해 달라는 함수이다.
+  app.enableShutdownHooks();
+
   await app.listen(port, host);
 }
 bootstrap();
