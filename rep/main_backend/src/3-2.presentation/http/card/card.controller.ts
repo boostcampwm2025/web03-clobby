@@ -39,9 +39,8 @@ export class CardController {
     return {card_id};
   };
 
-  // sse를 활용하여 card_id에 해당하는 card_item 리스트를 볼 수 있다. - get 요청
+  // sse를 활용하여 card_id에 해당하는 card_item 리스트를 볼 수 있다. - get 요청 -> 모든 유저가 card를 볼 수 있게 한다. 
   @Sse(":card_id/sse")
-  @UseGuards(JwtGuard) 
   sseCardItemListController(
     @Req() req : Request,
     @Param("card_id") card_id : string
@@ -60,7 +59,6 @@ export class CardController {
       }))
     );
   };
-
 
   @Post(":card_id/items")
   @UseGuards(JwtGuard)

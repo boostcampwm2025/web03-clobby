@@ -20,6 +20,15 @@ export class GetUploadUrlFromDisk<T> extends InboundBaseDisk<T> {
 };
 
 @Injectable()
+export class GetUploadUrlsFromDisk<T> extends InboundBaseDisk<T> {
+  constructor( disk : T ) { super(disk); };
+
+  public async getUrls( paths : Array<{ uniqueKey : string, pathName : string, mime_type : string }> ) : Promise<Record<string, any>> | never {
+    throw new NullInterfaceError();
+  };
+};
+
+@Injectable()
 export class GetMultiPartVerGroupIdFromDisk<T> extends InboundBaseDisk<T> {
   constructor( disk : T ) { super(disk); };
 

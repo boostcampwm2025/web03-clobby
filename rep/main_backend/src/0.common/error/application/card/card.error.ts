@@ -89,3 +89,12 @@ export class NotAllowCardItemMimeTypeValue extends BaseError {
     });
   };
 };
+
+export class DontGetCardItemAndAssetData extends BaseError {
+  constructor() {
+    super({
+      message: 'card_item, card_asset을 가져오지 못했습니다.',
+      status: 500,
+    });
+  };
+};
