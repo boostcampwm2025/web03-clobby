@@ -173,3 +173,29 @@ export class InsertCardAndCardStatToRedis extends InsertDataToCache<RedisClientT
   };
 
 };
+
+@Injectable()
+export class UpdateCardStatToRedis extends UpdateDataToCache<RedisClientType<any, any>> {
+
+  constructor(
+    @Inject(REDIS_SERVER) cache : RedisClientType<any, any>,  
+  ) { super(cache); };
+
+  // 데이터를 업데이트 할 것이고 일단 데이터에서 가져오고 그걸 받아오는 방식으로 수정할 예정이다. -> ( 걱정되는건 )
+  async updateKey({ namespace, keyName, updateValue }: { namespace: string; keyName: string; updateValue: number; }): Promise<boolean> {
+    
+    const cache = this.cache;
+
+    const exist = await cache.exists(namespace);
+
+    // 없을 수 있다 예를 들어서 만료가 됐다던지.. 그러면 일단 여기서 반환하자
+    if ( !exist ) return false;
+
+    // 정합성 유지를 위해서 바로 올리는 방법을 택해야 한다. 
+    await cache.hIncrBy(namespace, keyName, updateValue);
+    await cache.expire(namespace, 60 * 60);
+
+    return true;
+  };
+
+};  
