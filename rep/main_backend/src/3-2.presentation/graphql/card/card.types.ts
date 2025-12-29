@@ -177,3 +177,9 @@ export class UpdateCardItemInput {
   option? : Record<string, any>;
 
 };
+
+@InputType()
+export class UpdateCardItemClearOutput {
+  @Field(() => Boolean)
+  ok : boolean;
+};

@@ -9,7 +9,8 @@ import { CARD_ID_ATTRIBUTE_NAME_ATTR, CARD_ID_KEY_NAME_ATTR, CARD_NAMESPACE_ATTR
 import { CACHE_CARD_KEY_NAME, CACHE_CARD_NAMESPACE_NAME } from "@infra/cache/cache.constants";
 import { DB_CARD_STATS_ATTRIBUTE_NAME, DB_CARDS_ATTRIBUTE_NAME } from "@infra/db/db.constants";
 import { GetPresingendUrlsFromAwsS3 } from "@infra/disk/s3/adapters/disk.inbound";
-import { UpdateCardStatToMySql } from "@infra/db/mysql/card/card.outbound";
+import { UpdateCardItemsToMysql, UpdateCardStatToMySql } from "@infra/db/mysql/card/card.outbound";
+import { UpdateCardItemsUsecase } from "@/2.application/card/commands/usecase";
 
 
 @Module({
@@ -102,7 +103,20 @@ import { UpdateCardStatToMySql } from "@infra/db/mysql/card/card.outbound";
         UpdateCardStatToMySql,
         UpdateCardStatToRedis
       ]
-    }
+    },
+
+    // card에 item을 수정하기 위한 usecase
+    {
+      provide : UpdateCardItemsUsecase,
+      useFactory : (
+        updateCardItemsToDb : UpdateCardItemsToMysql
+      ) => {
+        return new UpdateCardItemsUsecase({
+          updateCardItemsToDb
+        });
+      },
+      inject : [UpdateCardItemsToMysql]
+    },
   ]
 })
 export class CardGraphqlModule {};
