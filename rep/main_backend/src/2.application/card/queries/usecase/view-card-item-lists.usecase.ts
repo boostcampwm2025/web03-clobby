@@ -4,16 +4,21 @@ import { Injectable } from "@nestjs/common";
 import { CardItemAssetProps, CardItemProps } from "@domain/card/vo";
 import { DontGetCardItemAndAssetData } from "@error/application/card/card.error";
 import { CardItemAndAssetViewReturnDto } from "../dto";
+import { UpdateDataToCache } from "@app/ports/cache/cache.outbound";
+import { UpdateValueToDb } from "@app/ports/db/db.outbound";
 
 
 type GetCardItemDatasUsecaseValues = {
   cardIdAttribute : string;
+  cardNamespace : string;
 };
 
-type GetCardItemDatasUsecaseProps<T, ET> = {
+type GetCardItemDatasUsecaseProps<T, CT, ET> = {
   usecaseValues : GetCardItemDatasUsecaseValues; // card_id에 대한 데이터 이름
   selectCardItems : SelectDataFromDb<T>; // 모든 card_item 데이터를 db에서 찾아야 한다. 
-  getUploadUrlsFromDisk : GetUploadUrlsFromDisk<ET> // 모든 upload_url을 가져와야 한다. 
+  getUploadUrlsFromDisk : GetUploadUrlsFromDisk<ET>; // 모든 upload_url을 가져와야 한다.
+  updateCardStatToDb : UpdateValueToDb<T>;
+  updateCardStatToCache : UpdateDataToCache<CT>; // card_stat에 대해서 cache 수정
 };
 
 export type ViewCardItemAndAssetListsType = {
@@ -22,18 +27,22 @@ export type ViewCardItemAndAssetListsType = {
 }; // 우리가 card_item, card_asset을 받게 된다.
 
 @Injectable()
-export class GetCardItemDatasUsecase<T, ET> {
+export class GetCardItemDatasUsecase<T, CT, ET> {
 
-  private readonly usecaseValues : GetCardItemDatasUsecaseProps<T, ET> ["usecaseValues"];
-  private readonly selectCardItems : GetCardItemDatasUsecaseProps<T, ET>["selectCardItems"];
-  private readonly getUploadUrlsFromDisk : GetCardItemDatasUsecaseProps<T, ET>["getUploadUrlsFromDisk"];
+  private readonly usecaseValues : GetCardItemDatasUsecaseProps<T, CT, ET> ["usecaseValues"];
+  private readonly selectCardItems : GetCardItemDatasUsecaseProps<T, CT, ET>["selectCardItems"];
+  private readonly getUploadUrlsFromDisk : GetCardItemDatasUsecaseProps<T, CT, ET>["getUploadUrlsFromDisk"];
+  private readonly updateCardStatToDb : GetCardItemDatasUsecaseProps<T, CT, ET>["updateCardStatToDb"];
+  private readonly updateCardStatToCache : GetCardItemDatasUsecaseProps<T, CT, ET>["updateCardStatToCache"];
 
   constructor({
-    usecaseValues, selectCardItems, getUploadUrlsFromDisk
-  } : GetCardItemDatasUsecaseProps<T, ET>) {
+    usecaseValues, selectCardItems, getUploadUrlsFromDisk, updateCardStatToDb, updateCardStatToCache
+  } : GetCardItemDatasUsecaseProps<T, CT, ET>) {
     this.usecaseValues = usecaseValues;
     this.selectCardItems = selectCardItems;
     this.getUploadUrlsFromDisk = getUploadUrlsFromDisk;
+    this.updateCardStatToDb = updateCardStatToDb;
+    this.updateCardStatToCache = updateCardStatToCache;
   }
 
   async execute(card_id : string) : Promise<Array<CardItemAndAssetViewReturnDto>> {
@@ -85,6 +94,11 @@ export class GetCardItemDatasUsecase<T, ET> {
       // 업로드 된건 주입 
       if (dto.card_asset) dto.card_asset.path = upload_url; 
     };
+
+    // 조회수 올리기 -> 아예 여기서 속도가 좀 느려지더라도 명확하게 하자 
+    await this.updateCardStatToDb.update({ uniqueValue : card_id, updateColName : "", updateValue : "" }); // card_stat에 값 변경
+    const namespace : string = `${this.usecaseValues.cardNamespace}:${card_id}`;
+    await this.updateCardStatToCache.updateKey({ namespace, keyName : "", updateValue : undefined }); // cache에서 card 정보 변경
 
     return [
       ...completeCheckData,

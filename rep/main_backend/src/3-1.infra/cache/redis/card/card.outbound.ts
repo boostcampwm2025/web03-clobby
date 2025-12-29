@@ -1,11 +1,12 @@
 import { InsertDataToCache, UpdateDataToCache } from "@app/ports/cache/cache.outbound";
 import { Inject, Injectable } from "@nestjs/common";
 import { type RedisClientType } from "redis";
-import { CACHE_CARD_ITEM_ASSET_KEY_NAME, CACHE_CARD_NAMESPACE_NAME, REDIS_SERVER } from "../../cache.constants";
+import { CACHE_CARD_ITEM_ASSET_KEY_NAME, CACHE_CARD_KEY_NAME, CACHE_CARD_NAMESPACE_NAME, REDIS_SERVER } from "../../cache.constants";
 import { InsertCardAssetDataProps } from "@app/card/commands/usecase";
-import { CardItemAssetProps } from "@domain/card/vo";
+import { CardItemAssetProps, CardProps, CardStateProps } from "@domain/card/vo";
 import { ConfigService } from "@nestjs/config";
 import { UpdateCardItemAssetValueProps } from "@app/card/commands/dto";
+import { GetCardMetaAndStatProps } from "@app/card/queries/usecase";
 
 
 @Injectable()
@@ -137,6 +138,38 @@ export class UpdateCardItemAssetEntityToRedis extends UpdateDataToCache<RedisCli
     pipe.expire(namespace, 60 * 60);
     const res = await pipe.exec();
     return Array.isArray(res);
+  };
+
+};
+
+@Injectable()
+export class InsertCardAndCardStatToRedis extends InsertDataToCache<RedisClientType<any, any>> {
+
+  constructor(
+    @Inject(REDIS_SERVER) cache : RedisClientType<any, any>
+  ) { super(cache); };
+
+  async insert(entity: GetCardMetaAndStatProps): Promise<boolean> {
+    
+    const card : CardProps = entity.card;
+    const cardStat : CardStateProps = entity.card_stat;
+
+    const namespace : string = `${CACHE_CARD_NAMESPACE_NAME.CACHE_CARD}:${entity.card.card_id}`;
+    const tx = this.cache.multi();
+
+    for ( const keyName of Object.values(CACHE_CARD_KEY_NAME) ) {
+
+      const value = (card as any)[keyName] ?? (cardStat as any )[keyName];
+
+      if ( value === undefined || value === null ) continue; // 값이 없다면 스킵
+
+      tx.hSet(namespace, keyName, String(value));
+    };
+
+    tx.expire(namespace, 60 * 60);
+    const res = await tx.exec();
+
+    return res !== null;
   };
 
 };

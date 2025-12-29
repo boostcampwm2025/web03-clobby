@@ -50,6 +50,7 @@ export class SelectCardItemAssetFromRedis extends SelectDataFromCache<RedisClien
 
 };
 
+// card card_stat과 관련된 redis 찾기
 @Injectable()
 export class SelectCardMetaAndStatFromRedis extends SelectDataFromCache<RedisClientType<any, any>> {
 
