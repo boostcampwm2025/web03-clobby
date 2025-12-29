@@ -1,9 +1,9 @@
 import { SelectDataFromDb } from "@app/ports/db/db.inbound";
 import { Inject, Injectable } from "@nestjs/common";
 import { RowDataPacket, type Pool } from "mysql2/promise";
-import { DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME, DB_CARD_ITEMS_ATTRIBUTE_NAME, DB_TABLE_NAME, MYSQL_DB } from "../../db.constants";
+import { DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME, DB_CARD_ITEMS_ATTRIBUTE_NAME, DB_CARD_STATS_ATTRIBUTE_NAME, DB_CARDS_ATTRIBUTE_NAME, DB_TABLE_NAME, MYSQL_DB } from "../../db.constants";
 import { CardItemAssetProps, CardItemAssetStatusProps, CardItemProps } from "@domain/card/vo";
-import { GetCardItemAndAssetListsType } from "@app/card/queries/usecase";
+import { GetCardItemAndAssetListsType, GetCardMetaAndStatProps } from "@app/card/queries/usecase";
 
 
 interface CardItemAssetRowPacket extends RowDataPacket {
@@ -32,8 +32,8 @@ export class SelectCardItemAssetFromMysql extends SelectDataFromDb<Pool> {
 
     const sql : string = `
     SELECT 
-    \`${DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME.CARD_ID}\`,
-    \`${DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME.ITEM_ID}\`,
+    BIN_TO_UUID(\`${DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME.CARD_ID}\`, true) AS ${DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME.CARD_ID},
+    BIN_TO_UUID(\`${DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME.ITEM_ID}\`, true) AS ${DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME.ITEM_ID},
     \`${DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME.KEY_NAME}\`,
     \`${DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME.MIME_TYPE}\`,
     \`${DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME.STATUS}\`,
@@ -41,7 +41,7 @@ export class SelectCardItemAssetFromMysql extends SelectDataFromDb<Pool> {
     \`${DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME.CREATED_AT}\`,
     \`${DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME.UPDATED_AT}\`
     FROM \`${tableName}\`
-    WHERE \`${attributeName}\` = ?
+    WHERE \`${attributeName}\` = UUID_TO_BIN(?, true)
     LIMIT 1
     `;
 
@@ -200,5 +200,94 @@ export class SelectAllCardItemAndAssetFromMysql extends SelectDataFromDb<Pool> {
 
     return datas;
   }
+
+};
+
+
+interface CardMetaAndStatRow extends RowDataPacket {
+  card_id: string;
+  user_id: string;
+  category_id: number;
+  thumbnail_path: string | null;
+  status: "published" | "draft" | "archived";         
+  title: string;
+  workspace_width: number;
+  workspace_height: number;
+  background_color: string;
+  view_count: number;
+  like_count: number;
+}
+@Injectable()
+export class SelectCardAndStatFromMysql extends SelectDataFromDb<Pool> {
+
+  constructor(
+    @Inject(MYSQL_DB) db : Pool
+  ) { super(db); };
+
+  private async selectData({
+    db, attributeName, attributeValue
+  } : {
+    db : Pool, attributeName : string, attributeValue : string
+  }) : Promise<GetCardMetaAndStatProps | undefined> {
+
+    const cardTableName : string = DB_TABLE_NAME.CARDS;
+    const cardNamespace : string = "c";
+
+    const cardStatTableName : string = DB_TABLE_NAME.CARD_STATS;
+    const cardStatNamespace : string = "cs";
+
+    const sql : string = `
+    SELECT 
+    BIN_TO_UUID(${cardNamespace}.\`${DB_CARDS_ATTRIBUTE_NAME.CARD_ID}\`, true) AS ${DB_CARDS_ATTRIBUTE_NAME.CARD_ID},
+    BIN_TO_UUID(${cardNamespace}.\`${DB_CARDS_ATTRIBUTE_NAME.USER_ID}\`, true) AS ${DB_CARDS_ATTRIBUTE_NAME.USER_ID},
+    ${cardNamespace}.\`${DB_CARDS_ATTRIBUTE_NAME.CATEGORY_ID}\`,
+    ${cardNamespace}.\`${DB_CARDS_ATTRIBUTE_NAME.THUMBNAIL_PATH}\`,
+    ${cardNamespace}.\`${DB_CARDS_ATTRIBUTE_NAME.STATUS}\`,
+    ${cardNamespace}.\`${DB_CARDS_ATTRIBUTE_NAME.TITLE}\`,
+    ${cardNamespace}.\`${DB_CARDS_ATTRIBUTE_NAME.WORKSPACE_WIDTH}\`,
+    ${cardNamespace}.\`${DB_CARDS_ATTRIBUTE_NAME.WORKSPACE_HEIGHT}\`,
+    ${cardNamespace}.\`${DB_CARDS_ATTRIBUTE_NAME.BACKGROUND_COLOR}\`,
+    ${cardStatNamespace}.\`${DB_CARD_STATS_ATTRIBUTE_NAME.VIEW_COUNT}\`,
+    ${cardStatNamespace}.\`${DB_CARD_STATS_ATTRIBUTE_NAME.LIKE_COUNT}\`
+    FROM \`${cardTableName}\` ${cardNamespace} INNER JOIN \`${cardStatTableName}\` ${cardStatNamespace}
+    ON ${cardNamespace}.\`${DB_CARDS_ATTRIBUTE_NAME.CARD_ID}\` = ${cardStatNamespace}.\`${DB_CARD_STATS_ATTRIBUTE_NAME.CARD_ID}\`
+    WHERE ${cardNamespace}.\`${attributeName}\` = UUID_TO_BIN(?, true)
+    LIMIT 1
+    `; 
+
+    const [ rows ] = await db.query<CardMetaAndStatRow[]>(sql, [attributeValue]);
+
+    if ( !rows || rows.length === 0 ) return undefined;
+    const row : CardMetaAndStatRow = rows[0]
+    return {
+      card : {
+        card_id: row.card_id,
+        user_id: row.user_id,
+        category_id: row.category_id,
+        thumbnail_path: row.thumbnail_path ?? undefined,
+        status: row.status,
+        title: row.title,
+        workspace_width: row.workspace_width,
+        workspace_height: row.workspace_height,
+        background_color: row.background_color,
+      },
+      card_stat : {
+        id : 1,
+        card_id: row.card_id,
+        view_count: row.view_count,
+        like_count: row.like_count,
+      }
+    }
+  }
+
+  // 여기서는 card_id가 사용된다. 
+  async select({ attributeName, attributeValue, }: { attributeName: string; attributeValue: any; }): Promise<GetCardMetaAndStatProps | undefined> {
+    
+    const db : Pool = this.db;
+
+    const data = await this.selectData({ db, attributeName, attributeValue });
+
+    return data;
+  };
 
 };
