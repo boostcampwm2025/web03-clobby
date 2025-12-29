@@ -95,7 +95,8 @@ export class SelectAllCardItemAndAssetFromMysql extends SelectDataFromDb<Pool> {
     // card_asset과 관련된 테이블
     const cardItemAssetTableName : string = DB_TABLE_NAME.CARD_ITEM_ASSETS;
     const cardItemAssetNamespace : string = "cia";
-
+    
+    // 문제는 item_id인데... 
     const ciCols = [
       DB_CARD_ITEMS_ATTRIBUTE_NAME.ITEM_ID,
       DB_CARD_ITEMS_ATTRIBUTE_NAME.CARD_ID,
@@ -124,10 +125,20 @@ export class SelectAllCardItemAndAssetFromMysql extends SelectDataFromDb<Pool> {
       DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME.CARD_ID
     ] as const;
 
+    // 여기서 만약 해당 값에 달하면 그건 예외처리하는 방식으로 변경하려고 한다.
+    const uuidCols = new Set<string>(["item_id", "card_id"]);
+    const isUuidCol = (c: string): c is "item_id" | "card_id" => uuidCols.has(c); 
+
     // 전체 카드 열이름으로 바꾸기
     const selectClause : string = [
-      ...ciCols.map((c) => `${cardItemNamespace}.\`${c}\` AS \`ci__${c}\``),
-      ...ciaCols.map((c) => `${cardItemAssetNamespace}.\`${c}\` AS \`cia__${c}\``),
+      ...ciCols.map((c) => {
+        if ( isUuidCol(c) ) return `BIN_TO_UUID(${cardItemNamespace}.\`${c}\`, true) AS \`ci__${c}\``
+        else return `${cardItemNamespace}.\`${c}\` AS \`ci__${c}\``
+      }),
+      ...ciaCols.map((c) => {
+        if ( isUuidCol(c) ) return `BIN_TO_UUID(${cardItemAssetNamespace}.\`${c}\`, true) AS \`cia__${c}\``
+        else return `${cardItemAssetNamespace}.\`${c}\` AS \`cia__${c}\``;
+      }),
     ].join(",\n    ");
 
     // 명확한건 해당 attribute_name이 맞는지 확인해주어야 한다.
@@ -142,7 +153,7 @@ export class SelectAllCardItemAndAssetFromMysql extends SelectDataFromDb<Pool> {
     FROM \`${cardItemTableName}\` ${cardItemNamespace} 
     LEFT JOIN \`${cardItemAssetTableName}\` ${cardItemAssetNamespace} ON
     ${cardItemNamespace}.\`${DB_CARD_ITEMS_ATTRIBUTE_NAME.ITEM_ID}\` = ${cardItemAssetNamespace}.\`${DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME.ITEM_ID}\`
-    WHERE ${cardItemNamespace}.\`${attributeName}\` = ? AND ${cardItemNamespace}.\`${DB_CARD_ITEMS_ATTRIBUTE_NAME.DELETED_AT}\` IS NULL
+    WHERE ${cardItemNamespace}.\`${attributeName}\` = UUID_TO_BIN(?, true) AND ${cardItemNamespace}.\`${DB_CARD_ITEMS_ATTRIBUTE_NAME.DELETED_AT}\` IS NULL
     `;
 
     const [ rows ] = await db.query<Array<any>>(sql, [attributeValue]);
