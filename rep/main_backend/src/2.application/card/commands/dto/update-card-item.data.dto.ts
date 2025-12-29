@@ -35,7 +35,8 @@ export type CompletePartsType = {
 
 export type ChangeFileType = {
   upload_id : string;
-  complete_parts : Array<CompletePartsType>
+  complete_parts : Array<CompletePartsType>,
+  part_size : number;
 };  
 
 export type AfterUpdateCardItemDataInfo = {

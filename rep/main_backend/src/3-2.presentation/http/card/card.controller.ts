@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, Param, Patch, Post, Req, Sse, UseGuards, UsePipes, ValidationPipe, MessageEvent } from "@nestjs/common";
+import { Body, Controller, HttpCode, Param, Patch, Post, Req, Sse, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common";
 import { JwtGuard } from "../auth/guards";
 import { type Request } from "express";
 import { CardService } from "./card.service";
@@ -6,14 +6,12 @@ import { Payload } from "@app/auth/commands/dto";
 import { CheckEtagsValidate, CheckEtagValidate, CreateCardItemValidate, CreateCardValidate, GetPresignedUrlsValidate, UpdateCardItemFileValdate } from "./card.validate";
 import { AfterCreateCardItemDataInfo, AfterUpdateCardItemDataInfo, CheckCardItemDatasUrlProps, CheckCardItemDataUrlProps, CreateCardDto, CreateCardItemDataDto, UpdateCardItemInfoProps } from "@app/card/commands/dto";
 import { MultiPartResponseDataDto, UploadMultipartDataDto } from "@app/card/queries/dto";
-import { RedisSseBrokerService } from "@infra/channel/redis/channel.service";
 
 
 @Controller("api/cards")
 export class CardController {
   constructor(
     private readonly cardService : CardService,
-    private readonly redisSseBroker : RedisSseBrokerService
   ) {}
 
   @Post("")
@@ -59,7 +57,7 @@ export class CardController {
   // };
 
   @Post(":card_id/items")
-  @UseGuards(JwtGuard)
+  // @UseGuards(JwtGuard)
   @UsePipes(new ValidationPipe({
     transform: true,
     whitelist: true,
@@ -79,7 +77,7 @@ export class CardController {
 
   // 추후에 인가를 추가 해야 한다. 유저는 자신의 카드에만 접근할 수 있는 권한이 주어진다.
   @Post(":card_id/items/:item_id/presigned_urls")
-  @UseGuards(JwtGuard)
+  // @UseGuards(JwtGuard)
   @UsePipes(new ValidationPipe({
     transform : true,
     whitelist : true
@@ -100,7 +98,7 @@ export class CardController {
 
   // 10mb 이하일 경우 이를 이용해서 검증
   @Post(":card_id/items/:item_id/check")
-  @UseGuards(JwtGuard)
+  // @UseGuards(JwtGuard)
   @UsePipes(new ValidationPipe({
     transform : true,
     whitelist : true    
@@ -120,7 +118,7 @@ export class CardController {
 
   // 10mb 이상일 경우 이를 이용해서 검증
   @Post(":card_id/items/:item_id/checks")
-  @UseGuards(JwtGuard)
+  // @UseGuards(JwtGuard)
   @UsePipes(new ValidationPipe({
     transform : true,
     whitelist : true
@@ -141,7 +139,7 @@ export class CardController {
   // file에 내용만 update할때 사용하는 거 - 기존에 값을 덮어 쓴다 라는 의미가 강해서 Put으로 하기로 하였다. 
   // 만약 10mb 이상이라면 같은 파일이면 기존의 것을 이어서 받을 수 있도록 하는건 어떨지?
   @Patch(":card_id/items/:item_id/file")
-  @UseGuards(JwtGuard)
+  // @UseGuards(JwtGuard)
   @UsePipes(new ValidationPipe({
     transform : true,
     whitelist : true

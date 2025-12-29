@@ -111,7 +111,7 @@ export class UpdateCardItemDataUsecase<T, ET, DT> {
     }
 
     // 추가로 기존의 type이 같은지 확인하는 로직 추가 -> mime_type을 활용해야 한다. 
-    const originType : string | undefined = checkCardAsset.mime_type.split("/").at(0)?.trim(); // mime_type에 앞에만 
+    const originType : string | undefined = checkCardAsset.mime_type.trim(); // mime_type에 앞에만 
     if ( cardAsset.mime_type !== originType ) throw new NotAllowCardItemMimeTypeValue();
 
     // 3. 해당 item key_name에 해당하는 url 데이터 주기 -> 최대한 생성과 비슷하게 맞추어서 재활용 하기 

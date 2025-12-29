@@ -439,10 +439,11 @@ export class UpdateCardItemAssetEntityToMySql extends UpdateValueToDb<Pool> {
 
     // update용 key중에서 값이 있으면 col에 넣어서 수정하기 
     updateValueKeys.forEach(( updateValueKey : UpdateKey ) => {
-
+      
+      const existKey = colNameMapping[updateValueKey]
       const updateV = updateValue[updateValueKey];
 
-      if ( updateV !== undefined ) {
+      if ( existKey !== undefined && updateV !== undefined ) {
         colNames.push( colNameMapping[updateValueKey] ); // 업데이트할 열 이름
         colValues.push(updateV); // 업데이트할 값 
       }

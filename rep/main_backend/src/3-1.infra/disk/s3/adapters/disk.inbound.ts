@@ -337,10 +337,11 @@ export class GetCompleteMultipartTagsFromAwsS3 extends GetMultiPartVerCompleteGr
     // 만약 없다면 새로운 upload_id를 발급하고 빈 완료목록을 준다.
     if ( !UploadId ) {
       UploadId = await this.createUploadId({ Bucket, key_name, mime_type });
-
+      // 기존의 코드를 최대한 이용하기로 한다. 
       return {
         upload_id : UploadId,
-        complete_parts : []
+        complete_parts : [],
+        part_size : 10 * 1024 * 1024
       };
     };
 
@@ -349,7 +350,8 @@ export class GetCompleteMultipartTagsFromAwsS3 extends GetMultiPartVerCompleteGr
 
     return {
       upload_id : UploadId,
-      complete_parts
+      complete_parts,
+      part_size : 10 * 1024 * 1024
     };
   };
 
