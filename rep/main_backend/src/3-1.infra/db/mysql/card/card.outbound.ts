@@ -767,3 +767,42 @@ export class UpdateCardToMysql extends UpdateValueToDb<Pool> {
   }
 
 };
+
+// card_id가 주어지면 그에 대해서 soft 삭제를 한다. 
+@Injectable()
+export class DeleteCardToMysql extends DeleteValueToDb<Pool> {
+
+  constructor(
+    @Inject(MYSQL_DB) db : Pool,
+  ) { super(db); };
+
+  private async deleteData({
+    db, tableName, uniqueValue
+  } : {
+    db : Pool, tableName : string, uniqueValue : string
+  }) : Promise<boolean> {
+
+    const sql : string = `
+    UPDATE \`${tableName}\`
+    SET 
+      \`${DB_CARDS_ATTRIBUTE_NAME.DELETED_AT}\` = NOW(6)
+    WHERE \`${DB_CARDS_ATTRIBUTE_NAME.CARD_ID}\` = UUID_TO_BIN(?, true)
+    `;
+
+    const [ result ] = await db.execute<ResultSetHeader>(sql, [ uniqueValue ]);
+
+    return result && result.affectedRows ? true : false;
+  };
+
+  // uniqueValue는 card_id 이다. 
+  async delete({ uniqueValue, addOption }: { uniqueValue: string; addOption: undefined; }): Promise<boolean> {
+
+    const db : Pool = this.db;
+    const tableName : string = DB_TABLE_NAME.CARDS;
+
+    const deleted : boolean = await this.deleteData({ db, tableName, uniqueValue });
+
+    return deleted;
+  };
+
+};
