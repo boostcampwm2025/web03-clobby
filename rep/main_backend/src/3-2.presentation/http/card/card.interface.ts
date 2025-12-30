@@ -1,3 +1,4 @@
+import { CardDataProps } from "@app/card/queries/dto";
 import { IdGenerator, PathMapping } from "@domain/shared";
 import { Injectable } from "@nestjs/common";
 import path from "path";
@@ -36,8 +37,8 @@ export class CardItemPathMapping implements PathMapping {
 
 // 스트림과 관련된 type들 
 export type ListState = {
-  recents : Array<any>;
-  popularities : Array<any>; 
+  recents : Array<CardDataProps>;
+  popularities : Array<CardDataProps>; 
 };
 
 // 스트림을 나눌 메시지

@@ -48,10 +48,10 @@ export class CardController {
 
     // 필요한 채널이 있으면 여기서 생성하고 구독하면 된다. 
     // 1. 최근 리스트
-    const recents : string = `${CHANNEL_SSE_NAME.CARD_ITEMS}:recent`; 
+    const recents : string = `${CHANNEL_SSE_NAME.CARD_ITEMS}:recents`; 
     this.redisSseBroker.subscribe(recents); 
     // 2. 조회수 높은 거 리스트
-    const popularity : string = `${CHANNEL_SSE_NAME.CARD_ITEMS}:popularity`; 
+    const popularity : string = `${CHANNEL_SSE_NAME.CARD_ITEMS}:popularities`; 
     this.redisSseBroker.subscribe(popularity);
     
     req.on("close", () => {
