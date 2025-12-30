@@ -1,4 +1,4 @@
-import { DeleteDatasToCache, InsertDataToCache, UpdateDataToCache } from "@app/ports/cache/cache.outbound";
+import { DeleteDatasToCache, DeleteDataToCache, InsertDataToCache, UpdateDataToCache } from "@app/ports/cache/cache.outbound";
 import { Inject, Injectable } from "@nestjs/common";
 import { type RedisClientType } from "redis";
 import { CACHE_CARD_ITEM_ASSET_KEY_NAME, CACHE_CARD_KEY_NAME, CACHE_CARD_NAMESPACE_NAME, REDIS_SERVER } from "../../cache.constants";
@@ -280,5 +280,22 @@ export class UpdateCardToRedis extends UpdateDataToCache<RedisClientType<any, an
 
     return res !== null;
   };
+
+};
+
+// card에 namespace에 대해서 삭제 
+@Injectable()
+export class DeleteCardToRedis extends DeleteDataToCache<RedisClientType<any, any>> {
+
+  constructor(
+    @Inject(REDIS_SERVER) cache : RedisClientType<any, any>,
+  ) { super(cache); };
+
+  async deleteNamespace(namespace: string): Promise<boolean> {
+    
+    await this.cache.del(namespace);
+
+    return true;
+  }
 
 };
