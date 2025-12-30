@@ -131,6 +131,41 @@ export class Card {
 };
 
 // 여기서 부터는 mutation 전용으로 만들 수 있다. 
+
+// card와 관련된 input 이라고 할 수 있다.
+@InputType()
+export class UpdateCardInput {
+
+  // 이값은 수정이라기 보다는 반드시 포함해야 하는 요소
+  @Field(() => ID)
+  card_id : string;
+
+  @Field(() => Int, { nullable : true })
+  category_id? : number;
+
+  @Field(() => String, { nullable : true })
+  thumbnail_path?  : string | null;
+
+  @Field(() => String, { nullable : true })
+  title? : string;
+
+  @Field(() => Int, { nullable : true })
+  workspace_width? : number;
+
+  @Field(() => Int, { nullable : true })
+  workspace_height? : number;
+
+  @Field(() => String, { nullable : true })
+  background_color? : string;
+};
+
+@ObjectType()
+export class UpdateCardOutput { 
+  @Field(() => Boolean)
+  ok : boolean
+};
+
+// card_item을 수정하기 위한 input 이라고 할 수 있다. 
 @InputType()
 export class UpdateCardItemInput {
 

@@ -1,5 +1,5 @@
 import { Resolver, ResolveField, Parent, Query, Args, ID, Mutation } from "@nestjs/graphql";
-import { Card, CardItem, DeleteCardItemInput, UpdateCardItemOutput, UpdateCardItemInput, DeleteCardItemOuput } from "./card.types";
+import { Card, CardItem, DeleteCardItemInput, UpdateCardItemOutput, UpdateCardItemInput, DeleteCardItemOuput, UpdateCardOutput, UpdateCardInput } from "./card.types";
 import { CardGraphqlService } from "./card.service";
 
 
@@ -19,6 +19,14 @@ export class CardGraphqlResover {
   @ResolveField(() => [CardItem], { name : "card_items" })
   async cardItems(@Parent() card : Card) : Promise<CardItem[]> {
     return this.cardService.cardItemService(card.card_id);
+  }
+
+  // 카드 자체에 대한 업데이트와 삭제 부분을 추가 해야 한다. 
+  @Mutation(() => UpdateCardOutput, { name : "update_card" })
+  async updateCard(
+    @Args("input", { type : () => UpdateCardInput }) input : UpdateCardInput
+  ) {
+    
   }
 
   // 카드에 아이템을 수정하는 로직 -> 여러개를 수정할 수 있게 하자 ( 하나만 해도 괜찮다. ) 
