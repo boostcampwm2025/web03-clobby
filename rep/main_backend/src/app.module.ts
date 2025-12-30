@@ -40,7 +40,7 @@ import GraphQLJSON from "graphql-type-json";
       },
 
       playground : process.env.NODE_ENV !== "production", // graphql 테스트 
-      introspection : process.env.NODE_ENV !== "production", // 그 playground를 조회할 수 있게 하는 기능 
+      introspection : false, // 그 playground를 조회할 수 있게 하는 기능 
 
       context : ({ req, res } : { req : Request, res : Response }) => ({ req, res }) // req, res 접근을 만들 수 있다면 ( 공통적으로 graphql이 모두 받게 되는 context )
     }), // graphql에 대한 진입점도 만들고 그에 따른 처리를 하기 위해서 사용

@@ -178,7 +178,7 @@ export class UpdateCardItemInput {
 
 };
 
-@InputType()
+@ObjectType()
 export class UpdateCardItemOutput {
   @Field(() => Boolean)
   ok : boolean;
@@ -201,7 +201,7 @@ export class DeleteCardItemInput {;
 
 };
 
-@InputType()
+@ObjectType()
 export class DeleteCardItemOuput {
 
   @Field(() => Boolean)
