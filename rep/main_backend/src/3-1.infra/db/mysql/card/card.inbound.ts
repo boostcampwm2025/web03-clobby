@@ -262,7 +262,7 @@ export class SelectCardAndStatFromMysql extends SelectDataFromDb<Pool> {
     ${cardStatNamespace}.\`${DB_CARD_STATS_ATTRIBUTE_NAME.LIKE_COUNT}\`
     FROM \`${cardTableName}\` ${cardNamespace} INNER JOIN \`${cardStatTableName}\` ${cardStatNamespace}
     ON ${cardNamespace}.\`${DB_CARDS_ATTRIBUTE_NAME.CARD_ID}\` = ${cardStatNamespace}.\`${DB_CARD_STATS_ATTRIBUTE_NAME.CARD_ID}\`
-    WHERE ${cardNamespace}.\`${attributeName}\` = UUID_TO_BIN(?, true)
+    WHERE ${cardNamespace}.\`${attributeName}\` = UUID_TO_BIN(?, true) AND ${cardNamespace}.\`${DB_CARDS_ATTRIBUTE_NAME.DELETED_AT}\` IS NULL
     LIMIT 1
     `; 
 

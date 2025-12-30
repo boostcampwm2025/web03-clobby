@@ -1,7 +1,7 @@
 import { CardMetaDataUsecase, GetCardItemDatasUsecase } from "@app/card/queries/usecase";
 import { HttpException, Injectable } from "@nestjs/common";
-import { Card, CardItem, CardItemAssetStatusType, CardItemType, DeleteCardItemInput, DeleteCardItemOuput, UpdateCardItemInput, UpdateCardItemOutput } from "./card.types";
-import { DeleteCardItemsUsecase, UpdateCardItemsUsecase } from "@app/card/commands/usecase";
+import { Card, CardItem, CardItemAssetStatusType, CardItemType, DeleteCardInput, DeleteCardItemInput, DeleteCardItemOuput, UpdateCardInput, UpdateCardItemInput, UpdateCardItemOutput, UpdateCardOutput } from "./card.types";
+import { DeleteCardItemsUsecase, DeleteCardUsecase, UpdateCardItemsUsecase, UpdateCardUsecase } from "@app/card/commands/usecase";
 
 
 @Injectable()
@@ -10,8 +10,10 @@ export class CardGraphqlService {
   constructor(
     private readonly cardMetaDataUsecase : CardMetaDataUsecase<any, any>,
     private readonly getCardItemUsecase : GetCardItemDatasUsecase<any, any, any>,
+    private readonly updateCardUsecase : UpdateCardUsecase<any, any>,
+    private readonly deleteCardUsecase : DeleteCardUsecase<any, any>,
     private readonly updateCardItemUsecase : UpdateCardItemsUsecase<any>,
-    private readonly deleteCardItemsUsecase : DeleteCardItemsUsecase<any, any>
+    private readonly deleteCardItemsUsecase : DeleteCardItemsUsecase<any, any>,
   ) {};
 
   async cardService(card_id : string) : Promise<Card> {
@@ -110,6 +112,44 @@ export class CardGraphqlService {
       );
     }
   }
+
+  // card를 수정할때 사용하는 service 
+  async updateCardService(input : UpdateCardInput) : Promise<UpdateCardItemOutput> {
+    try {
+      await this.updateCardUsecase.execute(input);
+      return { ok : true };
+    } catch (err) {
+      throw new HttpException(
+        {
+          message: err.message || err,
+          status: err.status || 500,
+        },
+        err.status || 500,
+        {
+          cause: err,
+        },
+      );
+    }
+  };
+
+  // card를 삭제할때 사용하는 service
+  async deleteCardService(input : DeleteCardInput) : Promise<UpdateCardOutput> {
+    try {
+      await this.deleteCardUsecase.execute(input.card_id);
+      return { ok : true };
+    } catch (err) {
+      throw new HttpException(
+        {
+          message: err.message || err,
+          status: err.status || 500,
+        },
+        err.status || 500,
+        {
+          cause: err,
+        },
+      );
+    };
+  };
 
   // card_item의 정보를 수정할때 사용하는 service
   async updateCardItemsService(input : UpdateCardItemInput[]) : Promise<UpdateCardItemOutput> {

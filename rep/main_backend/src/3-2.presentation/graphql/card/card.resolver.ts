@@ -25,17 +25,17 @@ export class CardGraphqlResover {
   @Mutation(() => UpdateCardOutput, { name : "update_card" })
   async updateCard(
     @Args("input", { type : () => UpdateCardInput }) input : UpdateCardInput
-  ) {
-    
-  }
+  ) : Promise<UpdateCardOutput> {
+    return this.cardService.updateCardService(input);
+  };
 
   // 카드를 삭제하는 부분 
   @Mutation(() => DeleteCardOutput, { name : "delete_card" })
   async deleteCard(
     @Args("input", { type : () => DeleteCardInput }) input : DeleteCardInput
-  ) {
-    
-  }
+  ) : Promise<DeleteCardOutput> {
+    return this.cardService.deleteCardService(input);
+  };
 
   // 카드에 아이템을 수정하는 로직 -> 여러개를 수정할 수 있게 하자 ( 하나만 해도 괜찮다. ) 
   // 만약 데이터중 하나라도 오염된게 있다면 이는 수정하면 안되는 부분인 것이다 따라서 하나의 오류는 업데이트가 안되는 걸로 처리할 예정이다. 
@@ -44,7 +44,7 @@ export class CardGraphqlResover {
     @Args("inputs", { type: () => [UpdateCardItemInput] } ) inputs : UpdateCardItemInput[]
   ) : Promise<UpdateCardItemOutput> {
     return this.cardService.updateCardItemsService(inputs);
-  }
+  };
 
   // 카드에 아이템을 삭제하는 로직
   @Mutation(() => DeleteCardItemOuput, { name : "delete_card_items" })
@@ -52,6 +52,6 @@ export class CardGraphqlResover {
     @Args("inputs", { type: () => DeleteCardItemInput  }) inputs : DeleteCardItemInput
   ) : Promise<DeleteCardItemOuput> {
     return this.cardService.deleteCardItemsService(inputs);
-  } 
+  };
 
 };
