@@ -26,6 +26,8 @@ export default function MeetingMenu() {
     members,
     hasNewChat,
     setHasNewChat,
+    isChatOpen,
+    isMemberOpen,
     isWorkspaceOpen,
     isCodeEditorOpen,
     setIsOpen,
@@ -36,12 +38,12 @@ export default function MeetingMenu() {
   const toggleVideo = () => setVideo(video === 'ON' ? 'OFF' : 'ON');
 
   const onMemberClick = () => {
-    setIsOpen('isMemberOpen', true);
+    setIsOpen('isMemberOpen', !isMemberOpen);
   };
 
   const onChatClick = () => {
     setHasNewChat(false);
-    setIsOpen('isChatOpen', true);
+    setIsOpen('isChatOpen', !isChatOpen);
   };
 
   const onWorkspaceClick = () => {
