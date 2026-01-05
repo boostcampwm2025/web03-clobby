@@ -18,6 +18,7 @@ import MeetingButton from '@/components/meeting/MeetingButton';
 import { useState } from 'react';
 
 export default function MeetingMenu() {
+  // 추후 전역 변수로 수정 필요
   const [meetingState, setMeetingState] = useState({
     audio: 'ON',
     video: 'ON',
@@ -41,6 +42,14 @@ export default function MeetingMenu() {
 
   const onChatClick = () => {
     setMeetingState((prev) => ({ ...prev, newChat: false }));
+  };
+
+  const onWorkspaceClick = () => {
+    setMeetingState((prev) => ({ ...prev, workspace: !prev.workspace }));
+  };
+
+  const onCodeEditorClick = () => {
+    setMeetingState((prev) => ({ ...prev, codeEditor: !prev.codeEditor }));
   };
 
   return (
@@ -104,10 +113,14 @@ export default function MeetingMenu() {
         <MeetingButton
           icon={<WorkspaceIcon className="h-8 w-8" />}
           text="워크스페이스"
+          isActive={meetingState.workspace}
+          onClick={onWorkspaceClick}
         />
         <MeetingButton
           icon={<CodeIcon className="h-8 w-8" />}
           text="코드 에디터"
+          isActive={meetingState.codeEditor}
+          onClick={onCodeEditorClick}
         />
       </section>
 
