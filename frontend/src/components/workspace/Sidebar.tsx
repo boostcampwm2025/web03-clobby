@@ -1,135 +1,92 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { v4 as uuidv4 } from 'uuid';
-import { useWorkspaceStore } from '@/store/useWorkspaceStore';
-import { TextItem, ImageItem, VideoItem } from '@/types/workspace';
+import { useState } from 'react';
 
 import NavButton from './sidebar/NavButton';
-import CardPanel from './sidebar/card/CardPanel';
 import TextPanel from './sidebar/TextPanel';
+import MediaPanel from './sidebar/MediaPanel';
+import PolygonPanel from './sidebar/PolygonPanel';
+import { ImageIcon } from '@/assets/icons/common';
+import {
+  CursorIcon,
+  PenIcon,
+  EraserIcon,
+  PentagonIcon,
+  TextBoxIcon,
+} from '@/assets/icons/editor';
 
-type TabType = 'card' | 'text' | 'image' | 'video' | null;
+type TabType = 'move' | 'draw' | 'eraser' | 'text' | 'polygon' | 'media' | null;
 
 export default function Sidebar() {
-  const [activeTab, setActiveTab] = useState<TabType>('card');
-  const [isSaved, setIsSaved] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>(null);
+  const [panelTop, setPanelTop] = useState<number | null>(null);
 
-  const { addItem, resizeWorkspace, setBackground, cardData } =
-    useWorkspaceStore();
+  const handleTabClick = (
+    tab: TabType,
+    e: React.MouseEvent<HTMLButtonElement>,
+  ) => {
+    //상세 패널 위치 계산
+    const centerY =
+      e.currentTarget.offsetTop + e.currentTarget.offsetHeight / 2;
 
-  const handleSave = () => {
-    // 저장 로직 구현
-    setIsSaved(true);
-
-    // 2초 뒤 복구
-    setTimeout(() => {
-      setIsSaved(false);
-    }, 2000);
-  };
-
-  // 단축키 감지(ctrl + s / cmd + s)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-        e.preventDefault();
-        handleSave();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [cardData]);
-
-  const toggleTab = (tab: TabType) => {
     setActiveTab((prev) => (prev === tab ? null : tab));
+    setPanelTop(centerY);
   };
-
-  // TODO : 각 아이템 추가 핸들러 구현
 
   return (
-    <aside className="z-1 flex h-full border-r border-neutral-200 bg-white shadow-sm">
-      {/* 좌측 네비게이션 */}
-      <nav className="flex w-30 flex-col items-center justify-between border-r border-neutral-200 py-4">
-        <div className="flex w-full flex-col gap-2">
-          <NavButton
-            icon="/icons/sidebar/cardIcon.svg"
-            label="카드"
-            isActive={activeTab === 'card'}
-            onClick={() => toggleTab('card')}
-          />
-          <NavButton
-            icon="/icons/sidebar/textIcon.svg"
-            label="텍스트"
-            isActive={activeTab === 'text'}
-            onClick={() => toggleTab('text')}
-            onClick={() => toggleTab('text')}
-            onDoubleClick={() => {
-              handleAddText();
-            }}
-          />
-          <NavButton
-            icon="/icons/sidebar/imageIcon.svg"
-            label="이미지"
-            isActive={activeTab === 'image'}
-            onClick={() => toggleTab('image')}
-          />
-          <NavButton
-            icon="/icons/sidebar/videoIcon.svg"
-            label="동영상"
-            isActive={activeTab === 'video'}
-            onClick={() => toggleTab('video')}
-          />
-        </div>
+    <aside className="fixed top-1/2 left-4 z-50 flex -translate-y-1/2 items-start">
+      <div className="relative flex flex-col items-center gap-2 rounded bg-neutral-800 p-2">
+        {/* 메인 패널 */}
 
-        <div className="mb-2 w-full px-2">
-          <button
-            onClick={handleSave}
-            className="group flex w-full flex-col items-center justify-center gap-1 rounded-lg py-2 transition"
+        <NavButton
+          icon={CursorIcon}
+          label="move"
+          isActive={activeTab === 'move'}
+        />
+        <NavButton
+          icon={PenIcon}
+          label="draw"
+          isActive={activeTab === 'draw'}
+        />
+        <NavButton
+          icon={EraserIcon}
+          label="eraser"
+          isActive={activeTab === 'eraser'}
+        />
+
+        <div className="h-px w-8 bg-neutral-200" />
+
+        <NavButton
+          icon={PentagonIcon}
+          label="polygon"
+          isActive={activeTab === 'polygon'}
+          onClick={(e) => handleTabClick('polygon', e)}
+        />
+        <NavButton
+          icon={TextBoxIcon}
+          label="text"
+          isActive={activeTab === 'text'}
+          onClick={(e) => handleTabClick('text', e)}
+        />
+        <NavButton
+          icon={ImageIcon}
+          label="image"
+          isActive={activeTab === 'media'}
+          onClick={(e) => handleTabClick('media', e)}
+        />
+
+        {/* 상세 패널 */}
+        {activeTab && panelTop !== null && (
+          <div
+            className="absolute left-full ml-2 w-12 -translate-y-1/2 rounded bg-neutral-800 p-2"
+            style={{ top: panelTop }}
           >
-            <div
-              className={`flex h-15 w-15 items-center justify-center rounded-full transition-all duration-300 ${
-                isSaved ? 'bg-lime-600' : 'bg-transparent'
-              }`}
-            >
-              <div
-                className={`h-8 w-8 transition-colors duration-200 ${
-                  isSaved
-                    ? 'bg-white'
-                    : 'bg-neutral-400 group-hover:bg-lime-600'
-                }`}
-                style={{
-                  maskImage: `url(/icons/sidebar/checkIcon.svg)`,
-                  maskRepeat: 'no-repeat',
-                  maskPosition: 'center',
-                  maskSize: 'contain',
-                  WebkitMaskImage: `url(/icons/sidebar/checkIcon.svg)`,
-                  WebkitMaskRepeat: 'no-repeat',
-                  WebkitMaskPosition: 'center',
-                  WebkitMaskSize: 'contain',
-                }}
-              />
-            </div>
-
-            <span
-              className={`text-sm font-semibold transition-colors ${
-                isSaved ? 'text-lime-600' : 'text-neutral-500'
-              }`}
-            >
-              {isSaved ? '저장됨' : '완료'}
-            </span>
-          </button>
-        </div>
-      </nav>
-
-      {/* 사이드바 상세 패널 */}
-      {activeTab === 'card' && <CardPanel />}
-      {activeTab === 'text' && <TextPanel />}
-      {/* TODO : 상세 패널 추가 */}
-      {/* {activeTab === 'text' && <TextPanel />} */}
-      {activeTab === 'image' && <ImagePanel />}
-      {/* {activeTab === 'video' && <VideoPanel />} */}
+            {activeTab === 'text' && <TextPanel />}
+            {activeTab === 'polygon' && <PolygonPanel />}
+            {activeTab === 'media' && <MediaPanel />}
+          </div>
+        )}
+      </div>
     </aside>
   );
 }
