@@ -1,80 +1,37 @@
-'use client';
-
-import { motion, useSpring } from 'framer-motion';
-import CardItem from '@/components/card/CardItem';
-import { useMotionValue } from 'framer-motion';
-import { useState } from 'react';
-import SlideGuide from '@/components/card/SlideGuide';
-
-const VISIBLE_COUNT = 90;
-
-// 임시 카드 데이터
-const CARDS = Array.from({ length: VISIBLE_COUNT }, (_, i) => ({
-  id: `card-${i}`,
-}));
+import Button from '@/components/common/button';
 
 export default function LandingPage() {
-  const rawRotation = useMotionValue(0); // 전역 회전값
-
-  /** 스프링기반 부드러운 로테이션 주기
-   * stiffness 낮을수록 → 더 부드러움
-   * damping 낮을수록 → 더 말랑
-   * 보통 damping 20~24
-   */
-  const smoothRotation = useSpring(rawRotation, {
-    stiffness: 120,
-    damping: 22,
-    mass: 0.9,
-  });
-
-  const [isDragging, setIsDragging] = useState(false);
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-
   return (
-    <main className="relative h-screen w-screen overflow-hidden bg-[#9E3B34]">
-      {/* 랜딩 타이틀 */}
-      <div className="absolute top-24 w-full text-center text-white">
-        <h1 className="text-[36px] leading-snug font-semibold">
-          새로운 시작이 될
-          <br />
-          카드를 골라보세요
-        </h1>
-      </div>
+    <main className="flex h-screen items-center justify-center">
+      <section className="m-auto flex w-full max-w-90 flex-col gap-16 px-6 py-4">
+        <div className="flex flex-col items-center justify-center gap-8">
+          <span className="text-[24px] font-bold text-neutral-900">
+            새 회의 시작
+          </span>
+          <Button>시작하기</Button>
+        </div>
 
-      {/* 카드 영역 */}
-      <motion.div
-        className="absolute -bottom-210 left-1/2 -translate-x-1/2"
-        drag="x"
-        dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.06}
-        onDragStart={() => {
-          setIsDragging(true);
-          setHoveredIndex(null);
-        }}
-        onDrag={(_, info) => {
-          rawRotation.set(rawRotation.get() + info.delta.x * 0.08);
-        }}
-        onDragEnd={(_, info) => {
-          rawRotation.set(rawRotation.get() + info.velocity.x * 0.02);
-          setIsDragging(false);
-        }}
-      >
-        {CARDS.map((card, idx) => (
-          <CardItem
-            key={card.id}
-            index={idx}
-            total={CARDS.length}
-            rotation={smoothRotation}
-            isDragging={isDragging}
-            isHovered={hoveredIndex === idx}
-            onHoverStart={() => !isDragging && setHoveredIndex(idx)}
-            onHoverEnd={() => setHoveredIndex(null)}
-          />
-        ))}
-      </motion.div>
+        <div className="flex w-full items-center gap-4 text-neutral-500">
+          <span className="h-px flex-1 bg-neutral-500" />
+          <span className="text-[14px] font-bold text-neutral-500">또는</span>
+          <span className="h-px flex-1 bg-neutral-500" />
+        </div>
 
-      {/* 슬라이드 가이드 */}
-      <SlideGuide />
+        <div className="flex flex-col items-center justify-center gap-8">
+          <span className="text-[24px] font-bold text-neutral-900">
+            회의 참여하기
+          </span>
+
+          <div className="flex w-full flex-col gap-6">
+            {/* TODO: input common-component 적용 */}
+            <input
+              placeholder="코드 또는 링크를 입력해주세요"
+              className="h-11 w-full max-w-78 rounded-sm border border-neutral-300 px-2 py-3 outline-none"
+            />
+            <Button>참여하기</Button>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
