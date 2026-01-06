@@ -1,4 +1,4 @@
-import { uuidv7Vo } from "@/1.domain/shared";
+import { uuidv7Vo } from "@domain/shared";
 import { roomCodeVo, roomMaxParticipantsVo, roomPasswordHashVo, RoomProps, roomStatusVo, roomTitleVo } from "../vo";
 
 

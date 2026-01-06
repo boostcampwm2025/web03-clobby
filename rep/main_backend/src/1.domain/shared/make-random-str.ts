@@ -1,5 +1,5 @@
 
 
 export interface MakeRandomStr {
-  make(length : string) : string;
+  make(length : number) : string;
 };

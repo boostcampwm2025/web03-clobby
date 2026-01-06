@@ -1,7 +1,7 @@
 
 
 
-export type RoomMaxParticipantProps = {
+export type RoomParticipantProps = {
   id : number;
   room_id : string;
   user_id : string;
