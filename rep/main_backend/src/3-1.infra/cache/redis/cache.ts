@@ -8,6 +8,7 @@ import {
 import { REDIS_SERVER } from '../cache.constants';
 import { SelectHsetDataFromRedis } from './user/user.inbound';
 import { InsertRoomDataToRedis } from './room/room.outbound';
+import { SelectRoomInfoFromRedis } from './room/room.inbound';
 
 
 @Global()
@@ -47,14 +48,16 @@ import { InsertRoomDataToRedis } from './room/room.outbound';
     InsertUserSessionDataToRedis,
     SelectHsetDataFromRedis,
     DeleteUserDataToRedis,
-    InsertRoomDataToRedis // room data를 생성할때 사용
+    InsertRoomDataToRedis, // room data를 생성할때 사용
+    SelectRoomInfoFromRedis, // roominfo 정보를 찾을때 사용
   ],
   exports: [
     REDIS_SERVER,
     InsertUserSessionDataToRedis,
     SelectHsetDataFromRedis,
     DeleteUserDataToRedis,
-    InsertRoomDataToRedis
+    InsertRoomDataToRedis,
+    SelectRoomInfoFromRedis
   ],
 })
 export class RedisModule {}
