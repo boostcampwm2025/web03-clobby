@@ -2,18 +2,19 @@
 
 import { useState } from 'react';
 
-import NavButton from './NavButton';
-import TextPanel from './TextPanel';
-import MediaPanel from './MediaPanel';
-import PolygonPanel from './PolygonPanel';
-import { ImageIcon } from '@/assets/icons/common';
+import NavButton from '@/components/whiteboard/common/NavButton';
+import TextPanel from '@/components/whiteboard/sidebar/text/TextPanel';
+import MediaPanel from '@/components/whiteboard/sidebar/media/MediaPanel';
+import PolygonPanel from '@/components/whiteboard/sidebar/polygon/PolygonPanel';
+
 import {
   CursorIcon,
   PenIcon,
   EraserIcon,
   PentagonIcon,
   TextBoxIcon,
-} from '@/assets/icons/editor';
+} from '@/assets/icons/whiteboard';
+import { ImageIcon } from '@/assets/icons/common';
 
 type TabType = 'move' | 'draw' | 'eraser' | 'text' | 'polygon' | 'media' | null;
 
@@ -83,8 +84,8 @@ export default function Sidebar() {
             className="absolute left-full ml-2 w-12 -translate-y-1/2 rounded bg-neutral-800 p-2"
             style={{ top: panelTop }}
           >
-            {activeTab === 'text' && <TextPanel />}
             {activeTab === 'polygon' && <PolygonPanel />}
+            {activeTab === 'text' && <TextPanel />}
             {activeTab === 'media' && <MediaPanel />}
           </div>
         )}

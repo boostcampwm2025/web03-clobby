@@ -1,13 +1,14 @@
-import HistoryControl from '@/components/workspace/ui/HistoryControl';
-import OverlayControl from '@/components/workspace/ui/OverlayControl';
-import Sidebar from '@/components/workspace/ui/Sidebar';
-import ToolbarManager from '@/components/workspace/ui/ToolbarManager';
-import ZoomControls from '@/components/workspace/ui/ZoomControl';
+import HistoryControl from '@/components/whiteboard/controls/HistoryControl';
+import OverlayControl from '@/components/whiteboard/controls/OverlayControl';
+import ZoomControls from '@/components/whiteboard/controls/ZoomControl';
+
+import Sidebar from '@/components/whiteboard/sidebar/Sidebar';
+import ToolbarContainer from '@/components/whiteboard/toolbar/ToolbarContainer';
 
 export default function Home() {
   return (
     <div className="relative flex min-h-screen items-center justify-center">
-      <ToolbarManager />
+      <ToolbarContainer />
       <Sidebar />
       <HistoryControl />
       <ZoomControls />
