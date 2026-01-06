@@ -14,22 +14,6 @@ const CARDS = Array.from({ length: VISIBLE_COUNT }, (_, i) => ({
 }));
 
 export default function LandingPage() {
-  const rawRotation = useMotionValue(0); // 전역 회전값
-
-  /** 스프링기반 부드러운 로테이션 주기
-   * stiffness 낮을수록 → 더 부드러움
-   * damping 낮을수록 → 더 말랑
-   * 보통 damping 20~24
-   */
-  const smoothRotation = useSpring(rawRotation, {
-    stiffness: 120,
-    damping: 22,
-    mass: 0.9,
-  });
-
-  const [isDragging, setIsDragging] = useState(false);
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-
   return (
     <main className="relative h-screen w-screen overflow-hidden bg-[#9E3B34]">
       {/* 랜딩 타이틀 */}
