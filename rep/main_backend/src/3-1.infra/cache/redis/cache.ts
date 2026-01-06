@@ -7,8 +7,7 @@ import {
 } from './user/user.outbound';
 import { REDIS_SERVER } from '../cache.constants';
 import { SelectHsetDataFromRedis } from './user/user.inbound';
-import { DeleteCardAssetToRedis, DeleteCardToRedis, InsertCardAndCardStatToRedis, InsertCardItemAssetInitDataToRedis, UpdateCardItemAssetDataToRedis, UpdateCardItemAssetEntityToRedis, UpdateCardStatToRedis, UpdateCardToRedis } from './card/card.outbound';
-import { SelectCardItemAssetFromRedis, SelectCardMetaAndStatFromRedis } from './card/card.inbound';
+
 
 @Global()
 @Module({
@@ -47,32 +46,12 @@ import { SelectCardItemAssetFromRedis, SelectCardMetaAndStatFromRedis } from './
     InsertUserSessionDataToRedis,
     SelectHsetDataFromRedis,
     DeleteUserDataToRedis,
-    InsertCardItemAssetInitDataToRedis,
-    SelectCardItemAssetFromRedis,
-    UpdateCardItemAssetDataToRedis,
-    UpdateCardItemAssetEntityToRedis,
-    SelectCardMetaAndStatFromRedis,
-    InsertCardAndCardStatToRedis,
-    UpdateCardStatToRedis,
-    DeleteCardAssetToRedis,
-    UpdateCardToRedis,
-    DeleteCardToRedis,
   ],
   exports: [
     REDIS_SERVER,
     InsertUserSessionDataToRedis,
     SelectHsetDataFromRedis,
     DeleteUserDataToRedis,
-    InsertCardItemAssetInitDataToRedis,
-    SelectCardItemAssetFromRedis,
-    UpdateCardItemAssetDataToRedis,
-    UpdateCardItemAssetEntityToRedis,
-    SelectCardMetaAndStatFromRedis,
-    InsertCardAndCardStatToRedis,
-    UpdateCardStatToRedis,
-    DeleteCardAssetToRedis,
-    UpdateCardToRedis,
-    DeleteCardToRedis
   ],
 })
 export class RedisModule {}

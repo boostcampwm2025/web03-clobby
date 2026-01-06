@@ -10,8 +10,6 @@ import {
   InsertOauthAndUserDataToMysql,
   InsertUserDataToMySql,
 } from './user/user.outbound';
-import { DeleteCardItemAndCardAssetDataToMysql, DeleteCardItemsToMySql, DeleteCardToMysql, InsertCardAndCardStateDataToMysql, InsertCardItemAndCardAssetDataToMysql, InsertCardItemDataToMysql, UpdateCardItemAssetDataToMysql, UpdateCardItemAssetEntityToMySql, UpdateCardItemsToMysql, UpdateCardStatToMySql, UpdateCardToMysql } from './card/card.outbound';
-import { SelectAllCardItemAndAssetFromMysql, SelectCardAndStatFromMysql, SelectCardItemAssetFromMysql, SelectCardListsFromMysql } from './card/card.inbound';
 
 @Global()
 @Module({
@@ -61,21 +59,7 @@ import { SelectAllCardItemAndAssetFromMysql, SelectCardAndStatFromMysql, SelectC
     SelectUserAndOauthWhereEmailFromMysql,
     InsertOauthAndUserDataToMysql,
     InsertUserDataToMySql,
-    InsertCardAndCardStateDataToMysql,
-    InsertCardItemDataToMysql,
-    InsertCardItemAndCardAssetDataToMysql,
-    DeleteCardItemAndCardAssetDataToMysql,
-    UpdateCardItemAssetDataToMysql,
-    SelectCardItemAssetFromMysql,
-    UpdateCardItemAssetEntityToMySql,
-    SelectAllCardItemAndAssetFromMysql,
-    SelectCardAndStatFromMysql,
-    UpdateCardStatToMySql,
-    UpdateCardItemsToMysql,
-    DeleteCardItemsToMySql,
-    UpdateCardToMysql,
-    DeleteCardToMysql,
-    SelectCardListsFromMysql,
+
   ],
   exports: [
     MYSQL_DB,
@@ -83,21 +67,6 @@ import { SelectAllCardItemAndAssetFromMysql, SelectCardAndStatFromMysql, SelectC
     SelectUserAndOauthWhereEmailFromMysql,
     InsertOauthAndUserDataToMysql,
     InsertUserDataToMySql,
-    InsertCardAndCardStateDataToMysql,
-    InsertCardItemDataToMysql,
-    InsertCardItemAndCardAssetDataToMysql,
-    DeleteCardItemAndCardAssetDataToMysql,
-    UpdateCardItemAssetDataToMysql,
-    SelectCardItemAssetFromMysql,
-    UpdateCardItemAssetEntityToMySql,
-    SelectAllCardItemAndAssetFromMysql,
-    SelectCardAndStatFromMysql,
-    UpdateCardStatToMySql,
-    UpdateCardItemsToMysql,
-    DeleteCardItemsToMySql,
-    UpdateCardToMysql,
-    DeleteCardToMysql,
-    SelectCardListsFromMysql
   ],
 })
 export class MysqlModule {}

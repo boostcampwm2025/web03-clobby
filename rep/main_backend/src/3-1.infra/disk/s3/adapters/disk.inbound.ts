@@ -5,10 +5,30 @@ import { Inject, Injectable } from "@nestjs/common";
 import { S3_DISK } from "../../disk.constants";
 import { ConfigService } from "@nestjs/config";
 import path from "path";
-import { GetUrlTypes } from "@app/card/queries/dto";
-import { DiskError, NotMakeUploadId } from "@error/infra/card/card.error";
-import { ChangeFileType, CheckCardItemDataTag, CompletePartsType } from "@app/card/commands/dto";
+import { DiskError, NotMakeUploadId } from "@error/infra/infra.error";
 
+
+// 일단 타입들은 놔두기 ( branch - feature/#17/quest-card 참고 해야 함 )
+export type GetUrlTypes = {
+  upload_url : string;
+  part_number : number;
+};
+
+export type CheckCardItemDataTag = {
+  part_number : number;
+  etag : string;
+};
+
+export type CompletePartsType = {
+  part_number : number;
+  etag : string;
+};
+
+export type ChangeFileType = {
+  upload_id : string;
+  complete_parts : Array<CompletePartsType>,
+  part_size : number;
+};  
 
 @Injectable()
 export class GetPresignedUrlFromS3Bucket extends GetUploadUrlFromDisk<S3Client> {

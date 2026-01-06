@@ -3,7 +3,7 @@ import { CompletedPart, CompleteMultipartUploadCommand, ListPartsCommand, ListPa
 import { Inject, Injectable } from "@nestjs/common";
 import { S3_DISK } from "../../disk.constants";
 import { ConfigService } from "@nestjs/config";
-import { NotCompleteDataToDisk } from "@error/infra/card/card.error";
+import { NotCompleteDataToDisk } from "@error/infra/infra.error";
 
 
 // 업로드 확인하는 로직
