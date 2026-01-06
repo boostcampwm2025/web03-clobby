@@ -38,7 +38,6 @@ export const CACHE_ROOM_MEMBERS_KEY_PROPS_NAME = Object.freeze({
   SOCKET_ID : "socket_id",
   IP : "ip",
   NICKNAME : "nickname",
-  PROFILE_PATH : "profile_path"
 } as const);
 
 // sockets은 해당 socket_id에 대해서 room_id, user_id, ip 등을 제공해줘서 빠르게 찾을 수 있게 도와준다. ( 예시 해당 socket에 대해서 정리 )
