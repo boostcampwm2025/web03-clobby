@@ -7,13 +7,8 @@ export const DB_TABLE_NAME = Object.freeze({
   USER_PROFILES: 'User_profiles',
   OAUTH_USERS: 'Oauth_users',
   DELETE_USERS: 'Delete_users',
-  USER_FOLLOWS : "User_follows",
-  CARDS : "Cards",
-  CARD_ITEMS : "Card_items",
-  CARD_STATS : "Card_stats",
-  CATEGORIES : "Categories",
-  CARD_LIKES : "Card_likes",
-  CARD_ITEM_ASSETS : "Card_item_assets"
+  ROOMS : "Rooms",
+  ROOM_PARTICIPANTS : "Room_participants"
 } as const);
 
 // 기본 테이블 이름에 쓰이는거
@@ -56,78 +51,23 @@ export const DB_DELETE_USERS_ATTRIBUTE_NAME = Object.freeze({
   ...DB_BASE_ATTRIBTE_NAME,
 } as const);
 
-export const DB_USER_FOLLOWS_ATTRIBUTE_NAME = Object.freeze({
-  ID : "id",
-  FOLLOWER_ID : "follower_id",
-  FOLLOWING_ID : "following_id",
-  CREATED_AT : 'created_at',
-} as const);
-
-export const DB_CARDS_ATTRIBUTE_NAME = Object.freeze({
-  CARD_ID : "card_id",
-  USER_ID : "user_id",
-  CATEGORY_ID : "category_id",
-  THUMBNAIL_PATH : "thumbnail_path",
-  STATUS : "status",
+// 방과 관련된 테이블 열 이름
+export const DB_ROOMS_ATTRIBUTE_NAME = Object.freeze({
+  CODE : "code",
   TITLE : "title",
-  WORKSPACE_WIDTH : "workspace_width",
-  WORKSPACE_HEIGHT : "workspace_height",
-  BACKGROUND_COLOR : "background_color",
+  PASSWORD_HASH : "password_hash",
+  OWNER_USER_ID : "owner_user_id",
+  MAX_PARTICIPANTS : "max_participants",
+  STATUS : "status", 
   DELETED_AT : "deleted_at",
   ...DB_BASE_ATTRIBTE_NAME
 } as const);
 
-export const DB_CARD_ITEMS_ATTRIBUTE_NAME = Object.freeze({
-  ITEM_ID : "item_id",
-  CARD_ID : "card_id",
-  TYPE : "type",
-  X : "x",
-  Y : "y",
-  WIDTH : "width",
-  HEIGHT : "height",
-  ROTATION : "rotation",
-  SCALE_X : "scale_x",
-  SCALE_Y : "scale_y",
-  OPACITY : "opacity",
-  Z_INDEX : "z_index",
-  IS_LOCKED : "is_locked",
-  IS_VISIBLE : "is_visible",
-  NAME : "name",
-  OPTION: "option",
-  DELETED_AT : "deleted_at",
-  ...DB_BASE_ATTRIBTE_NAME
-} as const);
-
-const DB_CARD_BASE_ATTRIBUTE_NAME = Object.freeze({
+// 방에 가입자들과 관련된 테이블 이름
+export const DB_ROOM_PARTICIPANTS_ATTRIBUTE_NAME = Object.freeze({
   ID : "id",
-  CARD_ID : "card_id",
-} as const);
-
-export const DB_CARD_STATS_ATTRIBUTE_NAME = Object.freeze({
-  ...DB_CARD_BASE_ATTRIBUTE_NAME,
-  LIKE_COUNT : "like_count",
-  VIEW_COUNT : "view_count",
-  ...DB_BASE_ATTRIBTE_NAME
-} as const);
-
-export const DB_CATEGORIES_ATTRIBUTE_NAME = Object.freeze({
-  ID : "id",
-  NAME : "name",
-  ...DB_BASE_ATTRIBTE_NAME  
-} as const);
-
-export const DB_CARD_LIKES_ATTRIBUTE_NAME = Object.freeze({
-  ...DB_CARD_BASE_ATTRIBUTE_NAME,
+  ROOM_ID : "room_id",
   USER_ID : "user_id",
-  CREATED_AT : 'created_at',
-} as const);
-
-export const DB_CARD_ITEM_ASSETS_ATTRIBUTE_NAME = Object.freeze({
-  ITEM_ID : "item_id",
-  KEY_NAME : "key_name",
-  MIME_TYPE : "mime_type",
-  SIZE : "size", 
-  STATUS : "status",
-  CARD_ID : "card_id",
-  ...DB_BASE_ATTRIBTE_NAME
+  JOINED_AT : "joined_at",
+  LEFT_AT : "left_at"
 } as const);

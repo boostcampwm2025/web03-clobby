@@ -9,54 +9,42 @@ export const CACHE_USER_SESSION_KEY_NAME = Object.freeze({
   REFRESH_TOKEN_HASH: 'refresh_token_hash',
 } as const);
 
-// card와 관련된 namespace
-export const CACHE_CARD_NAMESPACE_NAME = Object.freeze({
-  CACHE_CARD : "cache:card",
-  CACHE_CARD_ITEM : "cache:card:item", // card_item과 관련해서 저장
-  CACHE_CARD_ITEM_ASSET : "cache:card:item_asset", // card와 관련된 namespace 중에서 item_asset만
+// 방과 관련된 cache namespace
+export const CACHE_ROOM_NAMESPACE_NAME = Object.freeze({
+  CACHE_ROOM : "cache:rooms"
 } as const);
 
-// card와 관련된 namespace
-export const CACHE_CARD_KEY_NAME = Object.freeze({
-  CARD_ID : "card_id",
-  USER_ID : "user_id",
-  STATUS : "status",
-  CATEGORY_ID : "category_id",
-  THUMBNAIL_PATH : "thumbnail_path",
+// 방과 함께 추가적으로 사용할 namespace ( 아래는 예시 )
+// cache:rooms:${room_id}:info ?? members
+// cache:rooms:sockets
+export const CACHE_ROOM_SUB_NAMESPACE_NAME = Object.freeze({
+  INFO : "info",
+  MEMBERS : "members",
+  SOCKETS : "sockets"
+} as const);
+
+// code, title, owner_id 등 방에 정보들을 저장할 key_name들
+export const CACHE_ROOM_INFO_KEY_NAME = Object.freeze({
+  CODE : "code",
   TITLE : "title",
-  WORKSPACE_WIDTH : "workspace_width",
-  WORKSPACE_HEIGHT : "workspace_height",
-  BACKGROUND_COLOR : "background_color",
-  LIKE_COUNT : "like_count",
-  VIEW_COUNT : "view_count"
+  OWNER_ID : "owner_id",
+  MAX_PARTICIANTS : "max_particiants",
+  CURRENT_PARTICIANTS : "current_particiants",
+  PASSWORD_HASH : "password_hash"
 } as const);
 
-// card_item과 관련된 key_name
-export const CACHE_CARD_ITEM_KEY_NAME = Object.freeze({
-  CARD_ID : "card_id",
-  ITEM_ID : "item_id",
-  TYPE : "type",
-  X : "x",
-  Y : "y",
-  WIDTH : "width",
-  HEIGHT : "height",
-  ROTATION : "rotation",
-  SCALE_X : "scale_x",
-  SCALE_Y : "scale_y",
-  OPACITY : "opacity",
-  Z_INDEX : "z_index",
-  IS_LOCKED : "is_locked",
-  IS_VISIBLE : "is_visible",
-  NAME : "name",
-  OPTION: "option",
+// members는 user_id를 기반으로 저장할 예정이기 때문에 ( user_id : { props } )에 props에 들어갈 데이터이다.
+export const CACHE_ROOM_MEMBERS_KEY_PROPS_NAME = Object.freeze({
+  SOCKET_ID : "socket_id",
+  IP : "ip",
+  NICKNAME : "nickname",
+  PROFILE_PATH : "profile_path"
 } as const);
 
-export const CACHE_CARD_ITEM_ASSET_KEY_NAME = Object.freeze({
-  CARD_ID : "card_id",
-  ITEM_ID : "item_id",
-  KEY_NAME : "key_name",
-  MIME_TYPE : "mime_type",
-  SIZE : "size", 
-  STATUS : "status",
-  UPLOAD_ID : "upload_id"
+// sockets은 해당 socket_id에 대해서 room_id, user_id, ip 등을 제공해줘서 빠르게 찾을 수 있게 도와준다. ( 예시 해당 socket에 대해서 정리 )
+// socket_id : { props } 에 props에 들어갈 내용
+export const CACHE_ROOM_SOCKETS_KEY_PROPS_NAME = Object.freeze({
+  USER_ID : "user_id",
+  ROOM_ID : "room_id",
+  IP : "ip"
 } as const);
