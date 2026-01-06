@@ -1,6 +1,6 @@
 'use client';
 
-import NavButton from './NavButton';
+import NavButton from '../../common/NavButton';
 import { ImageIcon } from '@/assets/icons/common';
 import { VideoIcon, YoutubeIcon } from '@/assets/icons/editor';
 

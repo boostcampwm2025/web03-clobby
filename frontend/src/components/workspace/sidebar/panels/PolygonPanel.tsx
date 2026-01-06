@@ -1,6 +1,6 @@
 'use client';
 
-import NavButton from './NavButton';
+import NavButton from '../../common/NavButton';
 
 import { TriangleIcon, SquareIcon, PentagonIcon } from '@/assets/icons/editor';
 

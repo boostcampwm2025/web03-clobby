@@ -1,6 +1,6 @@
 'use client';
 
-import NavButton from './NavButton';
+import NavButton from '../common/NavButton';
 import { UndoIcon, RedoIcon } from '@/assets/icons/editor';
 
 export default function HistoryControls() {
