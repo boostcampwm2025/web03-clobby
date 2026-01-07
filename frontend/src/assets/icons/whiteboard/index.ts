@@ -29,3 +29,4 @@ export { default as DiamondIcon } from './diamondIcon.svg';
 export { default as ArrowIcon } from './arrowIcon.svg';
 export { default as DoubleArrowIcon } from './doubleArrowIcon.svg';
 export { default as ChevronArrowIcon } from './chevronArrowIcon.svg';
+export { default as LineIcon } from './lineIcon.svg';
