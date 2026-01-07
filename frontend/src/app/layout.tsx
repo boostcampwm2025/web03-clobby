@@ -18,6 +18,18 @@ const cafe24 = localFont({
   variable: '--font-cafe24',
 });
 
+const roboto = localFont({
+  src: [
+    {
+      path: './fonts/Roboto-Medium.ttf',
+      weight: '500',
+      style: 'normal',
+    },
+    // 필요한 다른 두께가 있다면 추가
+  ],
+  variable: '--font-roboto',
+});
+
 export const metadata: Metadata = {
   title: 'DEVMEET',
   description: '코드 에디터 화상통화',
@@ -30,7 +42,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className={`${suit.variable} ${cafe24.variable} antialiased`}>
+      <body
+        className={`${suit.variable} ${cafe24.variable} ${roboto.variable} antialiased`}
+      >
         {children}
       </body>
     </html>

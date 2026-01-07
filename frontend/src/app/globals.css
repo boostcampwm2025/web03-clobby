@@ -3,6 +3,7 @@
 @theme {
   --font-sans: var(--font-suit), sans-serif;
   --font-cafe24: var(--font-cafe24), sans-serif;
+  --font-roboto: var(--font-roboto), sans-serif;
 }
 
 :root {
@@ -23,4 +24,18 @@ body {
 
 button {
   cursor: pointer;
+}
+
+/* Oauth 버튼에 사용될 규정에 맞는 폰트 속성 */
+.kakao-font {
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+  @apply text-[15px] leading-normal font-semibold text-black/85;
+}
+
+.google-font {
+  font-family: var(--font-roboto);
+  @apply text-sm leading-5 text-[#1F1F1F];
 }
