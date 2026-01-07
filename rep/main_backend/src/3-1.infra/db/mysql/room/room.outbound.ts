@@ -1,4 +1,4 @@
-import { DeleteValueToDb, InsertValueToDb } from "@app/ports/db/db.outbound";
+import { DeleteValueToDb, InsertValueToDb, UpdateValueToDb } from "@app/ports/db/db.outbound";
 import { Inject, Injectable } from "@nestjs/common";
 import { ResultSetHeader, type Pool } from "mysql2/promise";
 import { DB_ROOM_PARTICIPANTS_ATTRIBUTE_NAME, DB_ROOMS_ATTRIBUTE_NAME, DB_TABLE_NAME, MYSQL_DB } from "../../db.constants";
@@ -160,6 +160,7 @@ export class DeleteHardRoomParticipantInfoDataToMysql extends DeleteValueToDb<Po
     WHERE \`${DB_ROOM_PARTICIPANTS_ATTRIBUTE_NAME.ROOM_ID}\` = UUID_TO_BIN(?, true) AND
     \`${DB_ROOM_PARTICIPANTS_ATTRIBUTE_NAME.USER_ID}\` = UUID_TO_BIN(?, true) AND 
     \`${DB_ROOM_PARTICIPANTS_ATTRIBUTE_NAME.LEFT_AT}\` IS NULL
+    LIMIT 1
     `;
 
     const [ result ] = await db.execute<ResultSetHeader>(sql, [ room_id, user_id ]);
@@ -174,5 +175,42 @@ export class DeleteHardRoomParticipantInfoDataToMysql extends DeleteValueToDb<Po
     const tableName : string = DB_TABLE_NAME.ROOM_PARTICIPANTS;
     const deleted : boolean = await this.deleteData({ db, tableName, room_id : uniqueValue, user_id : addOption });
     return deleted;
+  };
+};
+
+// 이건 이제 퇴장했다는 것을 업데이트 함 소프트 삭제는 좀 애매하고 이에 대해서 수정
+@Injectable()
+export class UpdateRoomParticipantInfoToMysql extends UpdateValueToDb<Pool> {
+
+  constructor(
+    @Inject(MYSQL_DB) db : Pool
+  ) { super(db); };
+
+  private async updateData({
+    db, tableName, room_id, user_id
+  } : {
+    db : Pool, tableName : string, room_id : string, user_id : string
+  }) : Promise<boolean> {
+
+    const sql : string = `
+    UPDATE \`${tableName}\`
+    SET \`${DB_ROOM_PARTICIPANTS_ATTRIBUTE_NAME.LEFT_AT}\` = CURRENT_TIMESTAMP
+    WHERE \`${DB_ROOM_PARTICIPANTS_ATTRIBUTE_NAME.ROOM_ID}\` = UUID_TO_BIN(?, true) AND
+    \`${DB_ROOM_PARTICIPANTS_ATTRIBUTE_NAME.USER_ID}\` = UUID_TO_BIN(?, true) AND
+    \`${DB_ROOM_PARTICIPANTS_ATTRIBUTE_NAME.LEFT_AT}\` IS NULL
+    LIMIT 1
+    `;
+
+    const [ result ] = await db.execute<ResultSetHeader>(sql, [ room_id, user_id ]);
+
+    return result && result.affectedRows ? true : false;
+  };
+
+  // uniqueValue는 room_id 이고 updateValue는 user_id 이다.
+  async update({ uniqueValue, updateColName, updateValue }: { uniqueValue: string; updateColName: string; updateValue: string; }): Promise<boolean> {
+    const db : Pool = this.db;
+    const tableName : string = DB_TABLE_NAME.ROOM_PARTICIPANTS;
+    const updated : boolean = await this.updateData({ db, tableName, room_id : uniqueValue, user_id : updateValue });
+    return updated;
   };
 };
