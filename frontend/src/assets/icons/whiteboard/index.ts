@@ -26,3 +26,6 @@ export { default as ZoomOutIcon } from './zoomOutIcon.svg';
 export { default as HandIcon } from './handIcon.svg';
 export { default as CircleIcon } from './circleIcon.svg';
 export { default as DiamondIcon } from './diamondIcon.svg';
+export { default as ArrowIcon } from './arrowIcon.svg';
+export { default as DoubleArrowIcon } from './doubleArrowIcon.svg';
+export { default as ChevronArrowIcon } from './chevronArrowIcon.svg';
