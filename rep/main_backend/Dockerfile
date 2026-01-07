@@ -29,10 +29,10 @@ RUN --mount=type=cache,id=pnpm-store-backend,target=/root/.local/share/pnpm/stor
     pnpm install --frozen-lockfile
 
 # 현재 발생하는 mediasoup poinstall 안되는 사례를 이걸 이용해서 안전하게 하려한다. 
-# RUN set -eux; \
-#   node -e "const path=require('path'); console.log(path.dirname(require.resolve('mediasoup/package.json')))" > /tmp/MSDIR; \
-#   cd "$(cat /tmp/MSDIR)"; \
-#   npm run postinstall 
+RUN set -eux; \
+  node -e "const path=require('path'); console.log(path.dirname(require.resolve('mediasoup/package.json')))" > /tmp/MSDIR; \
+  cd "$(cat /tmp/MSDIR)"; \
+  npm run postinstall 
 
 COPY . .
 
