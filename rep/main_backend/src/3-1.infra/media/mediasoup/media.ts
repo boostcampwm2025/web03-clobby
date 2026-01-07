@@ -16,7 +16,7 @@ export class MediasoupService implements OnModuleInit, OnModuleDestroy {
 
   // 처음에 이 모듈의 의존성을 부여할때 실행
   async onModuleInit() : Promise<void> {
-    const workerCount : number = Number(os.cpus().length) // 일단은 worker = cpu 갯수로 가고 나중에 조정할 수도? 
+    const workerCount : number = Number(Math.min(4, os.cpus().length)) // 일단은 worker = cpu 갯수로 가고 나중에 조정할 수도? ( 최대 4 )
 
     this.logger.log(`mediasoup에서 가용할 worker의 갯수: ${workerCount}`);
 
