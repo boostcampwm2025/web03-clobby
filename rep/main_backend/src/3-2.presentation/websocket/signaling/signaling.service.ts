@@ -1,10 +1,13 @@
 import { TokenDto } from "@app/auth/commands/dto";
-import { HttpException, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { Socket } from "socket.io";
 import * as cookie from "cookie";
-import { UnthorizedError } from "@error/application/user/user.error";
 import { ConnectResult, ConnectRoomDto, DisconnectRoomDto } from "@app/room/commands/dto";
 import { ConnectRoomUsecase, DisconnectRoomUsecase } from "@app/room/commands/usecase";
+import { v7 as uuidV7 } from "uuid";
+import { SocketPayload } from "./signaling.validate";
+import { PayloadRes } from "@app/auth/queries/dto";
+import { UnthorizedError } from "@error/application/user/user.error";
 
 
 @Injectable()
@@ -15,7 +18,7 @@ export class SignalingWebsocketService {
     private readonly connectRoomUsecase : ConnectRoomUsecase<any, any>
   ) {}
 
-  parseJwtToken( client : Socket ) : TokenDto {
+  parseJwtToken( client : Socket ) : TokenDto | undefined {
 
     // access_token 파싱
     let access_token : string | undefined;
@@ -32,15 +35,20 @@ export class SignalingWebsocketService {
       refresh_token = cookies["refresh_token"];
     };  
 
-    if ( !access_token || !refresh_token ) throw new UnthorizedError("websocket에 핸드세이크중에 access_token 또는 refresh_token이 존재하지 않습니다.");
+    if ( !access_token && !refresh_token ) return undefined;
+    if ( !access_token || !refresh_token ) throw new UnthorizedError("토큰이 존재하지 않습니다.");
 
     return {
       access_token, refresh_token
     };
   }
 
+  private makeUserId() : string  {
+    return uuidV7();
+  }
+
   // ip를 파싱할때 사용하는 함수
-  extractClientIp(client : Socket) : string {
+  private extractClientIp(client : Socket) : string {
     // nginx가 클라이언트의 원 IP를 전달하기 위해서 만든 헤더이다. ( 즉 Nginx가 집적 걸어줌 )
     const forwarded = client.handshake.headers['x-forwarded-for'];
 
@@ -51,6 +59,15 @@ export class SignalingWebsocketService {
 
     // 그렇지 않은경우 그냥 ip주소 사용
     return client.handshake.address;
+  };
+
+  makeSocketData({ payload, socket } : { payload : PayloadRes | undefined, socket : Socket }) : SocketPayload {
+    if ( payload ) return {
+      ...payload, ip : this.extractClientIp(socket), socket_id : socket.id, is_guest : false
+    }
+    else return {
+      user_id : this.makeUserId(), nickname : "", ip : this.extractClientIp(socket), socket_id : socket.id, is_guest : true
+    } 
   };
 
   // 방에 나갈때 사용하는 함수

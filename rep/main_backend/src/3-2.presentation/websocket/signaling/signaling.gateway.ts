@@ -7,8 +7,8 @@ import { Payload, TokenDto } from "@app/auth/commands/dto";
 import { PayloadRes } from "@app/auth/queries/dto";
 import { JwtWsGuard } from "../auth/guards/jwt.guard";
 import { WEBSOCKET_AUTH_CLIENT_EVENT_NAME, WEBSOCKET_NAMESPACE, WEBSOCKET_SIGNALING_CLIENT_EVENT_NAME, WEBSOCKET_SIGNALING_EVENT_NAME } from "../websocket.constants";
-import { JoinRoomValidate } from "./signaling.validate";
-import { ConnectResult, ConnectRoomDto, DisconnectRoomDto } from "@app/room/commands/dto";
+import { JoinRoomValidate, SocketPayload } from "./signaling.validate";
+import { ConnectResult, ConnectRoomDto } from "@app/room/commands/dto";
 import { CHANNEL_NAMESPACE } from "@infra/channel/channel.constants";
 
 
@@ -42,13 +42,14 @@ export class SignalingWebsocketGateway implements OnGatewayInit, OnGatewayConnec
     // 여기서 middleware를 추가할 수도 있다. ( 등록 후 연결 요청하면 이 미들웨어를 거친다. )
     server.use(async (socket, next) => {
       try {
-        // http 핸드세이크 가정중 access_token, refresh_token 가져온후 검증 -> 비회원도 접근이 가능하도록 해야 한다. 
-        const jwtToken : TokenDto = this.signalingService.parseJwtToken(socket);
-        const payload : PayloadRes = await this.jwtGuard.execute(jwtToken);
-
-        // payload 내용 저장
-        socket.data.user = payload;
-
+        // 회원 로직 http 핸드세이크 가정중 access_token, refresh_token 가져온후 검증 
+        const jwtToken : TokenDto | undefined = this.signalingService.parseJwtToken(socket);
+        if ( jwtToken ) {
+          const payload : PayloadRes = await this.jwtGuard.execute(jwtToken);
+          socket.data.user = this.signalingService.makeSocketData({ payload, socket });
+        } else {
+          socket.data.user = this.signalingService.makeSocketData({ payload : undefined, socket });
+        };
         // 계속 진행
         next();
       } catch (e) {
@@ -62,7 +63,7 @@ export class SignalingWebsocketGateway implements OnGatewayInit, OnGatewayConnec
   // 연결하자 마자 바로 해야 하는 하는 것 정의 가능
   async handleConnection(client: Socket) {
     const access_token : string = client.data.user.access_token;
-    client.emit(WEBSOCKET_AUTH_CLIENT_EVENT_NAME.ACCESS_TOKEN, {access_token});
+    if (access_token) client.emit(WEBSOCKET_AUTH_CLIENT_EVENT_NAME.ACCESS_TOKEN, {access_token});
   }
 
   // 연결이 끊긴다면
@@ -74,7 +75,7 @@ export class SignalingWebsocketGateway implements OnGatewayInit, OnGatewayConnec
 
     await this.signalingService.disconnectRoomService({
       user_id: user.user_id,
-      socket_id: client.id,
+      socket_id: user.socket_id,
       room_id,
     });
   };
@@ -90,10 +91,10 @@ export class SignalingWebsocketGateway implements OnGatewayInit, OnGatewayConnec
     @ConnectedSocket() client : Socket
   ) : Promise<void> {
     // 방에 room_id를 받아온다. 
-    const payload : Payload = client.data.user;
+    const payload : SocketPayload = client.data.user;
     const dto : ConnectRoomDto = {
       ...inputs, 
-      socket_id : client.id, user_id : payload.user_id, nickname : payload.nickname, ip : this.signalingService.extractClientIp(client)
+      socket_id : payload.socket_id, user_id : payload.user_id, nickname : payload.nickname ?? inputs.nickname, ip : payload.ip
     };
     try {
       // 여기서는 에러가 발생하면 바로 연결을 끊어야 한다. 
