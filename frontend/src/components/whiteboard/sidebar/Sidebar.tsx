@@ -3,9 +3,7 @@
 import { useState } from 'react';
 
 import NavButton from '@/components/whiteboard/common/NavButton';
-import TextPanel from '@/components/whiteboard/sidebar/panels/TextPanel';
 import MediaPanel from '@/components/whiteboard/sidebar/panels/MediaPanel';
-import PolygonPanel from '@/components/whiteboard/sidebar/panels/PolygonPanel';
 
 import { ImageIcon } from '@/assets/icons/common';
 import {
@@ -84,8 +82,6 @@ export default function Sidebar() {
             className="absolute left-full ml-2 w-12 -translate-y-1/2 rounded bg-neutral-800 p-2"
             style={{ top: panelTop }}
           >
-            {activeTab === 'text' && <TextPanel />}
-            {activeTab === 'polygon' && <PolygonPanel />}
             {activeTab === 'media' && <MediaPanel />}
           </div>
         )}
