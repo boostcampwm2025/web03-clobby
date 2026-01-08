@@ -1,1 +1,1 @@
-export * from "./check-transport.dto"
+export * from "./connect-transport.dto"
