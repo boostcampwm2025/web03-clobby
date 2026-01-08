@@ -43,11 +43,17 @@ export class MediasoupService implements OnModuleInit, OnModuleDestroy {
   };
 
   // worker 가져오기 ( round-robin 알고리즘 사용 )
-  picWorker() : Worker {
+  picWorker() : { worker : Worker, workerIdx : number} {
     if ( this.workers.length === 0 ) throw new Error("worker가 존재하지 않습니다.");
 
-    const worker = this.workers[this.workerIdx];
-    this.workerIdx = ( this.workerIdx + 1 ) % this.workers.length;
-    return worker;
+    const workerIdx : number = this.workerIdx;
+    const worker = this.workers[workerIdx];
+    this.workerIdx = ( workerIdx + 1 ) % this.workers.length;
+    return { worker, workerIdx };
+  };
+
+  // 특정 worker 가져오기 
+  getWorker(worker_idx : number) : Worker | undefined {
+    return this.workers[worker_idx];
   };
 };
