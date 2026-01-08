@@ -75,30 +75,6 @@ export default function CodeEditor({
   // 자동완성 토글
   const toggleAutoComplete = () => {
     setIsAutoCompleted((prev) => !prev);
-
-    if (editorRef.current) {
-      const nextValue = !isAutoCompleted;
-
-      editorRef.current.updateOptions({
-        quickSuggestions: {
-          other: nextValue, // 일반 코드
-          comments: nextValue, // 주석 안
-          strings: nextValue, // 문자열 안
-        },
-
-        suggestOnTriggerCharacters: nextValue, // 특정 문자 입력 시 자동완성 트리거
-        parameterHints: { enabled: nextValue }, // 함수 호출 시 파라미터 힌트
-        tabCompletion: nextValue ? 'on' : 'off', // 탭키로 자동완성 선택
-
-        // 자동 완성 목록에 어떤 걸 보여줄지
-        suggest: {
-          showMethods: nextValue,
-          showFunctions: nextValue,
-          showVariables: nextValue,
-          showConstants: nextValue,
-        },
-      });
-    }
   };
 
   return (
