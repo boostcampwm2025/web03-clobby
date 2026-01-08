@@ -111,7 +111,7 @@ export default function Canvas() {
   if (size.width === 0 || size.height === 0) return null;
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-neutral-100">
+    <div className="absolute inset-0 overflow-hidden bg-neutral-100">
       <Stage
         ref={stageRef}
         width={size.width}
