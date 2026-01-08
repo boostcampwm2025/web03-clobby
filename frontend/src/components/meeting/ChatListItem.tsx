@@ -1,6 +1,5 @@
 import { DownloadIcon, FileIcon } from '@/assets/icons/meeting';
-import { formatFileSize } from '@/utils/formatFileSize';
-import { formatTimestamp } from '@/utils/formatTimestamp';
+import { formatFileSize, formatTimestamp } from '@/utils/formatter';
 import Image from 'next/image';
 
 type TextChat = {
