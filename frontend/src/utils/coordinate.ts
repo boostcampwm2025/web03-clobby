@@ -25,3 +25,16 @@ export const screenToWorld = (
     y: (screenY - stagePos.y) / stageScale,
   };
 };
+
+// 화면 중앙의 World 좌표 계산
+export const getCenterWorldPos = (
+  stagePos: { x: number; y: number },
+  stageScale: number,
+) => {
+  if (typeof window === 'undefined') return { x: 0, y: 0 };
+
+  const centerX = window.innerWidth / 2;
+  const centerY = window.innerHeight / 2;
+
+  return screenToWorld(centerX, centerY, stagePos, stageScale);
+};
