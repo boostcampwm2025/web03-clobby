@@ -10,12 +10,14 @@ import ToolbarContainer from '@/components/whiteboard/toolbar/ToolbarContainer';
 
 const Canvas = dynamic(() => import('@/components/whiteboard/Canvas'), {
   ssr: false,
-  loading: () => <p>Loading...</p>,
+  loading: () => (
+    <div className="absolute inset-0 bg-neutral-100" />
+  ),
 });
 
 export default function Whiteboard() {
   return (
-    <div className="absolute inset-0 flex items-center justify-center">
+    <div className="absolute inset-0 flex items-center justify-center bg-neutral-100">
       <ToolbarContainer />
       <Sidebar />
       <HistoryControl />
