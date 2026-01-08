@@ -12,8 +12,6 @@ export function MediaPreview() {
   const { media, stream, canRenderVideo, toggleAudio, toggleVideo } =
     useMediaPreview();
 
-  //   console.log(media);
-
   return (
     <div
       className={`relative box-border h-90 w-160 overflow-hidden rounded-2xl bg-neutral-700 ${!canRenderVideo && 'p-4'}`}
