@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
-import { ConnectTransportType } from "./sfu.validate";
 import { CreateTransportDto, RoomEntry, TransportEntry } from "@app/sfu/commands/dto";
 import { CreateRouterUsecase, CreateTransportUsecase } from "@app/sfu/commands/usecase";
 import { RoomRouterRepository, TransportRepository } from "@infra/memory/sfu";
 import { ConnectTransportUsecase } from "@app/sfu/queries/usecase";
+import { ConnectTransportType } from "@app/sfu/queries/dto";
 
 
 @Injectable()

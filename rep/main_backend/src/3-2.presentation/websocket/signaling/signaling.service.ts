@@ -7,12 +7,11 @@ import { ConnectRoomUsecase, DisconnectRoomUsecase } from "@app/room/commands/us
 import { v7 as uuidV7 } from "uuid";
 import { DtlsHandshakeValidate, SocketPayload } from "./signaling.validate";
 import { PayloadRes } from "@app/auth/queries/dto";
-import { UnthorizedError } from "@error/application/user/user.error";
 import { SfuService } from "@present/webrtc/sfu/sfu.service";
 import { NotConnectSignalling } from "@error/presentation/signalling/signalling.error";
 import { CHANNEL_NAMESPACE } from "@infra/channel/channel.constants";
-import { CreateRoomTransportDto, CreateTransportDto } from "@app/sfu/commands/dto";
-import { ConnectTransportType } from "@/3-2.presentation/webrtc/sfu/sfu.validate";
+import { CreateTransportDto } from "@app/sfu/commands/dto";
+import { ConnectTransportType } from "@app/sfu/queries/dto";
 
 
 @Injectable()
@@ -48,8 +47,7 @@ export class SignalingWebsocketService {
       refresh_token = cookies["refresh_token"];
     };  
 
-    if ( !access_token && !refresh_token ) return undefined;
-    if ( !access_token || !refresh_token ) throw new UnthorizedError("토큰이 존재하지 않습니다.");
+    if ( !access_token || !refresh_token ) return undefined;
 
     return {
       access_token, refresh_token
@@ -97,6 +95,7 @@ export class SignalingWebsocketService {
   // 방에 나갈때 사용하는 함수
   async disconnectRoomService(dto : DisconnectRoomDto) : Promise<void> {
     await this.disconnectRoomUsecase.execute(dto);
+    this.sfuServer.closeRoomRouter(dto.room_id); // sfu 서버에 내용도 정리
   };
 
   // 방에 가입할때 사용하는 함수
