@@ -1,6 +1,11 @@
 {
   "name": "frontend",
   "version": "0.1.0",
+  "sideEffects": [
+    "*.css",
+    "*.scss",
+    "**/*.css"
+  ],
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,18 +15,21 @@
     "cz": "cz"
   },
   "dependencies": {
+    "clsx": "^2.1.1",
     "framer-motion": "^12.23.26",
     "konva": "^10.0.12",
     "next": "16.0.10",
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "react-konva": "^19.2.1",
+    "tailwind-merge": "^3.4.0",
     "use-image": "^1.1.4",
     "uuid": "^13.0.0",
     "zustand": "^5.0.9"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
+    "@svgr/webpack": "^8.1.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
