@@ -1,0 +1,21 @@
+'use client';
+
+import Section from '@/components/whiteboard/sidebar/ui/Section';
+import ColorPicker from '@/components/whiteboard/sidebar/ui/ColorPicker';
+
+// 배경 색상 설정 section
+interface BackgroundColorSectionProps {
+  color: string;
+  onChange: (color: string) => void;
+}
+
+export default function BackgroundColorSection({
+  color,
+  onChange,
+}: BackgroundColorSectionProps) {
+  return (
+    <Section title="Background">
+      <ColorPicker color={color} onChange={onChange} allowTransparent={true} />
+    </Section>
+  );
+}
