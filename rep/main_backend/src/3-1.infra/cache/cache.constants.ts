@@ -60,10 +60,17 @@ export const CACHE_ROOM_SOCKETS_KEY_PROPS_NAME = Object.freeze({
 
 // sfu와 관련된 cache 정보
 export const CACHE_SFU_NAMESPACE_NAME = Object.freeze({
+  USER_INFO : "cache:sfu:users", // + user_id -> 유저에 따라서 필요한 정보 저장
   TRANSPORT_INFO : "cache:sfu:transports", // + transport_id
   PRODUCER_INFO : "cache:sfu:producers", // + room_id:user_id -> 해당 user는 audio, video를 하나만 등록할수 있어야 하기 때문에 
   CONSUMER_INFO : "cache:sfu:consumers", // + room_id:user_id
 } as const);
+
+// sfu에 유저정보 관련
+export const CACHE_SFU_USER_KEY_NAME = Object.freeze({
+  SEND_TRANSPORT_ID : "send_transport_id",
+  RECV_TRANSPORT_ID : "recv_transport_id"
+});
 
 export const CACHE_SFU_TRANSPORTS_KEY_NAME = Object.freeze({
   SOCKET_ID : "socket_id",

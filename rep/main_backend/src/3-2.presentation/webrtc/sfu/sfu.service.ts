@@ -42,6 +42,7 @@ export class SfuService {
       this.transports.delete(transport_id);
     };
 
+    // 이 부분을 한번 봐바야 겠다. 여기서 마지막 유저가 나갔다면 모를까
     try {
       if (!entry.router.closed) entry.router.close();
     } finally {
@@ -49,10 +50,17 @@ export class SfuService {
     };
   };  
 
+  // 유저가 나갈때 로직을 구현한다. 
+  disconnectUser({ room_id, user_id } : { room_id : string, user_id : string }) {
+
+    // 1. 유저의 transport 정보를 가져온다.
+
+  }
+
   // 2. transport 부분 생성 ( 나중에 전체적인 부분 usecase로 빼자고 )
-  async createTransPort(dto : CreateTransportDto) : Promise<TransportEntry> {
+  async createTransPort(dto: CreateTransportDto): Promise<TransportEntry> {
     return this.createTransportUsecase.execute(dto);
-  };
+  }
 
   // 3. transport connect 연결 ( 이때 부터는 이제 sfu와 webrtc 통신이 가능해졌다고 생각하면 된다. )
   async connectTransport(dto : ConnectTransportType) : Promise<void> {

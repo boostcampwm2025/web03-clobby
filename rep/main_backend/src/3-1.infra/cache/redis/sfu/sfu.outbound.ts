@@ -1,7 +1,7 @@
 import { DeleteDataToCache, InsertDataToCache } from "@app/ports/cache/cache.outbound";
 import { Inject, Injectable } from "@nestjs/common";
 import { type RedisClientType } from "redis";
-import { CACHE_ROOM_INFO_KEY_NAME, CACHE_ROOM_INFO_PRODUCE_KEY_PROPS_NAME, CACHE_ROOM_NAMESPACE_NAME, CACHE_ROOM_SUB_NAMESPACE_NAME, CACHE_SFU_CONSUMER_KEY_PROPS_NAME, CACHE_SFU_NAMESPACE_NAME, CACHE_SFU_PRODUCES_KEY_PROPS_NAME, CACHE_SFU_TRANSPORTS_KEY_NAME, REDIS_SERVER } from "../../cache.constants";
+import { CACHE_ROOM_INFO_KEY_NAME, CACHE_ROOM_INFO_PRODUCE_KEY_PROPS_NAME, CACHE_ROOM_NAMESPACE_NAME, CACHE_ROOM_SUB_NAMESPACE_NAME, CACHE_SFU_CONSUMER_KEY_PROPS_NAME, CACHE_SFU_NAMESPACE_NAME, CACHE_SFU_PRODUCES_KEY_PROPS_NAME, CACHE_SFU_TRANSPORTS_KEY_NAME, CACHE_SFU_USER_KEY_NAME, REDIS_SERVER } from "../../cache.constants";
 import { CreateRoomTransportDto, InsertConsumerDataDto, InsertProducerDto } from "@app/sfu/commands/dto";
 
 
@@ -13,15 +13,37 @@ export class CreateSfuTransportInfoToRedis extends InsertDataToCache<RedisClient
   ) { super(cache); };
 
   async insert(entity: CreateRoomTransportDto): Promise<boolean> {
+    
+    const infoKey = `${CACHE_SFU_NAMESPACE_NAME.TRANSPORT_INFO}:${entity.transport_id}`;
+    const userKey = `${CACHE_SFU_NAMESPACE_NAME.USER_INFO}:${entity.user_id}`;
+    const typeField =
+      entity.type === "send"
+        ? CACHE_SFU_USER_KEY_NAME.SEND_TRANSPORT_ID
+        : CACHE_SFU_USER_KEY_NAME.RECV_TRANSPORT_ID;
 
-    const namespace : string = `${CACHE_SFU_NAMESPACE_NAME.TRANSPORT_INFO}:${entity.transport_id}`; 
+    const tx = this.cache.multi();
 
-    await this.cache.hSet(namespace, {
+    tx.hSetNX(userKey, typeField, entity.transport_id);
+
+    tx.hSet(infoKey, {
       [CACHE_SFU_TRANSPORTS_KEY_NAME.ROOM_ID] : entity.room_id,
       [CACHE_SFU_TRANSPORTS_KEY_NAME.SOCKET_ID] : entity.socket_id,
       [CACHE_SFU_TRANSPORTS_KEY_NAME.TYPE] : entity.type,
       [CACHE_SFU_TRANSPORTS_KEY_NAME.USER_ID] : entity.user_id
-    });
+    }) 
+
+    const result = await tx.exec();
+    if (!result) return false;
+
+    const [[err1, hsetnxRes], [err2]] = result as any;
+
+    if (err1 || err2) return false;
+
+    // 유저 정보가 저장했는지 확인
+    if (hsetnxRes !== 1) {
+      await this.cache.del(infoKey).catch(() => {});
+      return false;
+    }
 
     return true;
   };
@@ -40,6 +62,33 @@ export class DeleteSfuTransportInfoToRedis extends DeleteDataToCache<RedisClient
     const transportNamespace : string = `${CACHE_SFU_NAMESPACE_NAME.TRANSPORT_INFO}:${namespace}`;
 
     await this.cache.del(transportNamespace);
+
+    return true;
+  }
+
+  // namespace는 transport_id, keyName은 user_id:type 로 하자 
+  async deleteKey({ namespace, keyName, }: { namespace: string; keyName: string; }): Promise<boolean> {
+    const transport_id = namespace;
+    const transportKey = `${CACHE_SFU_NAMESPACE_NAME.TRANSPORT_INFO}:${transport_id}`;
+
+    const [user_id, type] = keyName.split(":");
+    if (!user_id || !type) return false;
+    const userKey = `${CACHE_SFU_NAMESPACE_NAME.USER_INFO}:${user_id.trim()}`;
+
+    const field =
+      type.trim() === "send"
+        ? CACHE_SFU_USER_KEY_NAME.SEND_TRANSPORT_ID
+        : type.trim() === "recv"
+          ? CACHE_SFU_USER_KEY_NAME.RECV_TRANSPORT_ID
+          : null;
+    if (!field) return false;
+
+    await this.cache.del(transportKey);
+    const current = await this.cache.hGet(userKey, field);
+    // 현재 transport_id와 동일하면 삭제
+    if (current === transport_id) {
+      await this.cache.hDel(userKey, field);
+    }
 
     return true;
   }
@@ -183,7 +232,7 @@ export class DeleteConsumerDataToRedis extends DeleteDataToCache<RedisClientType
     
     const deleteNamespace : string = `${CACHE_SFU_NAMESPACE_NAME.CONSUMER_INFO}:${namespace}`;
 
-    await this.cache.hDel(deleteNamespace, keyName);
+    const result = await this.cache.hDel(deleteNamespace, keyName);
 
     return true;
   };

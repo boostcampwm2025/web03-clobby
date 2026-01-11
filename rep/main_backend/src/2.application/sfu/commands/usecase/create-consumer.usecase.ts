@@ -64,7 +64,8 @@ export class CreateConsumerUsecase<T> {
 
       // consumer 닫혔을때 처리 
       const consumer_id : string = consumer.id;
-      consumer.on("@close", () => {
+      consumer.observer.on("close", () => {
+
         // 메모리에서 삭제
         if ( this.consumerRepo.get(consumer_id) ) this.consumerRepo.delete(consumer_id);
 

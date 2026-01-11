@@ -50,7 +50,7 @@ export class CreateTransportUsecase<T> {
 
       // 5. cache에 transport info 정보 저장
       const validate: CreateRoomTransportDto = { ...dto, transport_id: transportId };
-      await this.insertTranportInfoToRedis.insert(validate);
+      await this.insertTranportInfoToRedis.insert(validate); 
 
       // 6. transport 없어졌을때 이벤트 생성
       transport.observer.on("close", () => {
@@ -60,7 +60,7 @@ export class CreateTransportUsecase<T> {
         this.roomRepo.patch(dto.room_id, (e) => e.transport_ids.delete(transportId));
 
         // cache에 삭제 - transport_id를 전달하고 namespace를 잘 정리해야 한다.
-        this.deleteTransportInfoToRedis.deleteNamespace(transportId);
+        this.deleteTransportInfoToRedis.deleteKey({ namespace : transportId, keyName : `${dto.user_id}:${dto.type}`});
       });
 
       return {
