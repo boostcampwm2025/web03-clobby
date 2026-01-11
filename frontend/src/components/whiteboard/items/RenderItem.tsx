@@ -2,11 +2,7 @@
 
 import { Text, Arrow } from 'react-konva';
 import { useCanvasStore } from '@/store/useCanvasStore';
-import type {
-  TextItem,
-  ArrowItem,
-  WhiteboardItem,
-} from '@/types/whiteboard';
+import type { TextItem, ArrowItem, WhiteboardItem } from '@/types/whiteboard';
 
 interface RenderItemProps {
   item: WhiteboardItem;
@@ -86,7 +82,7 @@ export default function RenderItem({
         {...arrowItem}
         id={item.id}
         draggable
-        hitStrokeWidth={30}  
+        hitStrokeWidth={30}
         onMouseDown={() => onSelect(item.id)}
         onMouseEnter={(e) => {
           const container = e.target.getStage()?.container();
@@ -109,15 +105,15 @@ export default function RenderItem({
         onDragEnd={(e) => {
           const pos = e.target.position();
           const newPoints = arrowItem.points.map((p, i) =>
-            i % 2 === 0 ? p + pos.x : p + pos.y
+            i % 2 === 0 ? p + pos.x : p + pos.y,
           );
-          
+
           e.target.position({ x: 0, y: 0 });
-          
+
           onChange({
             points: newPoints,
           });
-          
+
           onDragEnd?.();
         }}
       />

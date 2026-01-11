@@ -2,7 +2,7 @@
 
 import NavButton from '@/components/whiteboard/common/NavButton';
 
-import { PanelProps } from '@/types/whiteboardUI';
+import { PanelProps } from '@/types/whiteboard/whiteboardUI';
 
 import { ImageIcon } from '@/assets/icons/common';
 import { VideoIcon, YoutubeIcon } from '@/assets/icons/whiteboard';

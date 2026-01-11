@@ -1,12 +1,5 @@
-export type TextAlignment = 'left' | 'center' | 'right';
-export type TextWrap = 'word' | 'char' | 'none';
+import { BaseItem, TextAlignment, TextWrap } from '@/types/whiteboard/base';
 
-interface BaseItem {
-  id: string;
-  type: 'text' | 'arrow';
-}
-
-// 텍스트 아이템
 export interface TextItem extends BaseItem {
   type: 'text';
   x: number;
@@ -22,7 +15,6 @@ export interface TextItem extends BaseItem {
   parentPolygonId?: string;
 }
 
-// 화살표 아이템
 export interface ArrowItem extends BaseItem {
   type: 'arrow';
   points: number[];
@@ -32,6 +24,3 @@ export interface ArrowItem extends BaseItem {
   pointerWidth: number;
   tension: number;
 }
-
-// 통합 타입
-export type WhiteboardItem = TextItem | ArrowItem;

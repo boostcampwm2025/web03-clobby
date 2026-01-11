@@ -10,7 +10,10 @@ interface ArrowHandlesProps {
   selectedHandleIndex: number | null;
   onHandleClick: (e: KonvaEventObject<MouseEvent>, index: number) => void;
   onStartDrag: (e: KonvaEventObject<DragEvent>) => void;
-  onControlPointDrag: (pointIndex: number, e: KonvaEventObject<DragEvent>) => void;
+  onControlPointDrag: (
+    pointIndex: number,
+    e: KonvaEventObject<DragEvent>,
+  ) => void;
   onEndDrag: (e: KonvaEventObject<DragEvent>) => void;
 }
 
