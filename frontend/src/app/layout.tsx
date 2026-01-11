@@ -46,6 +46,8 @@ export default function RootLayout({
         className={`${suit.variable} ${cafe24.variable} ${roboto.variable} antialiased`}
       >
         {children}
+
+        <div id="modal-root" />
       </body>
     </html>
   );
