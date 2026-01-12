@@ -176,6 +176,9 @@ export class SignalingWebsocketGateway implements OnGatewayInit, OnGatewayConnec
       await this.signalingService.dtlsHandshake(client, validate);
 
       // 2. 방에 알릴 것이다 현재 접속을 했다고
+      const room_id : string = client.data.room_id;
+      const namespace : string = `${CHANNEL_NAMESPACE.SIGNALING}:${room_id}`;
+      client.to(namespace).emit(WEBSOCKET_SIGNALING_CLIENT_EVENT_NAME.NEW_USER, this.signalingService.makeUserInfo(client));
 
       return { ok : true };
     } catch (err){

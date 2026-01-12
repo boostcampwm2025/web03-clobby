@@ -12,7 +12,7 @@ import { NotConnectSignalling } from "@error/presentation/signalling/signalling.
 import { CHANNEL_NAMESPACE } from "@infra/channel/channel.constants";
 import { CreateConsumerDto, CreateConsumerResult, CreateProduceResult, CreatePropduceDto, CreateTransportDto, ResumeConsumerDto } from "@app/sfu/commands/dto";
 import { ConnectTransportType } from "@app/sfu/queries/dto";
-import { GetRoomMembersResult } from "@app/room/queries/dto";
+import { GetRoomMembersResult, MembersInfo } from "@app/room/queries/dto";
 import { GetRoomMembersUsecase } from "@app/room/queries/usecase";
 
 
@@ -188,6 +188,16 @@ export class SignalingWebsocketService {
   async getMemberData( client : Socket ) : Promise<GetRoomMembersResult> {
     const room_id : string = client.data.room_id;
     return this.getMembersUsecase.execute({room_id});
+  };
+
+  makeUserInfo(client : Socket) : MembersInfo {
+    const payload : SocketPayload = client.data.user;
+    return {
+      ...payload,
+      profile_path : null, // 이 부분은 좀 고민을 해야할 것 같다. 
+      cam : null,
+      mic : null
+    }
   };
 
 };
