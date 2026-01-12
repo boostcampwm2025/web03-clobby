@@ -34,6 +34,10 @@ button {
   @apply overflow-hidden text-ellipsis whitespace-nowrap;
 }
 
+.section-title {
+  @apply text-2xl font-bold text-neutral-900;
+}
+
 /* 미팅 관련 커스텀 클래스 */
 .dropdown-btn {
   @apply w-full px-3 py-2.5 text-left text-sm text-neutral-50 hover:bg-neutral-500;
