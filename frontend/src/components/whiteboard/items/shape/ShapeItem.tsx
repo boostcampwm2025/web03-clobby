@@ -13,6 +13,9 @@ interface ShapeItemProps {
 
   onMouseEnter: (e: Konva.KonvaEventObject<MouseEvent>) => void;
   onMouseLeave: (e: Konva.KonvaEventObject<MouseEvent>) => void;
+
+  onDragStart?: () => void;
+  onDragEnd?: () => void;
 }
 
 export default function ShapeItem({
@@ -21,6 +24,8 @@ export default function ShapeItem({
   onChange,
   onMouseEnter,
   onMouseLeave,
+  onDragStart,
+  onDragEnd,
 }: ShapeItemProps) {
   // 다각형 점 좌표
   let points: number[] = [];
@@ -43,6 +48,7 @@ export default function ShapeItem({
     onTouchStart: onSelect,
     onMouseEnter: onMouseEnter,
     onMouseLeave: onMouseLeave,
+    onDragStart: onDragStart,
 
     // 이동 후 바뀐 위치 좌표 저장(드래그 끝난 이후 도형의 위치 좌표)
     // 위치 조정
