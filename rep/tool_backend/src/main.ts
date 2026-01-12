@@ -9,6 +9,9 @@ async function bootstrap() {
   // 기본 설정
   const port: number = config.get<number>('NODE_PORT', 8080);
   const host: string = config.get<string>('NODE_HOST', 'localhost');
+
+  // 
+
   await app.listen(port, host);
 }
 bootstrap();

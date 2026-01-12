@@ -25,7 +25,7 @@ import {
 import { JwtGuard } from './guards';
 import { LoginValidate, SignUpValidate } from './auth.validate';
 
-@Controller('api/auth')
+@Controller('auth')
 export class AuthController {
   constructor(
     private readonly config: ConfigService,
