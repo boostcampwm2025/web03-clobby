@@ -1,4 +1,4 @@
-import { ToolType } from '@/types/whiteboardUI';
+import { ToolType } from '@/types/whiteboard/whiteboardUI';
 
 export const CURSOR_TOOLS: ToolType[] = ['move', 'select'];
 export const SHAPE_TOOLS: ToolType[] = [

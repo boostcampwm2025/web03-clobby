@@ -27,7 +27,7 @@ import {
 } from '@/assets/icons/whiteboard';
 
 // Type import
-import { ToolType, PanelType } from '@/types/whiteboardUI';
+import { ToolType, PanelType } from '@/types/whiteboard/whiteboardUI';
 
 // Constants import
 import {

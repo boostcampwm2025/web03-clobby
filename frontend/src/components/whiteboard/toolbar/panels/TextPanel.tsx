@@ -1,7 +1,7 @@
 'use client';
 
 import NavButton from '@/components/whiteboard/common/NavButton';
-import { PanelProps } from '@/types/whiteboardUI';
+import { PanelProps } from '@/types/whiteboard/whiteboardUI';
 import { TextBoxIcon } from '@/assets/icons/whiteboard';
 import { useAddWhiteboardItem } from '@/hooks/useAddWhiteboardItem';
 

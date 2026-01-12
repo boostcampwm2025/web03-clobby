@@ -30,7 +30,7 @@ export default function TextArea({
 
   useEffect(() => {
     if (!stageRef.current) return;
-    
+
     const textNode = stageRef.current.findOne('#' + textId) as Konva.Text;
     if (!textNode) return;
 
@@ -43,10 +43,10 @@ export default function TextArea({
 
   useEffect(() => {
     if (!ref.current || !stageRef.current) return;
-    
+
     const textNode = stageRef.current.findOne('#' + textId) as Konva.Text;
     if (!textNode) return;
-    
+
     const textarea = ref.current;
 
     //textNode와 스타일 동기화
@@ -122,12 +122,10 @@ export default function TextArea({
       const canvasWidth = nodeWidth / stageScale;
       const canvasHeight = textarea.offsetHeight / stageScale;
 
-      const hasWidthChanged = Math.abs(
-        canvasWidth - lastBoundsRef.current.width,
-      ) > 0.5;
-      const hasHeightChanged = Math.abs(
-        canvasHeight - lastBoundsRef.current.height,
-      ) > 0.5;
+      const hasWidthChanged =
+        Math.abs(canvasWidth - lastBoundsRef.current.width) > 0.5;
+      const hasHeightChanged =
+        Math.abs(canvasHeight - lastBoundsRef.current.height) > 0.5;
 
       if (!hasWidthChanged && !hasHeightChanged) return;
 
