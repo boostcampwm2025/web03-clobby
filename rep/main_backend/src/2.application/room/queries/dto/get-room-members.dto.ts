@@ -13,7 +13,7 @@ type MemberProviderInfo = {
 
 export type ProviderInfo = {
   user_id : string;
-  nickname : string; // 이거 추가하려면 하나에 로직이 더 들어가는데... 
+  nickname : string; 
   provider_id : string;
   kind: "audio" | "video";
   type : "mic" | "cam" | "screen_video" | "screen_audio";

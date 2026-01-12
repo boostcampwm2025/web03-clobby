@@ -146,7 +146,7 @@ export class SignalingWebsocketService {
   };
 
   // produce를 하기 위한 준비 
-  async onProduce( client : Socket , validate : OnProduceValidate ) : Promise<CreateProduceResult> {
+  async onProduce( client : Socket , validate : OnProduceValidate ) : Promise<CreateProduceResult & { nickname : string }> {
     const room_id : string = client.data.room_id;
     const payload : SocketPayload = client.data.user;
     const dto : CreatePropduceDto = {
@@ -154,7 +154,10 @@ export class SignalingWebsocketService {
       room_id,
       ...payload
     };
-    return this.sfuServer.createProducer(dto);
+    const result = await this.sfuServer.createProducer(dto);
+    return {
+      ...result, nickname : payload.nickname
+    };
   };
 
   // consumer를 하기 위한 준비
