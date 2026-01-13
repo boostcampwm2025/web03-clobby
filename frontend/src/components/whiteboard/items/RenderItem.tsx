@@ -7,9 +7,11 @@ import type {
   TextItem,
   ArrowItem,
   ShapeItem as ShapeItemType,
+  ImageItem as ImageItemType,
   WhiteboardItem,
 } from '@/types/whiteboard';
 import ShapeItem from '@/components/whiteboard/items/shape/ShapeItem';
+import ImageItem from '@/components/whiteboard/items/image/ImageItem';
 
 import { useCanvasStore } from '@/store/useCanvasStore';
 
@@ -113,6 +115,22 @@ export default function RenderItem({
     return (
       <ShapeItem
         shapeItem={shapeItem}
+        onSelect={() => onSelect(item.id)}
+        onChange={onChange}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+      />
+    );
+  }
+
+  // Image Rendering
+  if (item.type === 'image') {
+    const imageItem = item as ImageItemType;
+    return (
+      <ImageItem
+        imageItem={imageItem}
         onSelect={() => onSelect(item.id)}
         onChange={onChange}
         onMouseEnter={handleMouseEnter}
