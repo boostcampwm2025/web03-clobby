@@ -78,7 +78,7 @@ import { GetRoomMembersUsecase } from "@/2.application/room/queries/usecase";
       inject : [
         SelectRoomMemberInfosFromRedis
       ]
-    }
+    },
   ]
 })
 export class SignalingWebsocketModule {};

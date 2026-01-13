@@ -7,7 +7,7 @@ import { TokenDto } from "@app/auth/commands/dto";
 import { PayloadRes } from "@app/auth/queries/dto";
 import { JwtWsGuard } from "../auth/guards/jwt.guard";
 import { WEBSOCKET_AUTH_CLIENT_EVENT_NAME, WEBSOCKET_NAMESPACE, WEBSOCKET_PATH, WEBSOCKET_SIGNALING_CLIENT_EVENT_NAME, WEBSOCKET_SIGNALING_EVENT_NAME } from "../websocket.constants";
-import { DtlsHandshakeValidate, JoinRoomValidate, NegotiateIceValidate, OnConsumeValidate, OnProduceValidate, ResumeConsumersValidate, SocketPayload } from "./signaling.validate";
+import { DtlsHandshakeValidate, JoinRoomValidate, NegotiateIceValidate, OnConsumeValidate, OnProduceValidate, pauseConsumersValidate, ResumeConsumersValidate, SocketPayload } from "./signaling.validate";
 import { ConnectResult, ConnectRoomDto } from "@app/room/commands/dto";
 import { CHANNEL_NAMESPACE } from "@infra/channel/channel.constants";
 import { GetRoomMembersResult } from "@app/room/queries/dto";
@@ -270,6 +270,22 @@ export class SignalingWebsocketGateway implements OnGatewayInit, OnGatewayConnec
     }
   };
 
+  // consumer를 pause 하는 로직 ( 잠시 패킷을 안받겠다는 것 )
+  @SubscribeMessage(WEBSOCKET_SIGNALING_EVENT_NAME.PAUSE)
+  async pauseConsumerGateway(
+    @ConnectedSocket() client : Socket,
+    @MessageBody() validate : pauseConsumersValidate 
+  ) {
+    try {
+      // 1. consumer 멈춤
+      await this.signalingService.pauseConsumer(client, validate);
+
+      return { ok : true };
+    } catch (err) {
+      this.logger.error(err);
+      throw new WsException({ message : err.message ?? "에러 발생", status : err.status ?? 500 });      
+    };
+  };
 
   // producer가 이제 더이상 데이터를 보내지 않겠다고 이야기하는 이벤트
   

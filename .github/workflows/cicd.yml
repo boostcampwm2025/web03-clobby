@@ -356,6 +356,7 @@ jobs:
             # compose.env 파일 생성
             cat << EOF > compose.env
             MAIN_BACKEND_IMG=${{ secrets.DOCKER_HUB_USERNAME }}/${{ vars.DOCKER_MAIN_BACKEND_TEST_SERVER_IMG }}
+            TOOL_BACKEND_IMG=${{ secrets.DOCKER_HUB_USERNAME }}/${{ vars.DOCKER_TOOL_BACKEND_TEST_SERVER_IMG }}
             FRONTEND_IMG=${{ secrets.DOCKER_HUB_USERNAME }}/${{ vars.DOCKER_FRONTEND_TEST_SERVER_IMG }}
             EOF
 

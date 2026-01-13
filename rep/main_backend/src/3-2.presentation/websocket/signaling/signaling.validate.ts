@@ -108,3 +108,11 @@ export class ResumeConsumersValidate {
   consumer_id : string;
 
 };
+
+export class pauseConsumersValidate {
+
+  @IsNotEmpty()
+  @IsString()
+  consumer_id : string;
+
+};
