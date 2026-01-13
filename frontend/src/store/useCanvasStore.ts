@@ -11,6 +11,7 @@ import type {
   ArrowItem,
   ShapeItem,
   ShapeType,
+  ImageItem,
   WhiteboardItem,
 } from '@/types/whiteboard';
 
@@ -45,6 +46,13 @@ interface CanvasState {
     type: ShapeType,
     payload?: Partial<Omit<ShapeItem, 'id' | 'type' | 'shapeType'>>,
   ) => void;
+  addImage: (payload: {
+    src: string;
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+  }) => void;
 
   // Item Modification
   updateItem: (id: string, payload: Partial<WhiteboardItem>) => void;
@@ -157,6 +165,31 @@ export const useCanvasStore = create<CanvasState>((set) => ({
 
       return {
         items: [...state.items, newShape],
+        selectedId: id,
+      };
+    }),
+
+  // 이미지 추가
+  addImage: (payload) =>
+    set((state) => {
+      const id = uuidv4();
+      const newImage: ImageItem = {
+        id,
+        type: 'image',
+        src: payload.src,
+        x: payload.x ?? state.canvasWidth / 2 - 100,
+        y: payload.y ?? state.canvasHeight / 2 - 100,
+        width: payload.width ?? 500,
+        height: payload.height ?? 200,
+        rotation: 0,
+        stroke: undefined,
+        strokeWidth: 0,
+        cornerRadius: 0,
+        opacity: 1,
+      };
+
+      return {
+        items: [...state.items, newImage],
         selectedId: id,
       };
     }),
