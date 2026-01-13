@@ -46,20 +46,18 @@ export default function ItemTransformer({
     <Transformer
       ref={transformerRef}
       enabledAnchors={
-        isDrawingSelected
-          ? []
-          : isTextSelected
-            ? ['middle-left', 'middle-right']
-            : [
-                'top-left',
-                'top-right',
-                'bottom-left',
-                'bottom-right',
-                'top-center',
-                'bottom-center',
-                'middle-left',
-                'middle-right',
-              ]
+        isTextSelected
+          ? ['middle-left', 'middle-right']
+          : [
+              'top-left',
+              'top-right',
+              'bottom-left',
+              'bottom-right',
+              'top-center',
+              'bottom-center',
+              'middle-left',
+              'middle-right',
+            ]
       }
       rotateEnabled={!isDrawingSelected}
       anchorSize={10}
@@ -72,23 +70,14 @@ export default function ItemTransformer({
       rotationSnapTolerance={10}
       keepRatio={false}
       boundBoxFunc={(_oldBox, newBox) => {
-        newBox.width = Math.max(30, newBox.width);
+        // 최소 크기 제한
+        const minWidth = 30;
+        const minHeight = 30;
+
+        newBox.width = Math.max(minWidth, Math.abs(newBox.width));
+        newBox.height = Math.max(minHeight, Math.abs(newBox.height));
+
         return newBox;
-      }}
-      onTransform={(e) => {
-        // Transform 중에도 스케일 보정
-        const node = e.target;
-        const scaleX = node.scaleX();
-        const scaleY = node.scaleY();
-
-        if (scaleX !== 1 || scaleY !== 1) {
-          node.scaleX(1);
-          node.scaleY(1);
-
-          if (node.getClassName() === 'Text') {
-            node.width(node.width() * scaleX);
-          }
-        }
       }}
     />
   );

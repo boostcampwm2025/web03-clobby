@@ -1,9 +1,11 @@
 'use client';
 
+import Konva from 'konva';
 import { Text, Arrow, Line } from 'react-konva';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { useCursorStyle } from '@/hooks/useCursorStyle';
 import { useItemInteraction } from '@/hooks/useItemInteraction';
+
 import type {
   TextItem,
   ArrowItem,
@@ -62,6 +64,19 @@ export default function RenderItem({
             x: e.target.x(),
             y: e.target.y(),
           });
+        }}
+        onTransform={(e) => {
+          if (!isInteractive || isEraserMode) return;
+          const node = e.target;
+          const scaleX = node.scaleX();
+          const scaleY = node.scaleY();
+
+          // Transform 중에도 스케일 보정
+          if (scaleX !== 1 || scaleY !== 1) {
+            node.scaleX(1);
+            node.scaleY(1);
+            node.width(node.width() * scaleX);
+          }
         }}
         onTransformEnd={(e) => {
           if (!isInteractive || isEraserMode) return;
@@ -138,6 +153,7 @@ export default function RenderItem({
         tension={0.5}
         lineCap="round"
         lineJoin="round"
+        strokeScaleEnabled={true}
         onMouseDown={() => isInteractive && !isEraserMode && onSelect(item.id)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -152,6 +168,48 @@ export default function RenderItem({
 
           onChange({
             points: newPoints,
+          });
+        }}
+        onTransform={(e) => {
+          if (!isInteractive || isEraserMode) return;
+          const node = e.target;
+
+          if (node.getClassName() !== 'Line') return;
+          const lineNode = node as Konva.Line;
+
+          const scaleX = lineNode.scaleX();
+          const scaleY = lineNode.scaleY();
+
+          // strokeWidth를 scale로 나눠서 두께 유지
+          const avgScale = (scaleX + scaleY) / 2;
+          lineNode.strokeWidth(drawingItem.strokeWidth / avgScale);
+        }}
+        onTransformEnd={(e) => {
+          if (!isInteractive || isEraserMode) return;
+          const node = e.target;
+
+          if (node.getClassName() !== 'Line') return;
+          const lineNode = node as Konva.Line;
+
+          const scaleX = lineNode.scaleX();
+          const scaleY = lineNode.scaleY();
+
+          // 기존 좌표에 scale 곱한 후 scale 1로 초기화
+          const newPoints = drawingItem.points.map((p, i) =>
+            i % 2 === 0 ? p * scaleX : p * scaleY,
+          );
+
+          lineNode.scaleX(1);
+          lineNode.scaleY(1);
+
+          //두께 유지
+          lineNode.strokeWidth(drawingItem.strokeWidth);
+
+          onChange({
+            points: newPoints,
+            rotation: lineNode.rotation(),
+            scaleX: 1,
+            scaleY: 1,
           });
         }}
       />

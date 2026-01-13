@@ -110,9 +110,9 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
           state.canvasHeight / 2,
         ],
         stroke: payload?.stroke ?? '#111827',
-        strokeWidth: payload?.strokeWidth ?? 7,
-        pointerLength: payload?.pointerLength ?? 25,
-        pointerWidth: payload?.pointerWidth ?? 25,
+        strokeWidth: payload?.strokeWidth ?? 3,
+        pointerLength: payload?.pointerLength ?? 14,
+        pointerWidth: payload?.pointerWidth ?? 14,
         tension: payload?.tension ?? 0.6,
       };
 
@@ -126,7 +126,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
 
   currentDrawing: null,
 
-  // 그리기 시작
+  // 그리기
   startDrawing: (x, y) => {
     const newDrawing: DrawingItem = {
       id: uuidv4(),
@@ -134,11 +134,13 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       points: [x, y],
       stroke: '#111827',
       strokeWidth: 10,
+      scaleX: 1,
+      scaleY: 1,
+      rotation: 0,
     };
     set({ currentDrawing: newDrawing });
   },
 
-  // 그리기 계속
   continueDrawing: (x, y) => {
     const state = get();
     if (!state.currentDrawing) return;
@@ -159,7 +161,6 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     set({ currentDrawing: updatedDrawing });
   },
 
-  // 그리기 완료
   finishDrawing: () => {
     const state = get();
     if (!state.currentDrawing) return;

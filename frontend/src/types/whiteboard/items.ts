@@ -30,4 +30,7 @@ export interface DrawingItem extends BaseItem {
   points: number[];
   stroke: string;
   strokeWidth: number;
+  scaleX?: number;
+  scaleY?: number;
+  rotation?: number;
 }
