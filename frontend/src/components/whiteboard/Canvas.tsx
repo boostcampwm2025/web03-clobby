@@ -31,7 +31,7 @@ export default function Canvas() {
   const selectItem = useCanvasStore((state) => state.selectItem);
   const updateItem = useCanvasStore((state) => state.updateItem);
   const setEditingTextId = useCanvasStore((state) => state.setEditingTextId);
-  const drawingMode = useCanvasStore((state) => state.drawingMode);
+  const cursorMode = useCanvasStore((state) => state.cursorMode);
 
   const stageRef = useRef<Konva.Stage | null>(null);
   const [isDraggingArrow, setIsDraggingArrow] = useState(false);
@@ -70,12 +70,13 @@ export default function Canvas() {
     updateItem,
   });
 
+  // 그리기 훅
   const {
     handleDrawingMouseDown,
     handleDrawingMouseMove,
     handleDrawingMouseUp,
     currentDrawing,
-  } = useDrawing({ drawingMode });
+  } = useDrawing();
 
   useCanvasShortcuts({
     isArrowSelected,
@@ -97,8 +98,9 @@ export default function Canvas() {
     }
   };
 
+  // 마우스 이벤트
   const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    if (drawingMode) {
+    if (cursorMode === 'draw') {
       handleDrawingMouseDown(e);
     } else {
       handleCheckDeselect(e);
@@ -128,7 +130,7 @@ export default function Canvas() {
         ref={stageRef}
         width={size.width}
         height={size.height}
-        draggable={!drawingMode}
+        draggable={cursorMode !== 'draw'}
         x={stagePos.x}
         y={stagePos.y}
         scaleX={stageScale}

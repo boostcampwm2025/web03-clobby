@@ -47,8 +47,9 @@ export default function ToolbarContainer() {
   const [activeTool, setActiveTool] = useState<ToolType>('select');
   const [activePanel, setActivePanel] = useState<PanelType>(null);
 
-  const drawingMode = useCanvasStore((state) => state.drawingMode);
-  const setDrawingMode = useCanvasStore((state) => state.setDrawingMode);
+  // 커서 모드 상태
+  const cursorMode = useCanvasStore((state) => state.cursorMode);
+  const setCursorMode = useCanvasStore((state) => state.setCursorMode);
 
   // 핸들러 로직
   // 하위 패널에서 구체적인 도구 선택
@@ -107,14 +108,15 @@ export default function ToolbarContainer() {
         <NavButton
           icon={PenIcon}
           label="그리기"
-          isActive={drawingMode}
+          isActive={cursorMode === 'draw'}
           onClick={() => {
-            setDrawingMode(!drawingMode);
-            if (!drawingMode) {
+            if (cursorMode === 'draw') {
+              setCursorMode('select');
+              setActiveTool('select');
+            } else {
+              setCursorMode('draw');
               setActiveTool('draw');
               setActivePanel(null);
-            } else {
-              setActiveTool('select');
             }
           }}
           bgColor="bg-white"
@@ -151,8 +153,17 @@ export default function ToolbarContainer() {
         <NavButton
           icon={EraserIcon}
           label="지우개"
-          isActive={activeTool === 'eraser'}
-          onClick={() => handleToolSelect('eraser')}
+          isActive={cursorMode === 'eraser'}
+          onClick={() => {
+            if (cursorMode === 'eraser') {
+              setCursorMode('select');
+              setActiveTool('select');
+            } else {
+              setCursorMode('eraser');
+              setActiveTool('eraser');
+              setActivePanel(null);
+            }
+          }}
           bgColor="bg-white"
           activeBgColor="bg-sky-100 text-sky-600"
         />

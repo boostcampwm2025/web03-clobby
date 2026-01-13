@@ -3,11 +3,8 @@ import Konva from 'konva';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { getWorldPointerPosition } from '@/utils/coordinate';
 
-interface UseDrawingProps {
-  drawingMode: boolean;
-}
-
-export function useDrawing({ drawingMode }: UseDrawingProps) {
+export function useDrawing() {
+  const cursorMode = useCanvasStore((state) => state.cursorMode);
   const currentDrawing = useCanvasStore((state) => state.currentDrawing);
   const startDrawing = useCanvasStore((state) => state.startDrawing);
   const continueDrawing = useCanvasStore((state) => state.continueDrawing);
@@ -16,7 +13,7 @@ export function useDrawing({ drawingMode }: UseDrawingProps) {
   const [isDrawing, setIsDrawing] = useState(false);
 
   const handleDrawingMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    if (!drawingMode) return;
+    if (cursorMode !== 'draw') return;
 
     // 기존 아이템 클릭 시 그리기 시작 안 함
     const clickedOnEmpty =
@@ -32,7 +29,7 @@ export function useDrawing({ drawingMode }: UseDrawingProps) {
   };
 
   const handleDrawingMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    if (!isDrawing || !drawingMode) return;
+    if (!isDrawing || cursorMode !== 'draw') return;
 
     const stage = e.target.getStage();
     if (!stage) return;

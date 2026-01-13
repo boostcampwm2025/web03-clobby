@@ -9,6 +9,7 @@ import type {
   ArrowItem,
   WhiteboardItem,
   DrawingItem,
+  CursorMode,
 } from '@/types/whiteboard';
 
 interface CanvasState {
@@ -28,9 +29,12 @@ interface CanvasState {
   addText: (text?: Partial<Omit<TextItem, 'id' | 'type'>>) => string;
   addArrow: (payload?: Partial<Omit<ArrowItem, 'id' | 'type'>>) => void;
 
-  drawingMode: boolean;
+  // 커서 모드
+  cursorMode: CursorMode;
+  setCursorMode: (mode: CursorMode) => void;
+
+  // 자유 그리기
   currentDrawing: DrawingItem | null;
-  setDrawingMode: (mode: boolean) => void;
   startDrawing: (x: number, y: number) => void;
   continueDrawing: (x: number, y: number) => void;
   finishDrawing: () => void;
@@ -106,9 +110,9 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
           state.canvasHeight / 2,
         ],
         stroke: payload?.stroke ?? '#111827',
-        strokeWidth: payload?.strokeWidth ?? 3,
-        pointerLength: payload?.pointerLength ?? 14,
-        pointerWidth: payload?.pointerWidth ?? 14,
+        strokeWidth: payload?.strokeWidth ?? 7,
+        pointerLength: payload?.pointerLength ?? 25,
+        pointerWidth: payload?.pointerWidth ?? 25,
         tension: payload?.tension ?? 0.6,
       };
 
@@ -117,23 +121,24 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       };
     }),
 
-  drawingMode: false,
+  cursorMode: 'select',
+  setCursorMode: (mode) => set({ cursorMode: mode }),
+
   currentDrawing: null,
 
-  setDrawingMode: (mode) => set({ drawingMode: mode }),
-
-  // 그리기
+  // 그리기 시작
   startDrawing: (x, y) => {
     const newDrawing: DrawingItem = {
       id: uuidv4(),
       type: 'drawing',
       points: [x, y],
       stroke: '#111827',
-      strokeWidth: 3,
+      strokeWidth: 10,
     };
     set({ currentDrawing: newDrawing });
   },
 
+  // 그리기 계속
   continueDrawing: (x, y) => {
     const state = get();
     if (!state.currentDrawing) return;
@@ -154,6 +159,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     set({ currentDrawing: updatedDrawing });
   },
 
+  // 그리기 완료
   finishDrawing: () => {
     const state = get();
     if (!state.currentDrawing) return;
