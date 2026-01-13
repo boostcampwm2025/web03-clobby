@@ -7,7 +7,11 @@ import { PanelProps } from '@/types/whiteboard/whiteboardUI';
 import { ImageIcon } from '@/assets/icons/common';
 import { VideoIcon, YoutubeIcon } from '@/assets/icons/whiteboard';
 
+import { useAddWhiteboardItem } from '@/hooks/useAddWhiteboardItem';
+
 export default function MediaPanel({ selectedTool, onSelect }: PanelProps) {
+  const { handleAddImage } = useAddWhiteboardItem();
+
   const commonProps = {
     bgColor: 'bg-white',
     activeBgColor: 'bg-sky-100 text-sky-600',
@@ -19,7 +23,10 @@ export default function MediaPanel({ selectedTool, onSelect }: PanelProps) {
         icon={ImageIcon}
         label="이미지 업로드"
         isActive={selectedTool === 'image'}
-        onClick={() => onSelect('image')}
+        onClick={() => {
+          onSelect('image');
+          handleAddImage();
+        }}
         {...commonProps}
       />
       <NavButton
