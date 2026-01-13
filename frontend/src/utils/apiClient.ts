@@ -23,6 +23,11 @@ const baseApi = async <T>(
       typeof window !== 'undefined'
         ? sessionStorage.getItem('access_token')
         : null;
+
+    // 토큰이 필요한 API 호출에 토큰이 없는 경우 API 호출 X (매번 401 에러 로그 표시 방지)
+    if (withToken && !token) {
+      return Promise.reject(new Error('NO_TOKEN'));
+    }
   }
 
   const config: RequestInit = {

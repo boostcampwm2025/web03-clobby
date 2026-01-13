@@ -1,7 +1,7 @@
 'use client';
 
 import KakaoLogoIcon from '@/assets/auth/kakaoLogoIcon.svg';
-import { apiWithToken } from '@/utils/apiClient';
+import { api } from '@/utils/apiClient';
 
 interface KakaoAuthUrlResponse {
   url: string;
@@ -9,8 +9,7 @@ interface KakaoAuthUrlResponse {
 
 export default function KakaoLoginButton() {
   const getOAuthURL = async () => {
-    const { url } =
-      await apiWithToken.get<KakaoAuthUrlResponse>('/auth/kakao/url');
+    const { url } = await api.get<KakaoAuthUrlResponse>('/auth/kakao/url');
     window.location.href = url;
   };
 
