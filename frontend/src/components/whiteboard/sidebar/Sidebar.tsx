@@ -7,6 +7,11 @@ import ShapePanel from '@/components/whiteboard/sidebar/panels/ShapePanel';
 import ArrowPanel from '@/components/whiteboard/sidebar/panels/ArrowPanel';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import type { ArrowItem, ShapeItem } from '@/types/whiteboard';
+import {
+  ARROW_SIZE_PRESETS,
+  ARROW_STYLE_PRESETS,
+} from '@/components/whiteboard/sidebar/panels/arrowPresets';
+import { getArrowSize, getArrowStyle } from '@/utils/arrowPanelHelpers';
 
 // 사이드 바 선택된 요소 타입
 type SelectionType = 'shape' | 'arrow' | null;
@@ -73,16 +78,26 @@ export default function Sidebar() {
           />
         )}
 
+        {/* arrow */}
         {selectionType === 'arrow' && (
           <ArrowPanel
             stroke={(selectedItem as ArrowItem).stroke}
-            size="M"
-            style="straight"
+            size={getArrowSize(selectedItem as ArrowItem)}
+            style={getArrowStyle(selectedItem as ArrowItem)}
             onChangeStroke={(color) =>
               updateItem(selectedId!, { stroke: color })
             }
-            onChangeSize={(size) => {}}
-            onChangeStyle={(style) => {}}
+            onChangeSize={(size) => {
+              const preset = ARROW_SIZE_PRESETS[size];
+              updateItem(selectedId!, {
+                strokeWidth: preset.strokeWidth,
+                pointerLength: preset.pointerSize,
+                pointerWidth: preset.pointerSize,
+              });
+            }}
+            onChangeStyle={(style) => {
+              updateItem(selectedId!, { tension: ARROW_STYLE_PRESETS[style] });
+            }}
           />
         )}
       </div>

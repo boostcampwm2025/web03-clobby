@@ -2,12 +2,7 @@
 
 import Section from '@/components/whiteboard/sidebar/ui/Section';
 import ButtonGroup from '@/components/whiteboard/sidebar/ui/ButtonGroup';
-
-// Arrow 사이즈 타입
-type ArrowSize = 'S' | 'M' | 'L';
-
-// Arrow 스타일 타입
-type ArrowStyle = 'straight' | 'curved';
+import type { ArrowSize, ArrowStyle } from '../panels/arrowPresets';
 
 // Arrow 스타일 설정 section
 interface ArrowStyleSectionProps {

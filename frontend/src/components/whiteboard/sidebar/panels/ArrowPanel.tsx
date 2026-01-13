@@ -2,15 +2,16 @@
 
 import ArrowStrokeSection from '@/components/whiteboard/sidebar/sections/ArrowStrokeSection';
 import ArrowStyleSection from '@/components/whiteboard/sidebar/sections/ArrowStyleSection';
+import type { ArrowSize, ArrowStyle } from './arrowPresets';
 
 // ArrowPanel 컴포넌트
 interface ArrowPanelProps {
   stroke: string;
-  size: 'S' | 'M' | 'L';
-  style: 'straight' | 'curved';
+  size: ArrowSize;
+  style: ArrowStyle;
   onChangeStroke: (color: string) => void;
-  onChangeSize: (size: 'S' | 'M' | 'L') => void;
-  onChangeStyle: (style: 'straight' | 'curved') => void;
+  onChangeSize: (size: ArrowSize) => void;
+  onChangeStyle: (style: ArrowStyle) => void;
 }
 
 export default function ArrowPanel({
