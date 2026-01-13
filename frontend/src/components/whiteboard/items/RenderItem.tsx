@@ -28,6 +28,11 @@ export default function RenderItem({
   onArrowDblClick,
 }: RenderItemProps) {
   const setEditingTextId = useCanvasStore((state) => state.setEditingTextId);
+  const cursorMode = useCanvasStore((state) => state.cursorMode);
+
+  // 그리기 모드일 때는 아이템 조작 불가
+  const isInteractive = cursorMode !== 'draw';
+  const isEraserMode = cursorMode === 'eraser';
 
   // 텍스트 렌더링
   if (item.type === 'text') {
@@ -36,9 +41,10 @@ export default function RenderItem({
       <Text
         {...textItem}
         id={item.id}
-        draggable
-        onMouseDown={() => onSelect(item.id)}
-        onTouchStart={() => onSelect(item.id)}
+        draggable={isInteractive && !isEraserMode}
+        listening={isInteractive || isEraserMode}
+        onMouseDown={() => isInteractive && !isEraserMode && onSelect(item.id)}
+        onTouchStart={() => isInteractive && !isEraserMode && onSelect(item.id)}
         onMouseEnter={(e) => {
           const container = e.target.getStage()?.container();
           if (container) {
@@ -52,16 +58,19 @@ export default function RenderItem({
           }
         }}
         onDblClick={() => {
+          if (!isInteractive || isEraserMode) return;
           setEditingTextId(item.id);
           onSelect(item.id);
         }}
         onDragEnd={(e) => {
+          if (!isInteractive || isEraserMode) return;
           onChange({
             x: e.target.x(),
             y: e.target.y(),
           });
         }}
         onTransformEnd={(e) => {
+          if (!isInteractive || isEraserMode) return;
           const node = e.target;
           const scaleX = node.scaleX();
 
@@ -86,9 +95,13 @@ export default function RenderItem({
       <Arrow
         {...arrowItem}
         id={item.id}
-        draggable
+        draggable={isInteractive && !isEraserMode}
+        listening={isInteractive || isEraserMode}
         hitStrokeWidth={30}
-        onMouseDown={() => onSelect(item.id)}
+        tension={0.5}
+        lineCap="round"
+        lineJoin="round"
+        onMouseDown={() => isInteractive && !isEraserMode && onSelect(item.id)}
         onMouseEnter={(e) => {
           const container = e.target.getStage()?.container();
           if (container) {
@@ -102,12 +115,15 @@ export default function RenderItem({
           }
         }}
         onDblClick={() => {
+          if (!isInteractive || isEraserMode) return;
           onArrowDblClick?.(item.id);
         }}
         onDragStart={() => {
+          if (!isInteractive || isEraserMode) return;
           onDragStart?.();
         }}
         onDragEnd={(e) => {
+          if (!isInteractive || isEraserMode) return;
           const pos = e.target.position();
           const newPoints = arrowItem.points.map((p, i) =>
             i % 2 === 0 ? p + pos.x : p + pos.y,
@@ -132,13 +148,13 @@ export default function RenderItem({
       <Line
         {...drawingItem}
         id={item.id}
-        draggable
+        draggable={isInteractive && !isEraserMode}
+        listening={isInteractive || isEraserMode}
         hitStrokeWidth={30}
-        tension={0.4}
+        tension={0.5}
         lineCap="round"
         lineJoin="round"
-        listening={true}
-        onMouseDown={() => onSelect(item.id)}
+        onMouseDown={() => isInteractive && !isEraserMode && onSelect(item.id)}
         onMouseEnter={(e) => {
           const container = e.target.getStage()?.container();
           if (container) {
@@ -152,6 +168,7 @@ export default function RenderItem({
           }
         }}
         onDragEnd={(e) => {
+          if (!isInteractive || isEraserMode) return;
           const pos = e.target.position();
           const newPoints = drawingItem.points.map((p, i) =>
             i % 2 === 0 ? p + pos.x : p + pos.y,

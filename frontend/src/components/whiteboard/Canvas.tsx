@@ -14,6 +14,7 @@ import { useCanvasInteraction } from '@/hooks/useCanvasInteraction';
 import { useCanvasShortcuts } from '@/hooks/useCanvasShortcuts';
 import { useArrowHandles } from '@/hooks/useArrowHandles';
 import { useDrawing } from '@/hooks/useDrawing';
+import { useEraser } from '@/hooks/useEraser';
 
 import RenderItem from '@/components/whiteboard/items/RenderItem';
 import TextArea from '@/components/whiteboard/items/text/TextArea';
@@ -78,6 +79,10 @@ export default function Canvas() {
     currentDrawing,
   } = useDrawing();
 
+  // 지우개 훅
+  const { handleEraserMouseDown, handleEraserMouseMove, handleEraserMouseUp } =
+    useEraser();
+
   useCanvasShortcuts({
     isArrowSelected,
     selectedHandleIndex,
@@ -102,17 +107,27 @@ export default function Canvas() {
   const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
     if (cursorMode === 'draw') {
       handleDrawingMouseDown(e);
+    } else if (cursorMode === 'eraser') {
+      handleEraserMouseDown(e);
     } else {
       handleCheckDeselect(e);
     }
   };
 
   const handleMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    handleDrawingMouseMove(e);
+    if (cursorMode === 'draw') {
+      handleDrawingMouseMove(e);
+    } else if (cursorMode === 'eraser') {
+      handleEraserMouseMove(e);
+    }
   };
 
   const handleMouseUp = () => {
-    handleDrawingMouseUp();
+    if (cursorMode === 'draw') {
+      handleDrawingMouseUp();
+    } else if (cursorMode === 'eraser') {
+      handleEraserMouseUp();
+    }
   };
 
   const handleItemChange = (
@@ -130,7 +145,7 @@ export default function Canvas() {
         ref={stageRef}
         width={size.width}
         height={size.height}
-        draggable={cursorMode !== 'draw'}
+        draggable={cursorMode !== 'draw' && cursorMode !== 'eraser'}
         x={stagePos.x}
         y={stagePos.y}
         scaleX={stageScale}
@@ -150,6 +165,7 @@ export default function Canvas() {
           clipWidth={canvasWidth}
           clipHeight={canvasHeight}
         >
+          {/* Canvas 경계 */}
           <Rect
             name="bg-rect"
             x={0}
@@ -162,6 +178,7 @@ export default function Canvas() {
             listening={true}
           />
 
+          {/* 아이템 렌더링 */}
           {items.map((item) => (
             <RenderItem
               key={item.id}
@@ -185,6 +202,7 @@ export default function Canvas() {
             />
           ))}
 
+          {/* 화살표 핸들 (드래그 중이 아닐 때만) */}
           {isArrowSelected && selectedItem && !isDraggingArrow && (
             <ArrowHandles
               arrow={selectedItem as ArrowItem}
@@ -196,6 +214,7 @@ export default function Canvas() {
             />
           )}
 
+          {/* 그리는 중인 선 */}
           {currentDrawing && (
             <Line
               points={currentDrawing.points}
@@ -207,6 +226,7 @@ export default function Canvas() {
             />
           )}
 
+          {/* Transformer */}
           <ItemTransformer
             selectedId={selectedId}
             items={items}
@@ -215,6 +235,7 @@ export default function Canvas() {
         </Layer>
       </Stage>
 
+      {/* 텍스트 편집 모드 */}
       {editingTextId && editingItem && (
         <TextArea
           textId={editingTextId}
