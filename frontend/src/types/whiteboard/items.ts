@@ -24,3 +24,10 @@ export interface ArrowItem extends BaseItem {
   pointerWidth: number;
   tension: number;
 }
+
+export interface DrawingItem extends BaseItem {
+  type: 'drawing';
+  points: number[];
+  stroke: string;
+  strokeWidth: number;
+}

@@ -4,7 +4,12 @@ import {
   CANVAS_HEIGHT,
   CANVAS_WIDTH,
 } from '@/components/whiteboard/constants/canvas';
-import type { TextItem, ArrowItem, WhiteboardItem } from '@/types/whiteboard';
+import type {
+  TextItem,
+  ArrowItem,
+  WhiteboardItem,
+  DrawingItem,
+} from '@/types/whiteboard';
 
 interface CanvasState {
   stageScale: number;
@@ -23,6 +28,13 @@ interface CanvasState {
   addText: (text?: Partial<Omit<TextItem, 'id' | 'type'>>) => string;
   addArrow: (payload?: Partial<Omit<ArrowItem, 'id' | 'type'>>) => void;
 
+  drawingMode: boolean;
+  currentDrawing: DrawingItem | null;
+  setDrawingMode: (mode: boolean) => void;
+  startDrawing: (x: number, y: number) => void;
+  continueDrawing: (x: number, y: number) => void;
+  finishDrawing: () => void;
+
   updateItem: (id: string, payload: Partial<WhiteboardItem>) => void;
   deleteItem: (id: string) => void;
   bringToFront: (id: string) => void;
@@ -31,7 +43,7 @@ interface CanvasState {
   sendBackward: (id: string) => void;
 }
 
-export const useCanvasStore = create<CanvasState>((set) => ({
+export const useCanvasStore = create<CanvasState>((set, get) => ({
   stageScale: 1,
   stagePos:
     typeof window !== 'undefined'
@@ -104,6 +116,57 @@ export const useCanvasStore = create<CanvasState>((set) => ({
         items: [...state.items, newArrow],
       };
     }),
+
+  drawingMode: false,
+  currentDrawing: null,
+
+  setDrawingMode: (mode) => set({ drawingMode: mode }),
+
+  // 그리기
+  startDrawing: (x, y) => {
+    const newDrawing: DrawingItem = {
+      id: uuidv4(),
+      type: 'drawing',
+      points: [x, y],
+      stroke: '#111827',
+      strokeWidth: 3,
+    };
+    set({ currentDrawing: newDrawing });
+  },
+
+  continueDrawing: (x, y) => {
+    const state = get();
+    if (!state.currentDrawing) return;
+
+    const points = state.currentDrawing.points;
+    const lastX = points[points.length - 2];
+    const lastY = points[points.length - 1];
+
+    const distance = Math.sqrt(Math.pow(x - lastX, 2) + Math.pow(y - lastY, 2));
+
+    if (distance < 2) return;
+
+    const updatedDrawing = {
+      ...state.currentDrawing,
+      points: [...points, x, y],
+    };
+
+    set({ currentDrawing: updatedDrawing });
+  },
+
+  finishDrawing: () => {
+    const state = get();
+    if (!state.currentDrawing) return;
+
+    if (state.currentDrawing.points.length >= 4) {
+      set((state) => ({
+        items: [...state.items, state.currentDrawing!],
+        currentDrawing: null,
+      }));
+    } else {
+      set({ currentDrawing: null });
+    }
+  },
 
   // 아이템 업데이트
   updateItem: (id, payload) =>
