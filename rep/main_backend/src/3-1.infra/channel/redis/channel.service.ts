@@ -5,7 +5,7 @@ import { filter, map, Observable, share, Subject } from "rxjs";
 import { IoAdapter } from "@nestjs/platform-socket.io"
 import { createAdapter } from "@socket.io/redis-adapter"
 import { ConfigService } from "@nestjs/config";
-import { ServerOptions } from "http";
+import { ServerOptions } from "socket.io";
 
 
 // sse와 관련된 service 
@@ -98,7 +98,7 @@ export class RedisSseBrokerService implements OnModuleDestroy {
 export class RedisIoAdapter extends IoAdapter {
 
   private adapterConstructor! : ReturnType<typeof createAdapter>;
-  private readonly logger = new Logger();
+  private readonly logger = new Logger(RedisIoAdapter.name);
 
   // 기존의 sse에 pub, sub을 사용할 수도 있지만 그러면 sse랑 겹칠 수 있기때문에 websocket용으로 따로 pub, sub을 만드는 것이 안전
   private pub! : RedisClientType;
@@ -118,8 +118,8 @@ export class RedisIoAdapter extends IoAdapter {
     this.pub = createClient({ url, password });
     this.sub = this.pub.duplicate();
 
-    this.pub.on("error", (e) => this.logger.error("websocet에 pub 객체 생성 중 에러", e));
-    this.sub.on("error", (e) => this.logger.error("websocet에 sub 객체 생성 중 에러", e));
+    this.pub.on("error", (e) => this.logger.error("websocet에 pub 객체 에러", e));
+    this.sub.on("error", (e) => this.logger.error("websocet에 sub 객체 에러", e));
 
     await Promise.all([ this.pub.connect(), this.sub.connect() ]); // 모든 pub, sub이 연결되기 위해서
 
@@ -141,7 +141,10 @@ export class RedisIoAdapter extends IoAdapter {
   // reids가 내려갈때 사용되어 지는 함수 ( 해당 channel을 제대로 내리는 것이 중요하다. )
   // 모두 실행하는게 중요함으로 중간에 실패해도 모두 실행되도록 해야 함
   async close() : Promise<void> {
-    await Promise.allSettled([this.pub?.quit(), this.sub?.quit()]);
+    await Promise.allSettled([
+      this.pub?.quit().catch(() => this.pub?.disconnect()), 
+      this.sub?.quit().catch(() => this.sub?.disconnect())
+    ]);
   };
 
 };

@@ -193,7 +193,9 @@ export class SignalingWebsocketService {
   makeUserInfo(client : Socket) : MembersInfo {
     const payload : SocketPayload = client.data.user;
     return {
-      ...payload,
+      user_id : payload.user_id,
+      nickname : payload.nickname,
+      is_guest : payload.is_guest,
       profile_path : null, // 이 부분은 좀 고민을 해야할 것 같다. 
       cam : null,
       mic : null
