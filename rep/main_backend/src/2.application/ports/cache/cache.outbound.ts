@@ -73,4 +73,8 @@ export class DeleteDatasToCache<T> extends OutboundBaseCache<T> {
   public async deleteNamespaces(namespaces : Array<string>) : Promise<boolean> | never {
     throw new NullInterfaceError();
   }
+
+  public async deleteKeyNames(namespace : string, keyNames : Array<string>) : Promise<boolean> | never {
+    throw new NullInterfaceError();
+  };
 }
