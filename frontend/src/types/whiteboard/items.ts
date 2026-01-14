@@ -1,6 +1,5 @@
 import { BaseItem, TextAlignment, TextWrap } from '@/types/whiteboard/base';
 
-// Text Item
 export interface TextItem extends BaseItem {
   type: 'text';
   x: number;
@@ -16,7 +15,6 @@ export interface TextItem extends BaseItem {
   parentPolygonId?: string;
 }
 
-// Arrow Item
 export interface ArrowItem extends BaseItem {
   type: 'arrow';
   points: number[];
@@ -24,6 +22,14 @@ export interface ArrowItem extends BaseItem {
   strokeWidth: number;
   pointerLength: number;
   pointerWidth: number;
+  tension: number;
+}
+
+export interface LineItem extends BaseItem {
+  type: 'line';
+  points: number[];
+  stroke: string;
+  strokeWidth: number;
   tension: number;
 }
 
@@ -36,7 +42,7 @@ export interface DrawingItem extends BaseItem {
   scaleY?: number;
   rotation?: number;
 }
-// Shape Item
+
 export type ShapeType = 'rect' | 'circle' | 'triangle' | 'diamond' | 'pentagon';
 
 export interface ShapeItem extends BaseItem {
