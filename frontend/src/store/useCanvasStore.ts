@@ -165,8 +165,8 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
           state.canvasHeight / 2,
         ],
         stroke: payload?.stroke ?? '#111827',
-        strokeWidth: payload?.strokeWidth ?? 3,
-        tension: payload?.tension ?? 0.6,
+        strokeWidth: payload?.strokeWidth ?? 4,
+        tension: payload?.tension ?? 0.4,
       };
 
       return {

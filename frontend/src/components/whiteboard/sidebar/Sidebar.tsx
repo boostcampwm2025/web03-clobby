@@ -5,16 +5,22 @@ import { useMemo } from 'react';
 // 패널 컴포넌트들 임포트
 import ShapePanel from '@/components/whiteboard/sidebar/panels/ShapePanel';
 import ArrowPanel from '@/components/whiteboard/sidebar/panels/ArrowPanel';
+import LinePanel from '@/components/whiteboard/sidebar/panels/LinePanel';
+
 import { useCanvasStore } from '@/store/useCanvasStore';
-import type { ArrowItem, ShapeItem } from '@/types/whiteboard';
+import type { ArrowItem, LineItem, ShapeItem } from '@/types/whiteboard';
 import {
   ARROW_SIZE_PRESETS,
   ARROW_STYLE_PRESETS,
 } from '@/components/whiteboard/sidebar/panels/arrowPresets';
-import { getArrowSize, getArrowStyle } from '@/utils/arrowPanelHelpers';
+import {
+  getArrowSize,
+  getLineSize,
+  getItemStyle,
+} from '@/utils/arrowPanelHelpers';
 
 // 사이드 바 선택된 요소 타입
-type SelectionType = 'shape' | 'arrow' | null;
+type SelectionType = 'shape' | 'arrow' | 'line' | null;
 
 export default function Sidebar() {
   // 스토어에서 선택된 아이템 정보 가져오기
@@ -34,7 +40,9 @@ export default function Sidebar() {
       ? 'shape'
       : selectedItem?.type === 'arrow'
         ? 'arrow'
-        : null;
+        : selectedItem?.type === 'line'
+          ? 'line'
+          : null;
 
   // 선택 타입에 따른 표시될 헤더 제목
   const getHeaderTitle = () => {
@@ -43,6 +51,8 @@ export default function Sidebar() {
         return 'Shape';
       case 'arrow':
         return 'Arrow';
+      case 'line':
+        return 'Line';
       default:
         return '';
     }
@@ -78,11 +88,12 @@ export default function Sidebar() {
           />
         )}
 
+        {/* arrow */}
         {selectionType === 'arrow' && (
           <ArrowPanel
             stroke={(selectedItem as ArrowItem).stroke}
             size={getArrowSize(selectedItem as ArrowItem)}
-            style={getArrowStyle(selectedItem as ArrowItem)}
+            style={getItemStyle(selectedItem as ArrowItem)}
             startHeadType={(selectedItem as ArrowItem).startHeadType ?? 'none'}
             endHeadType={(selectedItem as ArrowItem).endHeadType ?? 'triangle'}
             onChangeStroke={(color) =>
@@ -104,6 +115,27 @@ export default function Sidebar() {
             }}
             onChangeEndHeadType={(type) => {
               updateItem(selectedId!, { endHeadType: type });
+            }}
+          />
+        )}
+
+        {/* line */}
+        {selectionType === 'line' && (
+          <LinePanel
+            stroke={(selectedItem as LineItem).stroke}
+            size={getLineSize(selectedItem as LineItem)}
+            style={getItemStyle(selectedItem as LineItem)}
+            onChangeStroke={(color) =>
+              updateItem(selectedId!, { stroke: color })
+            }
+            onChangeSize={(size) => {
+              const preset = ARROW_SIZE_PRESETS[size];
+              updateItem(selectedId!, {
+                strokeWidth: preset.strokeWidth,
+              });
+            }}
+            onChangeStyle={(style) => {
+              updateItem(selectedId!, { tension: ARROW_STYLE_PRESETS[style] });
             }}
           />
         )}

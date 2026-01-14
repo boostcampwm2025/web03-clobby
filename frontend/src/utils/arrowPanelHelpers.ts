@@ -1,4 +1,4 @@
-import type { ArrowItem } from '@/types/whiteboard';
+import type { ArrowItem, LineItem } from '@/types/whiteboard';
 import type {
   ArrowSize,
   ArrowStyle,
@@ -11,7 +11,14 @@ export function getArrowSize(arrow: ArrowItem): ArrowSize {
   return 'L';
 }
 
-// 현재 Arrow 스타일 결정
-export function getArrowStyle(arrow: ArrowItem): ArrowStyle {
-  return arrow.tension === 0 ? 'straight' : 'curved';
+// 현재 Line 사이즈 결정
+export function getLineSize(line: LineItem): ArrowSize {
+  if (line.strokeWidth <= 2) return 'S';
+  if (line.strokeWidth <= 4) return 'M';
+  return 'L';
+}
+
+// 현재 스타일 결정
+export function getItemStyle(item: ArrowItem | LineItem): ArrowStyle {
+  return item.tension === 0 ? 'straight' : 'curved';
 }
