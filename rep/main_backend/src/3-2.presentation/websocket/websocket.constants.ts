@@ -25,7 +25,11 @@ export const WEBSOCKET_SIGNALING_EVENT_NAME = Object.freeze({
   ROOM_MEMBERS : "signaling:ws:room_members",
   CONSUMES : "signaling:ws:consumes",
   RESUMES : "signaling:ws:resumes",
-  PAUSES : "signaling:ws:pauses"
+  PAUSES : "signaling:ws:pauses",
+
+  // 워크 스페이스 or 코드에디터 생성을 위한 이벤트 이름
+  OPEN_WHITEBOARD : "signaling:ws:open_whiteboard",
+  OPEN_CODEEDITOR : "signaling:ws:open_codeeditor"
 } as const);
 
 export const WEBSOCKET_SIGNALING_CLIENT_EVENT_NAME = Object.freeze({
@@ -34,4 +38,8 @@ export const WEBSOCKET_SIGNALING_CLIENT_EVENT_NAME = Object.freeze({
   NEW_PRODUCED : "room:new_produced",
   NEW_USER : "room:new_user",
   USER_CLOSED : "room:user_closed",
+
+  // 아래는 오게될 요청
+  REQUEST_WHITEBOARD : "room:request_whiteboard",
+  REQUEST_CODEEDITOR : "room:request_codeeditor"
 } as const);

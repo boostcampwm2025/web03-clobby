@@ -343,4 +343,18 @@ export class SignalingWebsocketGateway implements OnGatewayInit, OnGatewayConnec
     };
   };
 
+  // whiteboard를 열겠다. 
+  @SubscribeMessage(WEBSOCKET_SIGNALING_EVENT_NAME.OPEN_WHITEBOARD)
+  async openWhiteboardGateway(
+    @ConnectedSocket() client : Socket,
+  ) {
+    try {
+      
+    } catch (err) {
+      this.logger.error(err);
+      throw new WsException({ message : err.message ?? "에러 발생", status : err.status ?? 500 });          
+    };
+  };
+
+
 };
