@@ -11,6 +11,7 @@ import NavButton from '@/components/whiteboard/common/NavButton';
 // Panel import
 import ShapePanel from '@/components/whiteboard/toolbar/panels/ShapePanel';
 import MediaPanel from '@/components/whiteboard/toolbar/panels/MediaPanel';
+import StackPanel from '@/components/whiteboard/toolbar/panels/StackPanel';
 
 // Icon import
 // TODO : 필요한 아이콘 추가 : 화살표 / 기술 스택 아이콘 / line 아이콘
@@ -83,7 +84,10 @@ export default function ToolbarContainer() {
           icon={CursorIcon}
           label="선택"
           isActive={activeTool === 'select'}
-          onClick={() => handleToolSelect('select')}
+          onClick={() => {
+            handleToolSelect('select');
+            setActivePanel(null);
+          }}
           bgColor="bg-white"
           hvColor="bg-neutral-100"
           activeBgColor="bg-sky-100"
@@ -93,7 +97,10 @@ export default function ToolbarContainer() {
           icon={HandIcon}
           label="화면 이동"
           isActive={activeTool === 'move'}
-          onClick={() => handleToolSelect('move')}
+          onClick={() => {
+            handleToolSelect('move');
+            setActivePanel(null);
+          }}
           bgColor="bg-white"
           hvColor="bg-neutral-100"
           activeBgColor="bg-sky-100"
@@ -111,6 +118,7 @@ export default function ToolbarContainer() {
               setCursorMode('eraser');
               setActiveTool('eraser');
             }
+            setActivePanel(null);
           }}
           bgColor="bg-white"
           hvColor="bg-neutral-100"
@@ -131,6 +139,7 @@ export default function ToolbarContainer() {
               setCursorMode('draw');
               setActiveTool('draw');
             }
+            setActivePanel(null);
           }}
           bgColor="bg-white"
           hvColor="bg-neutral-100"
@@ -144,6 +153,7 @@ export default function ToolbarContainer() {
             handleAddText();
             setCursorMode('select');
             setActiveTool('select');
+            setActivePanel(null);
           }}
           bgColor="bg-white"
           hvColor="bg-neutral-100"
@@ -170,6 +180,7 @@ export default function ToolbarContainer() {
           onClick={() => {
             setCursorMode('select');
             setActiveTool('select');
+            setActivePanel(null);
           }}
           bgColor="bg-white"
           hvColor="bg-neutral-100"
@@ -183,6 +194,7 @@ export default function ToolbarContainer() {
             handleAddArrow();
             setCursorMode('select');
             setActiveTool('select');
+            setActivePanel(null);
           }}
           bgColor="bg-white"
           hvColor="bg-neutral-100"
