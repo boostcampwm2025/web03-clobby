@@ -8,6 +8,7 @@ import CookieParser from "cookie-parser";
 import { KafkaModule } from '@infra/event-stream/kafka/event-stream';
 import { GuardModule } from './guards/guard.module';
 import { WhiteboardModule } from './whiteboard/whiteboard.module';
+import { CodeeditorModule } from './codeeditor/codeeditor.module';
 
 
 @Module({
@@ -23,7 +24,8 @@ import { WhiteboardModule } from './whiteboard/whiteboard.module';
     // 추가 모듈
     HealthModule,
     GuardModule,
-    WhiteboardModule
+    WhiteboardModule, // whiteboard
+    CodeeditorModule // codeeditor
   ],
   controllers: [],
   providers: [],

@@ -63,7 +63,7 @@ export class WhiteboardWebsocketGateway implements OnGatewayInit, OnGatewayConne
     }
 
     // 방 입장후 알림
-    const namespace : string = `${WHITEBOARD_GROUP.WHITEBOARD}:${payload.room_id}`; // 방가입
+    const namespace : string = this.whiteboarService.makeNamespace(payload.room_id); // 방가입
     client.join(namespace);
 
     if ( payload.clientType === "main" ) {
@@ -81,7 +81,8 @@ export class WhiteboardWebsocketGateway implements OnGatewayInit, OnGatewayConne
 
   @SubscribeMessage(WHITEBOARD_EVENT_NAME.HEALTH_CHECK)
   healthCheck(
-    @ConnectedSocket() client : Socket,
+    // broad casting 방법은 client.to().emit()하시면 됩니다. 이때 namespace는 this.whiteboarService.makeNamespace(room_Id)로 나온 값입니다.
+    @ConnectedSocket() client : Socket, 
   ) {
     try {
       const payload : ToolBackendPayload = client.data.payload;

@@ -1,11 +1,11 @@
 import { GuardService } from "@/guards/guard.service";
 import { ToolBackendPayload } from "@/guards/guard.type";
 import { Injectable } from "@nestjs/common";
-import { WHITEBOARD_GROUP } from "./whiteboard.constants";
+import { CODEEDITOR_GROUP } from "./codeeditor.constants";
 
 
 @Injectable()
-export class WhiteboardService {
+export class CodeeditorService {
 
   constructor(
     private readonly guard : GuardService
@@ -22,15 +22,14 @@ export class WhiteboardService {
       clientType : type
     };
 
-    if ( payload.tool !== "whiteboard" ) throw new Error("whiteboard만 가능한 gateway입니다.");
-
-    // main인 경우 emit 해준다. 
+    if ( payload.tool !== "codeeditor" ) throw new Error("codeeditor만 가능한 gateway입니다.");
 
     return payload;
   }
 
+  // 이 함수로 가입을하고 여기로 브로드캐스팅을 진행합니다.
   makeNamespace(room_id : string) : string {
-    return `${WHITEBOARD_GROUP.WHITEBOARD}:${room_id}`
+    return `${CODEEDITOR_GROUP.CODEEDITOR}:${room_id}`
   }
 
 };
