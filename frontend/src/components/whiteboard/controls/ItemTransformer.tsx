@@ -32,13 +32,10 @@ export default function ItemTransformer({
       if (selectedId && !isArrowOrLineSelected) {
         // 해당 ID 노드 확인
         const selectedNode = stage.findOne('#' + selectedId);
-        // 노드가 존재하면 Transformer에 연결
         if (selectedNode) {
           transformerRef.current.nodes([selectedNode]);
           transformerRef.current.getLayer()?.batchDraw();
-        }
-        // 노드 존재하지 않으면 Transformer 해제
-        else {
+        } else {
           transformerRef.current.nodes([]);
         }
       } else {
@@ -51,8 +48,6 @@ export default function ItemTransformer({
     <Transformer
       ref={transformerRef}
       enabledAnchors={
-        // Text : 좌우 활성화
-        // Text제외 나머지 : 모든 방향 활성화
         isTextSelected
           ? ['middle-left', 'middle-right']
           : [
@@ -77,13 +72,30 @@ export default function ItemTransformer({
       rotationSnaps={[0, 90, 180, 270]}
       rotationSnapTolerance={10}
       keepRatio={false}
-      boundBoxFunc={(_oldBox, newBox) => {
+      boundBoxFunc={(oldBox, newBox) => {
         // 최소 크기 제한
-        const minWidth = 30;
-        const minHeight = 30;
+        const stage = stageRef.current;
+        const stageScale = stage ? stage.scaleX() : 1;
 
-        newBox.width = Math.max(minWidth, Math.abs(newBox.width));
-        newBox.height = Math.max(minHeight, Math.abs(newBox.height));
+        // 화면 확대 시 최소 크기도 함께 증가시켜야 더 못줄임
+        const minWidth = 30 * stageScale;
+        const minHeight = 30 * stageScale;
+
+        // 너비가 최소값보다 작으면 제한하고 위치 보정
+        if (newBox.width < minWidth) {
+          if (newBox.x !== oldBox.x) {
+            newBox.x = oldBox.x + oldBox.width - minWidth;
+          }
+          newBox.width = minWidth;
+        }
+
+        // 높이가 최소값보다 작으면 제한하고 위치 보정
+        if (newBox.height < minHeight) {
+          if (newBox.y !== oldBox.y) {
+            newBox.y = oldBox.y + oldBox.height - minHeight;
+          }
+          newBox.height = minHeight;
+        }
 
         return newBox;
       }}

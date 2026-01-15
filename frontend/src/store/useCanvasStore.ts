@@ -5,16 +5,22 @@ import {
   CANVAS_HEIGHT,
   CANVAS_WIDTH,
 } from '@/components/whiteboard/constants/canvas';
+
 import type {
+  WhiteboardItem,
   TextItem,
   ArrowItem,
   LineItem,
-  WhiteboardItem,
   DrawingItem,
   ShapeItem,
   ShapeType,
+  ImageItem,
+  VideoItem,
+  YoutubeItem,
   CursorMode,
 } from '@/types/whiteboard';
+
+import { extractYoutubeId } from '@/utils/youtube';
 
 interface CanvasState {
   // viewport State
@@ -48,6 +54,21 @@ interface CanvasState {
     type: ShapeType,
     payload?: Partial<Omit<ShapeItem, 'id' | 'type' | 'shapeType'>>,
   ) => void;
+  addImage: (payload: {
+    src: string;
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+  }) => void;
+  addVideo: (payload: {
+    src: string;
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+  }) => void;
+  addYoutube: (url: string) => void;
 
   // 커서 모드
   cursorMode: CursorMode;
@@ -249,6 +270,93 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
 
       return {
         items: [...state.items, newShape],
+        selectedId: id,
+      };
+    }),
+
+  // 이미지 추가
+  addImage: (payload) =>
+    set((state) => {
+      const id = uuidv4();
+      const newImage: ImageItem = {
+        id,
+        type: 'image',
+        src: payload.src,
+        x: payload.x ?? state.canvasWidth / 2 - 250,
+        y: payload.y ?? state.canvasHeight / 2 - 125,
+        width: payload.width ?? 500,
+        height: payload.height ?? 250,
+        rotation: 0,
+        stroke: undefined,
+        strokeWidth: 0,
+        cornerRadius: 0,
+        opacity: 1,
+      };
+
+      return {
+        items: [...state.items, newImage],
+        selectedId: id,
+      };
+    }),
+
+  // 비디오 추가
+  addVideo: (payload) =>
+    set((state) => {
+      const id = uuidv4();
+      const newVideo: VideoItem = {
+        id,
+        type: 'video',
+        src: payload.src,
+        x: payload.x ?? state.canvasWidth / 2 - 250,
+        y: payload.y ?? state.canvasHeight / 2 - 125,
+        width: payload.width ?? 500,
+        height: payload.height ?? 250,
+        rotation: 0,
+        stroke: undefined,
+        strokeWidth: 0,
+        cornerRadius: 0,
+        opacity: 1,
+      };
+
+      return {
+        items: [...state.items, newVideo],
+        selectedId: id,
+      };
+    }),
+
+  // 유튜브 Item 추가
+  addYoutube: (url) =>
+    set((state) => {
+      const videoId = extractYoutubeId(url);
+
+      // 유효하지 않은 URL 입력시 alert 띄우고 중단
+      if (!videoId) {
+        alert('올바른 유튜브 URL이 아닙니다.');
+        return state;
+      }
+
+      const id = uuidv4();
+      const width = 640;
+      const height = 360;
+
+      const newYoutube: YoutubeItem = {
+        id,
+        type: 'youtube',
+        url,
+        videoId,
+        x: state.canvasWidth / 2 - width / 2,
+        y: state.canvasHeight / 2 - height / 2,
+        width,
+        height,
+        rotation: 0,
+        stroke: undefined,
+        strokeWidth: 0,
+        cornerRadius: 10,
+        opacity: 1,
+      };
+
+      return {
+        items: [...state.items, newYoutube],
         selectedId: id,
       };
     }),

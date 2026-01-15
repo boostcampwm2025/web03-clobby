@@ -7,14 +7,17 @@ import {
   LineItem,
   DrawingItem,
   ShapeItem,
-  ArrowHeadType,
+  ImageItem,
+  VideoItem,
+  YoutubeItem,
 } from '@/types/whiteboard/items';
-
-export type { ArrowHeadType };
 
 export type WhiteboardItem =
   | TextItem
-  | ArrowItem
   | LineItem
+  | ArrowItem
   | DrawingItem
-  | ShapeItem;
+  | ShapeItem
+  | ImageItem
+  | VideoItem
+  | YoutubeItem;
