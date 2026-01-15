@@ -125,26 +125,7 @@ export default function ToolbarContainer() {
           activeBgColor="bg-sky-100"
         />
 
-        <NavButton
-          icon={EraserIcon}
-          label="지우개"
-          isActive={cursorMode === 'eraser'}
-          onClick={() => {
-            if (cursorMode === 'eraser') {
-              setCursorMode('select');
-              setActiveTool('select');
-            } else {
-              setCursorMode('eraser');
-              setActiveTool('eraser');
-            }
-            setActivePanel(null);
-          }}
-          bgColor="bg-white"
-          hvColor="bg-neutral-100"
-          activeBgColor="bg-sky-100"
-        />
-
-        <div className="h-8 w-px bg-neutral-200" />
+        <div className="h-7 w-px bg-neutral-200" />
 
         <NavButton
           icon={PenIcon}
@@ -232,6 +213,27 @@ export default function ToolbarContainer() {
           bgColor="bg-white"
           activeBgColor="bg-sky-100 text-sky-600"
         /> */}
+
+        <div className="h-7 w-px bg-neutral-200" />
+
+        <NavButton
+          icon={EraserIcon}
+          label="지우개"
+          isActive={cursorMode === 'eraser'}
+          onClick={() => {
+            if (cursorMode === 'eraser') {
+              setCursorMode('select');
+              setActiveTool('select');
+            } else {
+              setCursorMode('eraser');
+              setActiveTool('eraser');
+            }
+            setActivePanel(null);
+          }}
+          bgColor="bg-white"
+          hvColor="bg-neutral-100"
+          activeBgColor="bg-sky-100"
+        />
       </div>
 
       {activePanel === 'shape' && (
