@@ -5,13 +5,16 @@ import {
   CANVAS_HEIGHT,
   CANVAS_WIDTH,
 } from '@/components/whiteboard/constants/canvas';
+
 import type {
+  WhiteboardItem,
   TextItem,
   ArrowItem,
-  WhiteboardItem,
   DrawingItem,
   ShapeItem,
   ShapeType,
+  ImageItem,
+  VideoItem,
   CursorMode,
 } from '@/types/whiteboard';
 
@@ -46,6 +49,20 @@ interface CanvasState {
     type: ShapeType,
     payload?: Partial<Omit<ShapeItem, 'id' | 'type' | 'shapeType'>>,
   ) => void;
+  addImage: (payload: {
+    src: string;
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+  }) => void;
+  addVideo: (payload: {
+    src: string;
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+  }) => void;
 
   // 커서 모드
   cursorMode: CursorMode;
@@ -225,6 +242,55 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       };
     }),
 
+  // 이미지 추가
+  addImage: (payload) =>
+    set((state) => {
+      const id = uuidv4();
+      const newImage: ImageItem = {
+        id,
+        type: 'image',
+        src: payload.src,
+        x: payload.x ?? state.canvasWidth / 2 - 250,
+        y: payload.y ?? state.canvasHeight / 2 - 125,
+        width: payload.width ?? 500,
+        height: payload.height ?? 250,
+        rotation: 0,
+        stroke: undefined,
+        strokeWidth: 0,
+        cornerRadius: 0,
+        opacity: 1,
+      };
+
+      return {
+        items: [...state.items, newImage],
+        selectedId: id,
+      };
+    }),
+
+  // 비디오 추가
+  addVideo: (payload) =>
+    set((state) => {
+      const id = uuidv4();
+      const newVideo: VideoItem = {
+        id,
+        type: 'video',
+        src: payload.src,
+        x: payload.x ?? state.canvasWidth / 2 - 250,
+        y: payload.y ?? state.canvasHeight / 2 - 125,
+        width: payload.width ?? 500,
+        height: payload.height ?? 250,
+        rotation: 0,
+        stroke: undefined,
+        strokeWidth: 0,
+        cornerRadius: 0,
+        opacity: 1,
+      };
+
+      return {
+        items: [...state.items, newVideo],
+        selectedId: id,
+      };
+    }),
 
   // 아이템 업데이트
   updateItem: (id, payload) =>

@@ -6,14 +6,21 @@ import { useCanvasStore } from '@/store/useCanvasStore';
 import { useCursorStyle } from '@/hooks/useCursorStyle';
 import { useItemInteraction } from '@/hooks/useItemInteraction';
 import ShapeItem from '@/components/whiteboard/items/shape/ShapeItem';
+import ImageItem from '@/components/whiteboard/items/image/ImageItem';
+import VideoItem from '@/components/whiteboard/items/video/VideoItem';
 
 import type {
   TextItem,
   ArrowItem,
-  WhiteboardItem,
-  ShapeItem as ShapeItemType,
   DrawingItem,
+  ShapeItem as ShapeItemType,
+  ImageItem as ImageItemType,
+  VideoItem as VideoItemType,
+  WhiteboardItem,
 } from '@/types/whiteboard';
+
+
+
 
 // RenderItem Props
 interface RenderItemProps {
@@ -214,6 +221,38 @@ export default function RenderItem({
         isDraggable={isDraggable}
         isListening={isListening}
         onSelect={() => isInteractive && !isEraserMode && onSelect(item.id)}
+        onChange={onChange}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+      />
+    );
+  }
+
+  // Image Rendering
+  if (item.type === 'image') {
+    const imageItem = item as ImageItemType;
+    return (
+      <ImageItem
+        imageItem={imageItem}
+        onSelect={() => onSelect(item.id)}
+        onChange={onChange}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+      />
+    );
+  }
+
+  // Video Rendering
+  if (item.type === 'video') {
+    const videoItem = item as VideoItemType;
+    return (
+      <VideoItem
+        videoItem={videoItem}
+        onSelect={() => onSelect(item.id)}
         onChange={onChange}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
