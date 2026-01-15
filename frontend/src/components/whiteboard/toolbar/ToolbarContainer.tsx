@@ -52,9 +52,9 @@ export default function ToolbarContainer() {
   useClickOutside(toolbarRef, () => setActivePanel(null), !!activePanel);
 
   // 핸들러 로직
-  // 하위 패널에서 구체적인 도구 선택
-  const handleToolSelect = (tool: ToolType) => {
-    setActiveTool(tool);
+  // 패널에서 아이템 추가 후 select 모드로 전환
+  const handlePanelItemSelect = () => {
+    setActiveTool('select');
     setActivePanel(null);
     setCursorMode('select');
     // TODO: useWorkspaceStore.getState().setTool(tool);
@@ -96,7 +96,11 @@ export default function ToolbarContainer() {
           icon={CursorIcon}
           label="선택"
           isActive={activeTool === 'select'}
-          onClick={() => handleToolSelect('select')}
+          onClick={() => {
+            setActiveTool('select');
+            setActivePanel(null);
+            setCursorMode('select');
+          }}
           bgColor="bg-white"
           hvColor="bg-neutral-100"
           activeBgColor="bg-sky-100"
@@ -106,7 +110,16 @@ export default function ToolbarContainer() {
           icon={HandIcon}
           label="화면 이동"
           isActive={activeTool === 'move'}
-          onClick={() => handleToolSelect('move')}
+          onClick={() => {
+            if (cursorMode === 'move') {
+              setCursorMode('select');
+              setActiveTool('select');
+            } else {
+              setCursorMode('move');
+              setActiveTool('move');
+            }
+            setActivePanel(null);
+          }}
           bgColor="bg-white"
           hvColor="bg-neutral-100"
           activeBgColor="bg-sky-100"
@@ -226,7 +239,10 @@ export default function ToolbarContainer() {
           className="absolute top-full mt-2"
           style={{ left: `${panelLeft}px`, transform: 'translateX(-50%)' }}
         >
-          <ShapePanel selectedTool={activeTool} onSelect={handleToolSelect} />
+          <ShapePanel
+            selectedTool={activeTool}
+            onSelect={handlePanelItemSelect}
+          />
         </div>
       )}
 
@@ -235,7 +251,10 @@ export default function ToolbarContainer() {
           className="absolute top-full mt-2"
           style={{ left: `${panelLeft}px`, transform: 'translateX(-50%)' }}
         >
-          <MediaPanel selectedTool={activeTool} onSelect={handleToolSelect} />
+          <MediaPanel
+            selectedTool={activeTool}
+            onSelect={handlePanelItemSelect}
+          />
         </div>
       )}
 
