@@ -115,7 +115,7 @@ export default function CustomArrow({
     >
       {/* 화살표 선 */}
       <Line
-        points={item.points}
+        points={adjustedPoints}
         stroke={item.stroke}
         strokeWidth={item.strokeWidth}
         hitStrokeWidth={30}

@@ -1,7 +1,7 @@
 'use client';
 
 import Konva from 'konva';
-import { Text, Arrow, Line } from 'react-konva';
+import { Text, Line } from 'react-konva';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { useCursorStyle } from '@/hooks/useCursorStyle';
 import { useItemInteraction } from '@/hooks/useItemInteraction';
@@ -103,55 +103,14 @@ export default function RenderItem({
   if (item.type === 'arrow') {
     const arrowItem = item as ArrowItem;
 
-    // 커스텀 머리 타입이 설정되어 있으면 CustomArrow 사용
-    const hasCustomHead =
-      arrowItem.startHeadType !== undefined ||
-      arrowItem.endHeadType !== undefined;
-
-    if (hasCustomHead) {
-      return (
-        <CustomArrow
-          item={arrowItem}
-          onSelect={onSelect}
-          onChange={onChange}
-          onDragStart={onDragStart}
-          onDragEnd={onDragEnd}
-          onArrowDblClick={onArrowDblClick}
-        />
-      );
-    }
-
-    // 기본 Konva Arrow
     return (
-      <Arrow
-        {...arrowItem}
-        id={item.id}
-        draggable={isDraggable}
-        listening={isListening}
-        hitStrokeWidth={30}
-        lineCap="round"
-        lineJoin="round"
-        onMouseDown={() => isInteractive && !isEraserMode && onSelect(item.id)}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onDblClick={() => {
-          if (!isInteractive || isEraserMode) return;
-          onArrowDblClick?.(item.id);
-        }}
-        onDragStart={() => {
-          if (!isInteractive || isEraserMode) return;
-          onDragStart?.();
-        }}
-        onDragEnd={(e) => {
-          if (!isInteractive || isEraserMode) return;
-          const pos = e.target.position();
-          const newPoints = arrowItem.points.map((p, i) =>
-            i % 2 === 0 ? p + pos.x : p + pos.y,
-          );
-          e.target.position({ x: 0, y: 0 });
-          onChange({ points: newPoints });
-          onDragEnd?.();
-        }}
+      <CustomArrow
+        item={arrowItem}
+        onSelect={onSelect}
+        onChange={onChange}
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+        onArrowDblClick={onArrowDblClick}
       />
     );
   }
