@@ -8,6 +8,7 @@ import {
   ShapeItem,
   ImageItem,
   VideoItem,
+  YoutubeItem,
 } from '@/types/whiteboard/items';
 
 export type WhiteboardItem =
@@ -16,4 +17,5 @@ export type WhiteboardItem =
   | DrawingItem
   | ShapeItem
   | ImageItem
-  | VideoItem;
+  | VideoItem
+  | YoutubeItem;
