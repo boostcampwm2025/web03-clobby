@@ -2,7 +2,7 @@ import { TokenDto } from "@app/auth/commands/dto";
 import { Injectable } from "@nestjs/common";
 import { Socket } from "socket.io";
 import * as cookie from "cookie";
-import { ConnectResult, ConnectRoomDto, DisconnectRoomDto, InsertToolInfoData, OpenToolDto } from "@app/room/commands/dto";
+import { ConnectResult, ConnectRoomDto, DisconnectRoomDto, OpenToolDto } from "@app/room/commands/dto";
 import { ConnectRoomUsecase, DisconnectRoomUsecase, OpenToolUsecase } from "@app/room/commands/usecase";
 import { v7 as uuidV7 } from "uuid";
 import { DtlsHandshakeValidate, OnConsumesValidate, OnConsumeValidate, OnProduceValidate, PauseConsumersValidate, pauseConsumerValidate, ResumeConsumersValidate, ResumeConsumerValidate, SocketPayload } from "./signaling.validate";
@@ -14,8 +14,7 @@ import { CreateConsumerDto, CreateConsumerResult, CreateConsumerResults, CreateC
 import { ConnectTransportType, PauseConsumesDto, ResumeConsumerDto, ResumeConsumersDto } from "@app/sfu/queries/dto";
 import { GetRoomMembersResult, MembersInfo } from "@app/room/queries/dto";
 import { ConnectToolUsecase, GetRoomMembersUsecase } from "@app/room/queries/usecase";
-import { MakeIssueToolTicket } from "./signaling.interface";
-import { ConnectToolDto } from "@/2.application/room/queries/dto/connect-tool.usecase";
+import { ConnectToolDto } from "@app/room/queries/dto";
 
 
 @Injectable()
