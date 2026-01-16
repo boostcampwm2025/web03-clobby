@@ -16,7 +16,10 @@ export class GuardService {
     const publicJwkRaw = this.config.get<string>("NODE_APP_TICKET_PUBLIC_JWK");
     if (!publicJwkRaw) throw new Error("NO_PUBLIC_JWK");
 
-    const publicJwk = JSON.parse(publicJwkRaw) as JWK;
+    const publicJwk = JSON.parse(publicJwkRaw) as any;
+
+    const jwk = (publicJwk?.kty ? publicJwk : publicJwk?.keys?.[0]) as JWK;
+    if (!jwk) throw new Error("INVALID_JWK_FORMAT");
     const publicKey = await importJWK(publicJwk, "RS256");
 
     const iss = this.config.get<string>("NODE_APP_TICKET_ISS", "main_backend");
@@ -28,7 +31,7 @@ export class GuardService {
     const room_id = payload["room_id"];
     const tool = payload["tool"] as "whiteboard" | "codeeditor";
     const socket_id = payload["socket_id"];
-    const ticket = payload["ticket"];
+    const ticket = token;
     const scope = payload["scope"];
 
     if (typeof sub !== "string") throw new Error("sub가 없습니다. (user_id)");

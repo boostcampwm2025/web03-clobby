@@ -27,7 +27,7 @@ export class ToolConsumerController {
     @Payload() message: any,
     @Ctx() context: KafkaContext,
   ) {
-    const value = message?.value as ToolEnterEvent; // 
+    const value = message as ToolEnterEvent; // 
     const topic = context.getTopic();
     const partition = context.getPartition();
 
@@ -72,7 +72,7 @@ export class ToolConsumerController {
     @Payload() message: any,
     @Ctx() context: KafkaContext,
   ) {
-    const value = message?.value as ToolEnterEvent;
+    const value = message as ToolEnterEvent;
     const topic = context.getTopic();
 
     if (!value?.room_id || !value?.user_id) {
@@ -94,7 +94,7 @@ export class ToolConsumerController {
         request_user : value.user_id,
         tool : value.tool
       };
-      this.server.broadcastToolRequest(value.room_id, WEBSOCKET_SIGNALING_CLIENT_EVENT_NAME.REQUEST_WHITEBOARD, payload, socket_id);
+      this.server.broadcastToolRequest(value.room_id, WEBSOCKET_SIGNALING_CLIENT_EVENT_NAME.REQUEST_CODEEDITOR, payload, socket_id);
     } catch (err) {
       this.logger.error(err);
       this.server.emitToSocket(
