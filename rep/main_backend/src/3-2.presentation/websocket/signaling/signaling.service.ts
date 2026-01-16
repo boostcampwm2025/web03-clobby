@@ -12,8 +12,8 @@ import { NotConnectSignalling } from "@error/presentation/signalling/signalling.
 import { CHANNEL_NAMESPACE } from "@infra/channel/channel.constants";
 import { CreateConsumerDto, CreateConsumerResult, CreateConsumerResults, CreateConsumersDto, CreateProduceResult, CreatePropduceDto, CreateTransportDto } from "@app/sfu/commands/dto";
 import { ConnectTransportType, PauseConsumesDto, ResumeConsumerDto, ResumeConsumersDto } from "@app/sfu/queries/dto";
-import { GetRoomMembersResult, MembersInfo } from "@app/room/queries/dto";
-import { ConnectToolUsecase, GetRoomMembersUsecase } from "@app/room/queries/usecase";
+import { DisConnectToolDto, GetRoomMembersResult, MembersInfo } from "@app/room/queries/dto";
+import { ConnectToolUsecase, DisconnectToolUsecase, GetRoomMembersUsecase } from "@app/room/queries/usecase";
 import { ConnectToolDto } from "@app/room/queries/dto";
 
 
@@ -26,6 +26,7 @@ export class SignalingWebsocketService {
     private readonly getMembersUsecase : GetRoomMembersUsecase<any>,
     private readonly openToolUsecase : OpenToolUsecase<any>,
     private readonly connectToolUsecase : ConnectToolUsecase<any>,
+    private readonly disconnectToolUsecase : DisconnectToolUsecase<any>,
     private readonly sfuServer : SfuService,
   ) {}
 
@@ -271,4 +272,13 @@ export class SignalingWebsocketService {
     return this.connectToolUsecase.execute(dto);
   };
 
+  // tool에 disconnect 요청을 보낸다.
+  async disconnectTool(client : Socket, tool : "whiteboard" | "codeeditor" ) : Promise<void> {
+    const room_id : string = client.data.room_id;
+    const payload : SocketPayload = client.data.user;
+    const dto : DisConnectToolDto = {
+      ...payload, room_id, tool
+    };
+    await this.disconnectToolUsecase.execute(dto);
+  };
 };

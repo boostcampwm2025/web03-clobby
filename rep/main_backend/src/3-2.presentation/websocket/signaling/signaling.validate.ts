@@ -171,3 +171,13 @@ export class ConnectToolTypeValidate {
   tool : "whiteboard" | "codeeditor";
   
 };
+
+export const TOOL_LEFT_TOPIC_NAME = Symbol("TOOL_LEFT_TOPIC_NAME");
+
+export class DisConnectToolTypeValidate {
+
+  @IsNotEmpty()
+  @IsIn(["whiteboard", "codeeditor"])
+  tool : "whiteboard" | "codeeditor";
+  
+};

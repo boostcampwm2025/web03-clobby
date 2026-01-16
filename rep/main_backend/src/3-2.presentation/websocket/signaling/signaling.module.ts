@@ -9,8 +9,11 @@ import { SignalingWebsocketService } from "./signaling.service";
 import { AuthWebsocketModule } from "../auth/auth.module";
 import { SignalingWebsocketGateway } from "./signaling.gateway";
 import { SfuModule } from "@present/webrtc/sfu/sfu.module";
-import { ConnectToolUsecase, GetRoomMembersUsecase } from "@app/room/queries/usecase";
+import { ConnectToolUsecase, DisconnectToolUsecase, GetRoomMembersUsecase } from "@app/room/queries/usecase";
 import { ConfigService } from "@nestjs/config";
+import { TOOL_LEFT_TOPIC_NAME } from "./signaling.validate";
+import { EVENT_STREAM_NAME } from "@infra/event-stream/event-stream.constants";
+import { KafkaService } from "@infra/event-stream/kafka/event-stream-service";
 
 
 @Module({
@@ -24,6 +27,10 @@ import { ConfigService } from "@nestjs/config";
     SignalingWebsocketGateway,
     SignalingWebsocketService,
     CompareRoomArgonHash,
+    {
+      provide : TOOL_LEFT_TOPIC_NAME,
+      useValue : EVENT_STREAM_NAME.TOOL_LEFT
+    },
     {
       provide : MakeIssueToolTicket,
       useFactory : (config : ConfigService) => {
@@ -124,6 +131,25 @@ import { ConfigService } from "@nestjs/config";
       inject : [
         CheckRoomUserFromRedis,
         MakeIssueToolTicket
+      ]
+    },
+
+    // tool을 disconnect 하기 위한 usecase
+    {
+      provide : DisconnectToolUsecase,
+      useFactory : (
+        stream : KafkaService,
+        checkUserPaylodFromCache : CheckRoomUserFromRedis,
+        toolLeftTopicName : string
+      ) => {
+        return new DisconnectToolUsecase(stream, {
+          checkUserPaylodFromCache, toolLeftTopicName
+        })
+      },
+      inject : [
+        KafkaService,
+        CheckRoomUserFromRedis,
+        TOOL_LEFT_TOPIC_NAME
       ]
     }
 

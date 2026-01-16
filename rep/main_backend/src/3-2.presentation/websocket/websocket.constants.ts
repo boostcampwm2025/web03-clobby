@@ -30,7 +30,8 @@ export const WEBSOCKET_SIGNALING_EVENT_NAME = Object.freeze({
   // 워크 스페이스 or 코드에디터 생성을 위한 이벤트 이름
   OPEN_WHITEBOARD : "signaling:ws:open_whiteboard",
   OPEN_CODEEDITOR : "signaling:ws:open_codeeditor",
-  CONNECT_TOOL : "signaling:ws:connect_tool"
+  CONNECT_TOOL : "signaling:ws:connect_tool",
+  DISCONNECT_TOOL : "signaling:ws:disconnect_tool"
 } as const);
 
 export const WEBSOCKET_SIGNALING_CLIENT_EVENT_NAME = Object.freeze({
