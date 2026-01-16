@@ -2,14 +2,14 @@ import { ConnectRoomUsecase, DisconnectRoomUsecase, OpenToolUsecase } from "@app
 import { Module } from "@nestjs/common";
 import { SelectRoomDataFromMysql } from "@infra/db/mysql/room/room.inbound";
 import { CompareRoomArgonHash, MakeIssueToolTicket } from "./signaling.interface";
-import { CheckUserPayloadFromRedis, SelectRoomInfoFromRedis, SelectRoomMemberInfosFromRedis } from "@infra/cache/redis/room/room.inbound";
+import { CheckRoomUserFromRedis, CheckUserPayloadFromRedis, SelectRoomInfoFromRedis, SelectRoomMemberInfosFromRedis } from "@infra/cache/redis/room/room.inbound";
 import { DeleteHardRoomParticipantInfoDataToMysql, InsertRoomParticipantInfoDataToMysql, UpdateRoomParticipantInfoToMysql } from "@infra/db/mysql/room/room.outbound";
 import { DeleteRoomDatasToRedis, InsertRoomDatasToRedis, InsertToolTicketToRedis } from "@infra/cache/redis/room/room.outbound";
 import { SignalingWebsocketService } from "./signaling.service";
 import { AuthWebsocketModule } from "../auth/auth.module";
 import { SignalingWebsocketGateway } from "./signaling.gateway";
 import { SfuModule } from "@present/webrtc/sfu/sfu.module";
-import { GetRoomMembersUsecase } from "@app/room/queries/usecase";
+import { ConnectToolUsecase, GetRoomMembersUsecase } from "@app/room/queries/usecase";
 import { ConfigService } from "@nestjs/config";
 
 
@@ -108,7 +108,25 @@ import { ConfigService } from "@nestjs/config";
         MakeIssueToolTicket,
         InsertToolTicketToRedis
       ]
+    },
+
+    // tool에 connecting 하기 위한 usecase
+    {
+      provide : ConnectToolUsecase,
+      useFactory : (
+        checkUserPaylodFromCache : CheckRoomUserFromRedis,
+        makeToolTicket :MakeIssueToolTicket,
+      ) => {
+        return new ConnectToolUsecase({
+          checkUserPaylodFromCache, makeToolTicket
+        })
+      },
+      inject : [
+        CheckRoomUserFromRedis,
+        MakeIssueToolTicket
+      ]
     }
+
   ]
 })
 export class SignalingWebsocketModule {};

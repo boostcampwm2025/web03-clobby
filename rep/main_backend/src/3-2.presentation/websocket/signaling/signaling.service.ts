@@ -13,7 +13,7 @@ import { CHANNEL_NAMESPACE } from "@infra/channel/channel.constants";
 import { CreateConsumerDto, CreateConsumerResult, CreateConsumerResults, CreateConsumersDto, CreateProduceResult, CreatePropduceDto, CreateTransportDto } from "@app/sfu/commands/dto";
 import { ConnectTransportType, PauseConsumesDto, ResumeConsumerDto, ResumeConsumersDto } from "@app/sfu/queries/dto";
 import { GetRoomMembersResult, MembersInfo } from "@app/room/queries/dto";
-import { GetRoomMembersUsecase } from "@app/room/queries/usecase";
+import { ConnectToolUsecase, GetRoomMembersUsecase } from "@app/room/queries/usecase";
 import { MakeIssueToolTicket } from "./signaling.interface";
 import { ConnectToolDto } from "@/2.application/room/queries/dto/connect-tool.usecase";
 
@@ -26,8 +26,8 @@ export class SignalingWebsocketService {
     private readonly connectRoomUsecase : ConnectRoomUsecase<any, any>,
     private readonly getMembersUsecase : GetRoomMembersUsecase<any>,
     private readonly openToolUsecase : OpenToolUsecase<any>,
+    private readonly connectToolUsecase : ConnectToolUsecase<any>,
     private readonly sfuServer : SfuService,
-    private readonly makeJwkService : MakeIssueToolTicket,
   ) {}
 
   parseJwtToken( client : Socket ) : TokenDto | undefined {
@@ -269,7 +269,7 @@ export class SignalingWebsocketService {
     const dto : ConnectToolDto = {
       ...payload, room_id, tool
     };
-    return this.makeJwkService.make(dto);
+    return this.connectToolUsecase.execute(dto);
   };
 
 };

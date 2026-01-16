@@ -362,3 +362,45 @@ export class CheckToolTicketFromRedis extends SelectDataFromCache<RedisClientTyp
     }
   }
 };
+
+// user가 멤버가 맞는지 확인
+@Injectable()
+export class CheckRoomUserFromRedis extends SelectDataFromCache<RedisClientType<any, any>> {
+
+  constructor(
+    @Inject(REDIS_SERVER) cache : RedisClientType<any, any>
+  ) { super(cache); };  
+  
+
+  // namespace는 room_id, keyname은 user_id:tool
+  async select({ namespace, keyName, }: { namespace: string; keyName: string; }): Promise<boolean> {
+    
+    const room_id : string = namespace.trim();
+    const roomMemberNamespace : string = `${CACHE_ROOM_NAMESPACE_NAME.CACHE_ROOM}:${room_id}:${CACHE_ROOM_SUB_NAMESPACE_NAME.MEMBERS}`;
+    const roomInfoNamespace : string = `${CACHE_ROOM_NAMESPACE_NAME.CACHE_ROOM}:${room_id}:${CACHE_ROOM_SUB_NAMESPACE_NAME.INFO}`;
+
+    const [ user_id, tool ] = keyName.split(":");
+    if ( !user_id || !tool ) throw new NotAllowToolPayload();
+    
+    if ( tool !== "whiteboard"  &&  tool !== "codeeditor" ) throw new NotAllowToolPayload();
+
+    try {
+      const [memberExists, mainProducer] = await this.cache
+        .multi()
+        .hExists(roomMemberNamespace, user_id)
+        .hGet(roomInfoNamespace, CACHE_ROOM_INFO_KEY_NAME.MAIN_PRODUCER)
+        .exec();
+
+      const memberExistsBool = Boolean(memberExists);
+      if (!memberExistsBool) return false;
+      if (!mainProducer) return false;
+        
+      const paresd = JSON.parse(String(mainProducer));
+      if ( paresd.tool !== tool ) return false;
+      return true;
+    } catch (err) {
+      throw err;
+    }
+  };
+  
+};

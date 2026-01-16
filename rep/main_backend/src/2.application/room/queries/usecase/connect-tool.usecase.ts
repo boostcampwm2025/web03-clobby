@@ -1,7 +1,7 @@
 import { MakeToken } from "@app/ports/share";
 import { SelectDataFromCache } from "@app/ports/cache/cache.inbound";
 import { Injectable } from "@nestjs/common";
-import { ConnectToolDto } from "../dto/connect-tool.usecase";
+import { ConnectToolDto } from "../dto";
 import { NotAllowRoomMemberOne } from "@error/application/room/room.error";
 
 
