@@ -4,7 +4,7 @@ import { SelectRoomDataFromMysql } from "@infra/db/mysql/room/room.inbound";
 import { CompareRoomArgonHash, MakeIssueToolTicket } from "./signaling.interface";
 import { CheckRoomUserFromRedis, CheckUserPayloadFromRedis, SelectRoomInfoFromRedis, SelectRoomMemberInfosFromRedis } from "@infra/cache/redis/room/room.inbound";
 import { DeleteHardRoomParticipantInfoDataToMysql, InsertRoomParticipantInfoDataToMysql, UpdateRoomParticipantInfoToMysql } from "@infra/db/mysql/room/room.outbound";
-import { DeleteRoomDatasToRedis, InsertRoomDatasToRedis, InsertToolTicketToRedis } from "@infra/cache/redis/room/room.outbound";
+import { DeleteMainProducerFromRedis, DeleteRoomDatasToRedis, InsertRoomDatasToRedis, InsertToolTicketToRedis } from "@infra/cache/redis/room/room.outbound";
 import { SignalingWebsocketService } from "./signaling.service";
 import { AuthWebsocketModule } from "../auth/auth.module";
 import { SignalingWebsocketGateway } from "./signaling.gateway";
@@ -140,16 +140,18 @@ import { KafkaService } from "@infra/event-stream/kafka/event-stream-service";
       useFactory : (
         stream : KafkaService,
         checkUserPaylodFromCache : CheckRoomUserFromRedis,
-        toolLeftTopicName : string
+        toolLeftTopicName : string,
+        deleteMainContentsToCache : DeleteMainProducerFromRedis
       ) => {
         return new DisconnectToolUsecase(stream, {
-          checkUserPaylodFromCache, toolLeftTopicName
+          checkUserPaylodFromCache, toolLeftTopicName, deleteMainContentsToCache
         })
       },
       inject : [
         KafkaService,
         CheckRoomUserFromRedis,
-        TOOL_LEFT_TOPIC_NAME
+        TOOL_LEFT_TOPIC_NAME,
+        DeleteMainProducerFromRedis
       ]
     }
 
