@@ -4,6 +4,7 @@ import { KAFKA } from "../event-stream.constants";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { SASLOptions } from "kafkajs";
 import { KafkaService } from "./event-stream.service";
+import { MainConsumerController } from "./event-stream.controller";
 
 
 // kafka를 사용하기 위한 모듈
@@ -50,6 +51,9 @@ import { KafkaService } from "./event-stream.service";
         }
       }
     ])
+  ],
+  controllers : [
+    MainConsumerController
   ],
   providers : [
     KafkaService

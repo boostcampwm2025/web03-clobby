@@ -240,3 +240,22 @@ export class InsertToolTicketToRedis extends InsertDataToCache<RedisClientType<a
     throw new ConflictException('tool_ticket을 볼 수 없습니다.');
   }
 }
+
+@Injectable()
+export class DeleteMainProducerFromRedis extends DeleteDataToCache<RedisClientType<any, any>> {
+
+  constructor(
+    @Inject(REDIS_SERVER) cache: RedisClientType<any, any>
+  ) { super(cache); };  
+
+  // namespace는 room_id 이다.
+  async deleteNamespace(namespace: string): Promise<boolean> {
+    
+    const room_id : string = namespace;
+    const roomInfoNamespace : string = `${CACHE_ROOM_NAMESPACE_NAME.CACHE_ROOM}:${room_id}:${CACHE_ROOM_SUB_NAMESPACE_NAME.INFO}`;
+
+    const deleted : number = await this.cache.hDel(roomInfoNamespace, CACHE_ROOM_INFO_KEY_NAME.MAIN_PRODUCER);
+    
+    return deleted ? true : false;
+  };
+};
