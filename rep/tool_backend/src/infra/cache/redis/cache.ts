@@ -1,26 +1,17 @@
-import { Global, Module } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { REDIS_SERVER } from "../cache.constants";
-import { createClient } from "redis";
-
+import { Global, Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { REDIS_SERVER } from '../cache.constants';
+import { createClient } from 'redis';
 
 @Global()
 @Module({
-  providers : [
+  providers: [
     ConfigService,
     {
-      provide : REDIS_SERVER,
-      useFactory : async (
-        config : ConfigService
-      ) => {  
-        const url: string = config.get<string>(
-          'NODE_APP_REDIS_URL',
-          'redis://localhost:6379',
-        );
-        const password: string = config.get<string>(
-          'NODE_APP_REDIS_PASSWORD',
-          'password',
-        );
+      provide: REDIS_SERVER,
+      useFactory: async (config: ConfigService) => {
+        const url: string = config.get<string>('NODE_APP_REDIS_URL', 'redis://localhost:6379');
+        const password: string = config.get<string>('NODE_APP_REDIS_PASSWORD', 'password');
 
         const client = createClient({
           url,
@@ -36,11 +27,9 @@ import { createClient } from "redis";
 
         return client;
       },
-      inject : [ConfigService]
-    }
+      inject: [ConfigService],
+    },
   ],
-  exports : [
-    REDIS_SERVER
-  ]
+  exports: [REDIS_SERVER],
 })
-export class RedisCacheModule {};
+export class RedisCacheModule {}

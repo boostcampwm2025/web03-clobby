@@ -12,7 +12,7 @@
     "outDir": "./dist",
     "paths": {
       "@/*": ["./src/*"],
-      "@infra/*" : ["./src/infra/*"]
+      "@infra/*": ["./src/infra/*"]
     },
     "incremental": true,
     "skipLibCheck": true,

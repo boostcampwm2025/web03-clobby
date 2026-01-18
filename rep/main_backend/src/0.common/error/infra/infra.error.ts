@@ -33,19 +33,19 @@ export class InvalidTokenError extends Error {
 }
 
 export class ChannelError extends BaseError {
-  constructor(err : Error) {
+  constructor(err: Error) {
     super({
-      message : `${err}`,
-      status : 500
+      message: `${err}`,
+      status: 500,
     });
   }
 }
 
 export class CacheError extends BaseError {
-  constructor(message : string) {
+  constructor(message: string) {
     super({
-      message : `${message}`,
-      status : 500
+      message: `${message}`,
+      status: 500,
     });
   }
 }
@@ -53,9 +53,10 @@ export class CacheError extends BaseError {
 export class NotFoundRefereceError extends BaseError {
   constructor(message: string) {
     super({
-      message, status : 404
+      message,
+      status: 404,
     });
-    this.name = "NotFoundError";
+    this.name = 'NotFoundError';
   }
 }
 
@@ -63,19 +64,19 @@ export class NotInsertDatabaseError extends BaseError {
   constructor(name: string) {
     super({
       message: `${name} 데이터를 입력하지 못했습니다.`,
-      status : 404
+      status: 404,
     });
   }
 }
 
 export class DiskError extends BaseError {
-  constructor(err : Error) {
+  constructor(err: Error) {
     super({
-      message : `${err}`,
-      status : 500
-    })
+      message: `${err}`,
+      status: 500,
+    });
   }
-};
+}
 
 export class NotCompleteDataToDisk extends BaseError {
   constructor() {

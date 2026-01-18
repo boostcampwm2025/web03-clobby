@@ -1,9 +1,8 @@
-import { Global, Module } from "@nestjs/common";
-import { SIGNALING_WEBSOCKET } from "../websocket.constants";
-import { SignalingWebsocket } from "./signaling.service";
+import { Global, Module } from '@nestjs/common';
+import { SIGNALING_WEBSOCKET } from '../websocket.constants';
+import { SignalingWebsocket } from './signaling.service';
 
-
-@Global() 
+@Global()
 @Module({
   providers: [
     SignalingWebsocket,

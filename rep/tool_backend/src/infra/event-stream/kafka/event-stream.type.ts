@@ -1,8 +1,6 @@
-
-
 export type ToolLeftDto = {
   room_id: string;
   user_id: string;
   socket_id: string;
-  tool: "whiteboard" | "codeeditor";
+  tool: 'whiteboard' | 'codeeditor';
 };

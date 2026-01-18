@@ -4,14 +4,13 @@ import { HealthModule } from './health/health.module';
 import { RedisCacheModule } from '@infra/cache/redis/cache';
 import { RedisChannelModule } from '@infra/channel/redis/channel';
 import { MysqlModule } from '@infra/db/mysql/db';
-import CookieParser from "cookie-parser";
+import CookieParser from 'cookie-parser';
 import { KafkaModule } from '@infra/event-stream/kafka/event-stream';
 import { GuardModule } from './guards/guard.module';
 import { WhiteboardModule } from './whiteboard/whiteboard.module';
 import { CodeeditorModule } from './codeeditor/codeeditor.module';
 import { CodeeditorWebsocketModule } from './infra/websocket/codeeditor/codeeditor.module';
 import { WhiteboardWebsocketModule } from './infra/websocket/whiteboard/whiteboard.module';
-
 
 @Module({
   imports: [
@@ -30,15 +29,12 @@ import { WhiteboardWebsocketModule } from './infra/websocket/whiteboard/whiteboa
     CodeeditorModule, // codeeditor
     WhiteboardWebsocketModule, // whiteboard용 websocket
     CodeeditorWebsocketModule, // codeeditor용 websocket
-
   ],
   controllers: [],
   providers: [],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-    .apply(CookieParser())
-    .forRoutes({ path : "*", method : RequestMethod.ALL })
+    consumer.apply(CookieParser()).forRoutes({ path: '*', method: RequestMethod.ALL });
   }
 }

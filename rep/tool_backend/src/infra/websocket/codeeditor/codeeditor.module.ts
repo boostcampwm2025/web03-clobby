@@ -1,20 +1,16 @@
-import { Global, Module } from "@nestjs/common";
-import { CODEEDITOR_WEBSOCKET } from "../websocket.constants";
-import { CodeeditorWebsocket } from "./codeeditor.service";
-
+import { Global, Module } from '@nestjs/common';
+import { CODEEDITOR_WEBSOCKET } from '../websocket.constants';
+import { CodeeditorWebsocket } from './codeeditor.service';
 
 @Global()
 @Module({
-  providers : [
+  providers: [
     CodeeditorWebsocket,
     {
-      provide : CODEEDITOR_WEBSOCKET,
-      useExisting : CodeeditorWebsocket
-    }
+      provide: CODEEDITOR_WEBSOCKET,
+      useExisting: CodeeditorWebsocket,
+    },
   ],
-  exports : [
-    CodeeditorWebsocket,
-    CODEEDITOR_WEBSOCKET
-  ]
+  exports: [CodeeditorWebsocket, CODEEDITOR_WEBSOCKET],
 })
-export class CodeeditorWebsocketModule {};
+export class CodeeditorWebsocketModule {}

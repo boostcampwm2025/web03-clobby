@@ -1,24 +1,25 @@
-import { Module } from "@nestjs/common";
-import { RoomController } from "./room.controller";
-import { RoomService } from "./room.service";
-import { AuthModule } from "../auth/auth.module";
-import { CreateRoomUsecase } from "@app/room/commands/usecase";
-import { MakeArgonRoomPasswordHash, MakeRoomIdGenerator, MakeRoomRandomCodeGenerator } from "./room.interface";
-import { DeleteRoomDataToMysql, InsertRoomDataToMysql } from "@infra/db/mysql/room/room.outbound";
-import { InsertRoomDataToRedis } from "@infra/cache/redis/room/room.outbound";
-import { GetRoomInfoUsecase } from "@app/room/queries/usecase";
-import { SelectRoomInfoDataFromRedis } from "@infra/cache/redis/room/room.inbound";
-import { SelectRoomIdFromMysql } from "@infra/db/mysql/room/room.inbound";
-
+import { Module } from '@nestjs/common';
+import { RoomController } from './room.controller';
+import { RoomService } from './room.service';
+import { AuthModule } from '../auth/auth.module';
+import { CreateRoomUsecase } from '@app/room/commands/usecase';
+import {
+  MakeArgonRoomPasswordHash,
+  MakeRoomIdGenerator,
+  MakeRoomRandomCodeGenerator,
+} from './room.interface';
+import { DeleteRoomDataToMysql, InsertRoomDataToMysql } from '@infra/db/mysql/room/room.outbound';
+import { InsertRoomDataToRedis } from '@infra/cache/redis/room/room.outbound';
+import { GetRoomInfoUsecase } from '@app/room/queries/usecase';
+import { SelectRoomInfoDataFromRedis } from '@infra/cache/redis/room/room.inbound';
+import { SelectRoomIdFromMysql } from '@infra/db/mysql/room/room.inbound';
 
 @Module({
-  imports : [
-    AuthModule // jwt를 위한 import
+  imports: [
+    AuthModule, // jwt를 위한 import
   ],
-  controllers : [
-    RoomController,
-  ],   
-  providers : [
+  controllers: [RoomController],
+  providers: [
     // room에서 사용하는 서비스
     RoomService,
     MakeArgonRoomPasswordHash,
@@ -27,45 +28,48 @@ import { SelectRoomIdFromMysql } from "@infra/db/mysql/room/room.inbound";
 
     // usecase 관련
     {
-      provide : CreateRoomUsecase,
-      useFactory : (
-        passwordHash : MakeArgonRoomPasswordHash,
-        roomIdGenerator : MakeRoomIdGenerator,
-        makeRoomCodeGenerator : MakeRoomRandomCodeGenerator,
-        insertRoomDataToDb : InsertRoomDataToMysql,
-        insertRoomDataToCache : InsertRoomDataToRedis,
-        deleteRoomDataToDb : DeleteRoomDataToMysql,
+      provide: CreateRoomUsecase,
+      useFactory: (
+        passwordHash: MakeArgonRoomPasswordHash,
+        roomIdGenerator: MakeRoomIdGenerator,
+        makeRoomCodeGenerator: MakeRoomRandomCodeGenerator,
+        insertRoomDataToDb: InsertRoomDataToMysql,
+        insertRoomDataToCache: InsertRoomDataToRedis,
+        deleteRoomDataToDb: DeleteRoomDataToMysql,
       ) => {
         return new CreateRoomUsecase({
-          passwordHash, roomIdGenerator, makeRoomCodeGenerator, insertRoomDataToDb, insertRoomDataToCache, deleteRoomDataToDb
+          passwordHash,
+          roomIdGenerator,
+          makeRoomCodeGenerator,
+          insertRoomDataToDb,
+          insertRoomDataToCache,
+          deleteRoomDataToDb,
         });
       },
-      inject : [
+      inject: [
         MakeArgonRoomPasswordHash,
         MakeRoomIdGenerator,
         MakeRoomRandomCodeGenerator,
         InsertRoomDataToMysql,
         InsertRoomDataToRedis,
-        DeleteRoomDataToMysql
-      ]
+        DeleteRoomDataToMysql,
+      ],
     },
 
     // 방의 정보를 가져오는 로직
     {
-      provide : GetRoomInfoUsecase,
-      useFactory : (
-        selectRoomIdFromDb : SelectRoomIdFromMysql,
-        selectRoomInfoFromCache : SelectRoomInfoDataFromRedis
+      provide: GetRoomInfoUsecase,
+      useFactory: (
+        selectRoomIdFromDb: SelectRoomIdFromMysql,
+        selectRoomInfoFromCache: SelectRoomInfoDataFromRedis,
       ) => {
         return new GetRoomInfoUsecase({
-          selectRoomIdFromDb, selectRoomInfoFromCache
-        })
+          selectRoomIdFromDb,
+          selectRoomInfoFromCache,
+        });
       },
-      inject : [
-        SelectRoomIdFromMysql,
-        SelectRoomInfoDataFromRedis
-      ]
-    }
-  ]
+      inject: [SelectRoomIdFromMysql, SelectRoomInfoDataFromRedis],
+    },
+  ],
 })
-export class RoomModule {};
+export class RoomModule {}
