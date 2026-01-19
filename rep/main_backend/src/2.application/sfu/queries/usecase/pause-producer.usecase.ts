@@ -8,9 +8,9 @@ import { Producer } from "mediasoup/types";
 
 
 type PauseProducerUsecaseProps<T> = {
-  selectUserProduceFromCache : SelectDataFromCache<T>;
-  deleteUserProduceToCache : DeleteDataToCache<T>;
-  updateUserProduceToCache : UpdateDataToCache<T>;
+  selectUserProduceFromCache : SelectDataFromCache<T>; // 유저 producer를 찾을때 사용하는 객체
+  deleteUserProduceToCache : DeleteDataToCache<T>; // 만약 유령 producer가 존재할경우 업데이트 해주는 로직
+  updateUserProduceToCache : UpdateDataToCache<T>; // 유저의 produce의 상태를 업데이틑 해주는 로직
 };
 
 @Injectable()
@@ -34,7 +34,7 @@ export class PauseProducerUsecase<T> {
   async execute(dto : PauseProducerDto) : Promise<void> {
 
     // 1. 실제로 방에 위치해 있고 유저가 맞는지 확인 ( ON도 맞는지 확인 )
-    const checked : boolean = await this.selectUserProduceFromCache.select({ namespace : `${dto.room_id}:${dto.user_id}`, keyName : `${dto.kind}:${dto.producer_id}` });
+    const checked : boolean = await this.selectUserProduceFromCache.select({ namespace : `${dto.room_id}:${dto.user_id}`, keyName : dto.kind });
     if ( !checked ) throw new SfuErrorMessage("유저가 실제로 방에 있지 않습니다.");
 
     // 2. 그 유저의 producer를 멈춤 한다. 
@@ -44,7 +44,7 @@ export class PauseProducerUsecase<T> {
       throw new SfuErrorMessage("유저에 producer가 존재하지 않습니다."); // 유령 데이터 정리
     }
 
-    if ( !producer.paused ) await producer.pause();
+    if ( !producer.paused ) await producer.pause(); // 멈춘다. 
 
     // 3. 상태를 변경해준다. // 1. producer에 cache에서 off를 해준다. ( 추가로 전체 정보를 가져올때 로직도 수정이 필요 + 기존의  )
     await this.updateUserProduceToCache.updateKey({ namespace : `${dto.room_id}:${dto.user_id}`, keyName : dto.kind, updateValue : "off" });
