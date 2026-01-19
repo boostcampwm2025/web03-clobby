@@ -83,6 +83,7 @@ export default function TextArea({
     textarea.style.fontFamily = textNode.fontFamily();
     textarea.style.textAlign = textNode.align();
     textarea.style.color = textNode.fill() as string;
+    textarea.style.caretColor = '#000000';
 
     // Line Height 계산
     const lineHeightPx =
