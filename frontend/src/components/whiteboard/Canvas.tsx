@@ -8,6 +8,7 @@ import { Stage, Layer, Rect, Line } from 'react-konva';
 import type { WhiteboardItem, TextItem, ArrowItem } from '@/types/whiteboard';
 
 import { useCanvasStore } from '@/store/useCanvasStore';
+import { cn } from '@/utils/cn';
 
 import { useElementSize } from '@/hooks/useElementSize';
 import { useClickOutside } from '@/hooks/useClickOutside';
@@ -33,10 +34,12 @@ export default function Canvas() {
   const updateItem = useCanvasStore((state) => state.updateItem);
   const setEditingTextId = useCanvasStore((state) => state.setEditingTextId);
   const setViewportSize = useCanvasStore((state) => state.setViewportSize);
+  const cursorMode = useCanvasStore((state) => state.cursorMode);
 
   const stageRef = useRef<Konva.Stage | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDraggingArrow, setIsDraggingArrow] = useState(false);
+  const [isDraggingCanvas, setIsDraggingCanvas] = useState(false);
 
   const size = useElementSize(containerRef);
 
@@ -144,7 +147,14 @@ export default function Canvas() {
   return (
     <div
       ref={containerRef}
-      className="h-full w-full overflow-hidden bg-neutral-100"
+      className={cn(
+        'h-full w-full overflow-hidden bg-neutral-100',
+        cursorMode === 'select' && 'cursor-default',
+        cursorMode === 'move' && !isDraggingCanvas && 'cursor-grab',
+        cursorMode === 'move' && isDraggingCanvas && 'cursor-grabbing',
+        cursorMode === 'draw' && 'cursor-crosshair',
+        cursorMode === 'eraser' && 'cursor-cell',
+      )}
     >
       <Stage
         ref={stageRef}
@@ -156,8 +166,12 @@ export default function Canvas() {
         scaleX={stageScale}
         scaleY={stageScale}
         onWheel={handleWheel}
+        onDragStart={() => setIsDraggingCanvas(true)}
         onDragMove={handleDragMove}
-        onDragEnd={handleDragEnd}
+        onDragEnd={(e) => {
+          handleDragEnd(e);
+          setIsDraggingCanvas(false);
+        }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
