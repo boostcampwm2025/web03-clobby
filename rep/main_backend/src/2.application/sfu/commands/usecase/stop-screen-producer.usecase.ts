@@ -1,3 +1,4 @@
+// 해당 user에 대한 screen과 관련된 데이터를 끈다. 
 import { SelectDataFromCache } from "@app/ports/cache/cache.inbound";
 import { Injectable } from "@nestjs/common";
 import { StopScreenProducerCacheInfoResult, StopScreenProducerDto } from "../dto";
@@ -29,7 +30,7 @@ export class StopScreenProducerUsecase<T> {
   async execute(dto : StopScreenProducerDto) : Promise<void> {
 
     // 1. screen이 유저가 한게 맞는지 확인하는 로직 
-    const producerInfo : StopScreenProducerCacheInfoResult = await this.selectMainAndSubProducerFromCache.select({ namespace : `${dto.room_id}:${dto.user_id}`, keyName : "" });
+    const producerInfo : StopScreenProducerCacheInfoResult = await this.selectMainAndSubProducerFromCache.select({ namespace : dto.room_id, keyName : dto.user_id });
     if ( !producerInfo.main_producer_id && !producerInfo.sub_producer_id ) throw new SfuErrorMessage("화면공유는 화면공유를 킨 유저만 끌수 있습니다.");
 
     // 2. 맞다면 user screen에 관련된 producer를 내린다. -> 그 producer를 내린다면 자연스럽게 삭제가 되야 한다. 
