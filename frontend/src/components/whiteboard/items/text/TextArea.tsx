@@ -111,9 +111,7 @@ export default function TextArea({
 
     // 높이
     textarea.style.height = 'auto';
-    textarea.style.height = `${
-      textarea.scrollHeight + textNode.fontSize() * stageScale
-    }px`;
+    textarea.style.height = `${textarea.scrollHeight}px`;
 
     positionTextarea();
 
@@ -149,9 +147,7 @@ export default function TextArea({
 
     const handleInput = () => {
       textarea.style.height = 'auto';
-      textarea.style.height = `${
-        textarea.scrollHeight + textNode.fontSize() * stageScale
-      }px`;
+      textarea.style.height = `${textarea.scrollHeight}px`;
 
       onChange(textarea.value);
       positionTextarea();
