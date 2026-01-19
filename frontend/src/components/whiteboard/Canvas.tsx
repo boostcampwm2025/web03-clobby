@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useMemo } from 'react';
+import { useRef, useState, useMemo, useEffect } from 'react';
 
 import Konva from 'konva';
 import { Stage, Layer, Rect, Line } from 'react-konva';
@@ -9,7 +9,7 @@ import type { WhiteboardItem, TextItem, ArrowItem } from '@/types/whiteboard';
 
 import { useCanvasStore } from '@/store/useCanvasStore';
 
-import { useWindowSize } from '@/hooks/useWindowSize';
+import { useElementSize } from '@/hooks/useElementSize';
 import { useCanvasInteraction } from '@/hooks/useCanvasInteraction';
 import { useCanvasShortcuts } from '@/hooks/useCanvasShortcuts';
 import { useArrowHandles } from '@/hooks/useArrowHandles';
@@ -31,11 +31,21 @@ export default function Canvas() {
   const selectItem = useCanvasStore((state) => state.selectItem);
   const updateItem = useCanvasStore((state) => state.updateItem);
   const setEditingTextId = useCanvasStore((state) => state.setEditingTextId);
+  const setViewportSize = useCanvasStore((state) => state.setViewportSize);
 
   const stageRef = useRef<Konva.Stage | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isDraggingArrow, setIsDraggingArrow] = useState(false);
 
-  const size = useWindowSize();
+  const size = useElementSize(containerRef);
+
+  // viewport 크기를 store에 업데이트
+  useEffect(() => {
+    if (size.width > 0 && size.height > 0) {
+      setViewportSize(size.width, size.height);
+    }
+  }, [size.width, size.height, setViewportSize]);
+
   const { handleWheel, handleDragMove, handleDragEnd } = useCanvasInteraction(
     size.width,
     size.height,
@@ -108,10 +118,21 @@ export default function Canvas() {
     updateItem(id, newAttributes);
   };
 
-  if (size.width === 0 || size.height === 0) return null;
+  // width={0} height={0}으로 canvas 렌더링 방지
+  if (size.width === 0 || size.height === 0) {
+    return (
+      <div
+        ref={containerRef}
+        className="flex h-full w-full items-center justify-center"
+      ></div>
+    );
+  }
 
   return (
-    <div className="h-full w-full overflow-hidden bg-neutral-100">
+    <div
+      ref={containerRef}
+      className="h-full w-full overflow-hidden bg-neutral-100"
+    >
       <Stage
         ref={stageRef}
         width={size.width}
