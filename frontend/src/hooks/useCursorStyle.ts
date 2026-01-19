@@ -26,7 +26,7 @@ export function useCursorStyle(cursorType: CursorType = 'move') {
 
     const container = e.target.getStage()?.container();
     if (container) {
-      container.style.cursor = 'default';
+      container.style.cursor = '';
     }
   };
 
