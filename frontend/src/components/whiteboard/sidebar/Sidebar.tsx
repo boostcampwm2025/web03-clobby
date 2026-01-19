@@ -49,12 +49,7 @@ export default function Sidebar() {
 
   const selectionType = getSelectionType(selectedItem);
 
-  // 선택 타입에 따른 표시될 헤더 제목
-  const getHeaderTitle = () => {
-    return selectionType ? SIDEBAR_TYPES[selectionType] : '';
-  };
-
-  // 선택된 아이템이 없으면 사이드바 표시 안 함
+  // 선택된 아이템이 없거나 지원하지 않는 타입이면 사이드바 표시 안 함
   if (!selectedItem || !selectionType) {
     return null;
   }
@@ -64,7 +59,7 @@ export default function Sidebar() {
       {/* Sidebar Title */}
       <div className="mb-1">
         <h2 className="text-lg font-bold text-neutral-800">
-          {getHeaderTitle()}
+          {SIDEBAR_TYPES[selectionType]}
         </h2>
       </div>
 
