@@ -239,7 +239,7 @@ export class SignalingWebsocketGateway
     }
   }
 
-  // 본격적으로 프론트엔드에서 회의방에 배포하고 싶을때 사용
+  // 본격적으로 프론트엔드에서 회의방에 배포하고 싶을때 사용 -> 이미 있다면 ON하는 기능을 추가 해야 한다. 
   @SubscribeMessage(WEBSOCKET_SIGNALING_EVENT_NAME.PRODUCE)
   @UsePipes(
     new ValidationPipe({
@@ -451,4 +451,11 @@ export class SignalingWebsocketGateway
       throw new WsException({ message: err.message ?? '에러 발생', status: err.status ?? 500 });
     }
   }
+
+  // 카메라 or 마이크를 OFF할때 사용한다. -> 대신 카메라가 존재해야 한다. 
+  
+
+  // 화면공유를 내릴때 사용한다. -> 화면 공유가 되어있는 상태여야 한다. 
+
+
 }

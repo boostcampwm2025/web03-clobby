@@ -149,8 +149,8 @@ export class SignalingWebsocketService {
 
   // 방에 나갈때 사용하는 함수
   async disconnectRoomService(dto: DisconnectRoomDto): Promise<void> {
-    await this.disconnectRoomUsecase.execute(dto);
-    this.sfuServer.disconnectUser(dto.user_id); // sfu 서버에 내용도 정리
+    await this.disconnectRoomUsecase.execute(dto); // 여기서 추가적으로 main이든 그러한 것들을 정리해주어야 한다. 
+    await this.sfuServer.disconnectUser(dto.user_id); // sfu 서버에 내용도 정리
   }
 
   // 방에 가입할때 사용하는 함수
