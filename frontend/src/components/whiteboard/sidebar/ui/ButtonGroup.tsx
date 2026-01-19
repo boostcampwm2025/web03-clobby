@@ -23,7 +23,9 @@ export default function ButtonGroup<T extends string | number>({
 }: ButtonGroupProps<T>) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-xs text-neutral-700">{label}</span>
+      <span className="text-xs font-bold tracking-wide text-black uppercase select-none">
+        {label}
+      </span>
       <div className="flex gap-1 text-neutral-700">
         {options.map((option) => {
           const Icon = option.icon;
