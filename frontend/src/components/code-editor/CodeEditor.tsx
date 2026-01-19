@@ -46,10 +46,6 @@ export default function CodeEditor({
     useState<EditorLanguage>('typescript');
   const [onlyMyCursor, setOnlyMyCursor] = useState<boolean>(false);
 
-  useEffect(() => {
-    onlyMyCursorRef.current = onlyMyCursor;
-  }, [onlyMyCursor]);
-
   const handleMount = async (
     editor: monaco.editor.IStandaloneCodeEditor,
     monaco: typeof import('monaco-editor'),
@@ -252,9 +248,7 @@ export default function CodeEditor({
   useEffect(() => {
     onlyMyCursorRef.current = onlyMyCursor;
 
-    if (providerRef.current) {
-      if (!editorRef.current) return;
-
+    if (editorRef.current) {
       cursorCollectionsRef.current.forEach((c) => c.clear());
     }
   }, [onlyMyCursor]);
