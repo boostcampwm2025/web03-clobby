@@ -4,11 +4,8 @@ import type {
   TextItem,
   DrawingItem,
 } from '@/types/whiteboard';
-import type {
-  ArrowSize,
-  ArrowStyle,
-} from '@/components/whiteboard/sidebar/panels/arrowPresets';
-import type { TextSize } from '@/components/whiteboard/sidebar/panels/textPresets';
+import type { ArrowSize, ArrowStyle } from '@/constants/arrowPresets';
+import type { TextSize } from '@/constants/textPresets';
 import type { DrawingSize } from '@/constants/drawingPresets';
 
 // 현재 Arrow 사이즈 결정
