@@ -19,11 +19,13 @@ import {
   ARROW_SIZE_PRESETS,
   ARROW_STYLE_PRESETS,
 } from '@/components/whiteboard/sidebar/panels/arrowPresets';
+import { TEXT_SIZE_PRESETS } from '@/components/whiteboard/sidebar/panels/textPresets';
 import {
   getArrowSize,
   getLineSize,
+  getTextSize,
   getItemStyle,
-} from '@/utils/arrowPanelHelpers';
+} from '@/utils/sidebarStyleHelpers';
 
 // 사이드 바 선택된 요소 타입
 type SelectionType = 'shape' | 'arrow' | 'line' | 'text' | null;
@@ -161,7 +163,12 @@ export default function Sidebar() {
         {selectionType === 'text' && (
           <TextPanel
             fill={(selectedItem as TextItem).fill}
+            size={getTextSize(selectedItem as TextItem)}
             onChangeFill={(color) => updateItem(selectedId!, { fill: color })}
+            onChangeSize={(size) => {
+              const preset = TEXT_SIZE_PRESETS[size];
+              updateItem(selectedId!, { fontSize: preset.fontSize });
+            }}
           />
         )}
       </div>
