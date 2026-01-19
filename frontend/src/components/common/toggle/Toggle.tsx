@@ -57,7 +57,7 @@ export default function Toggle({
       className={cn(
         'relative inline-flex rounded-full transition-colors',
         sizeMap[size],
-        currentChecked ? 'bg-blue-500' : 'bg-gray-200',
+        currentChecked ? 'bg-blue-500' : 'bg-neutral-300',
         disabled && 'cursor-not-allowed opacity-50',
         className,
       )}

@@ -31,7 +31,7 @@ function CodeEditorToolbar({
   const disabledPresenter = hasPresenter && !isPresenter;
 
   return (
-    <div className="flex items-center justify-between border-b border-neutral-700 p-2">
+    <div className="flex items-center justify-between border-b border-neutral-700 px-4 py-2">
       <div className="flex w-full items-center justify-between">
         <div className="flex items-center gap-4">
           <label className="flex items-center gap-2 text-sm text-white">
