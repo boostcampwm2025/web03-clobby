@@ -23,6 +23,7 @@ import {
   ConnectTransportUsecase,
   PauseConsumerUsecase,
   PauseConsumesUsecase,
+  PauseProducerUsecase,
   ResumeConsumersUsecase,
   ResumeConsumerUsecase,
 } from '@app/sfu/queries/usecase';
@@ -30,6 +31,7 @@ import {
   ConnectTransportType,
   PauseConsumerDto,
   PauseConsumesDto,
+  PauseProducerDto,
   ResumeConsumerDto,
   ResumeConsumersDto,
 } from '@app/sfu/queries/dto';
@@ -49,6 +51,7 @@ export class SfuService {
     private readonly createConsumersUsecase: CreateConsumersUsecase<any>,
     private readonly resumeConsumersUsecase: ResumeConsumersUsecase<any>,
     private readonly pauseConsumersUsecase: PauseConsumesUsecase<any>,
+    private readonly pauseProducerUsecase : PauseProducerUsecase<any>, // producer를 멈추기 위한 usecase
     // infra
     private readonly roomRouters: RoomRouterRepository,
     private readonly transports: TransportRepository,
@@ -132,4 +135,9 @@ export class SfuService {
   async pauseConsumers(dto: PauseConsumesDto): Promise<void> {
     await this.pauseConsumersUsecase.execute(dto);
   }
+
+  // 11. producer off 
+  async pauseProducers(dto : PauseProducerDto) : Promise<void> {
+    await this.pauseProducerUsecase.execute(dto);
+  };
 }

@@ -21,6 +21,7 @@ import {
   OnProduceValidate,
   PauseConsumersValidate,
   pauseConsumerValidate,
+  PauseProducerValidate,
   ResumeConsumersValidate,
   ResumeConsumerValidate,
   SocketPayload,
@@ -41,6 +42,7 @@ import {
 import {
   ConnectTransportType,
   PauseConsumesDto,
+  PauseProducerDto,
   ResumeConsumerDto,
   ResumeConsumersDto,
 } from '@app/sfu/queries/dto';
@@ -202,7 +204,7 @@ export class SignalingWebsocketService {
   async onProduce(
     client: Socket,
     validate: OnProduceValidate,
-  ): Promise<CreateProduceResult & { nickname: string }> {
+  ): Promise<CreateProduceResult & { nickname: string, is_paused : boolean }> {
     const room_id: string = client.data.room_id;
     const payload: SocketPayload = client.data.user;
     const dto: CreatePropduceDto = {
@@ -214,6 +216,7 @@ export class SignalingWebsocketService {
     return {
       ...result,
       nickname: payload.nickname,
+      is_paused : false
     };
   }
 
@@ -339,5 +342,26 @@ export class SignalingWebsocketService {
       tool,
     };
     await this.disconnectToolUsecase.execute(dto);
-  }
+  };
+
+  // 특정 produce를 끄겠다는 것
+  async pauseProduce(client : Socket, validate: PauseProducerValidate) : Promise<CreateProduceResult & { nickname: string, is_paused : boolean }>  {
+    const room_id: string = client.data.room_id;
+    const payload: SocketPayload = client.data.user;
+    const dto : PauseProducerDto = {
+      room_id,
+      user_id : payload.user_id,
+      ...validate
+    };
+    await this.sfuServer.pauseProducers(dto);
+    return {
+      ...validate,
+      status : "user",
+      type : validate.kind === "video" ? "cam" : "mic",
+      user_id : payload.user_id,
+      nickname : payload.nickname,
+      is_paused : true
+    };
+  };
+
 }

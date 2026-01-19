@@ -39,6 +39,7 @@ export const WEBSOCKET_SIGNALING_CLIENT_EVENT_NAME = Object.freeze({
   JOINED: 'room:joined',
   ADMISSION: 'room:admission',
   NEW_PRODUCED: 'room:new_produced',
+  PAUSE_PRODUCED : "room:pause_produced",
   NEW_USER: 'room:new_user',
   USER_CLOSED: 'room:user_closed',
   ERROR: 'room:error',
