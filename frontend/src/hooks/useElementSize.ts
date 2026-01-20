@@ -1,9 +1,9 @@
-import { useEffect, useState, RefObject } from 'react';
+import { useLayoutEffect, useState, RefObject } from 'react';
 
 export const useElementSize = (ref: RefObject<HTMLElement | null>) => {
   const [size, setSize] = useState({ width: 0, height: 0 });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!ref.current) return;
 
     const element = ref.current;
