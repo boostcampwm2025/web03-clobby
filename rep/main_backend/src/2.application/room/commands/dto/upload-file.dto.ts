@@ -29,9 +29,15 @@ export type DirectUploadInfo = {
   upload_url : string;
 };
 
+export type UploadUrls = {
+  upload_url : string;
+  part_number : number;
+};
+
 export type MultipartUploadInitInfo = {
   upload_id : string; 
   part_size : number;
+  upload_urls : Array<UploadUrls>; // 이제 업로드를 실행해야 할 url들
 };
 
 export type MultipartCompletedPart = {
@@ -39,10 +45,17 @@ export type MultipartCompletedPart = {
   etag : string;
 };
 
-export type MultipartUploadCompleteInfo = {
+export type MultipartUploadResumeInfoValue = {
   upload_id : string;
   complete_parts : Array<MultipartCompletedPart>,
   part_size : number;
+};
+
+export type MultipartUploadResumeInfo = {
+  upload_id : string;
+  part_size : number;
+  complete_parts : Array<MultipartCompletedPart>,
+  upload_urls : Array<UploadUrls>; // 이제 업로드를 실행해야할 url들
 }; 
 
 // 데이터를 insert할때 사용되는 dto
@@ -59,7 +72,7 @@ export type InsertUploadFileInfoDto = {
 };
 
 export type UploadFileResult = {
-  type : "direct" | "multipart" | "multipart_complete"; // multipart_complete가 upload 남은거
+  type : "direct" | "multipart" | "multipart_resume" | "multipart_completed"; // multipart_complete가 upload 남은거
 
   file_id : string;
 
@@ -67,5 +80,5 @@ export type UploadFileResult = {
 
   multipart : MultipartUploadInitInfo | null;
 
-  multipart_complete : MultipartUploadCompleteInfo | null;
+  multipart_resume : MultipartUploadResumeInfo | null;
 };

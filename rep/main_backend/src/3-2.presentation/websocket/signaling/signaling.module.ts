@@ -39,7 +39,7 @@ import { ConfigService } from '@nestjs/config';
 import { TOOL_LEFT_TOPIC_NAME } from './signaling.validate';
 import { EVENT_STREAM_NAME } from '@infra/event-stream/event-stream.constants';
 import { KafkaService } from '@infra/event-stream/kafka/event-stream-service';
-import { GetCompleteMultipartTagsFromAwsS3, GetMultipartUploadIdFromS3Bucket, GetPresignedUrlFromS3Bucket } from '@infra/disk/s3/adapters/disk.inbound';
+import { GetCompleteMultipartTagsFromAwsS3, GetMultipartUploadIdFromS3Bucket, GetPresignedUrlFromS3Bucket, GetPresignedUrlsFromS3Bucket } from '@infra/disk/s3/adapters/disk.inbound';
 
 
 @Module({
@@ -184,10 +184,11 @@ import { GetCompleteMultipartTagsFromAwsS3, GetMultipartUploadIdFromS3Bucket, Ge
         getUploadUrlFromDisk : GetPresignedUrlFromS3Bucket,
         getCompleteUploadUrlFromDisk : GetCompleteMultipartTagsFromAwsS3,
         getMultiVerGroupIdFromDisk : GetMultipartUploadIdFromS3Bucket, 
+        getUploadUrlsFromDisk : GetPresignedUrlsFromS3Bucket,
         insertFileInfoToCache : InsertFileInfoToRedis
       ) => {
         return new UploadFileUsecase({
-          checkUserAndSelectPrevFileInfoFromCache, makeFileId, getUploadUrlFromDisk, getCompleteUploadUrlFromDisk, getMultiVerGroupIdFromDisk, insertFileInfoToCache
+          checkUserAndSelectPrevFileInfoFromCache, makeFileId, getUploadUrlFromDisk, getCompleteUploadUrlFromDisk, getMultiVerGroupIdFromDisk, getUploadUrlsFromDisk, insertFileInfoToCache
         })
       },
       inject : [
@@ -196,6 +197,7 @@ import { GetCompleteMultipartTagsFromAwsS3, GetMultipartUploadIdFromS3Bucket, Ge
         GetPresignedUrlFromS3Bucket,
         GetCompleteMultipartTagsFromAwsS3,
         GetMultipartUploadIdFromS3Bucket,
+        GetPresignedUrlsFromS3Bucket,
         InsertFileInfoToRedis
       ]
     }
