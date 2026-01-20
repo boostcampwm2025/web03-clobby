@@ -4,13 +4,13 @@ import { createProduceHelper } from '@/utils/createProduceHelpers';
 import { useMemo } from 'react';
 
 export const useProduce = () => {
-  const { sendTransport, setProducer, setIsProducing } =
+  const { socket, sendTransport, setProducer, setIsProducing } =
     useMeetingSocketStore();
   const { setMedia } = useMeetingStore();
 
   // sendTransport가 초기화 된 이후 createProduceHelper 선언
   const helpers = useMemo(() => {
-    if (!sendTransport) return null;
+    if (!socket || !sendTransport) return null;
     return createProduceHelper(sendTransport);
   }, [sendTransport]);
 
@@ -49,11 +49,16 @@ export const useProduce = () => {
   const stopAudioProduce = () => {
     const { audioProducer } = useMeetingSocketStore.getState().producers;
 
-    if (audioProducer) {
+    if (socket && audioProducer) {
       // Mediasoup 전송 중단
       audioProducer.close();
       // 실제 하드웨어 정지
       audioProducer.track?.stop();
+      // 서버에 OFF 신호 전달
+      socket.emit('signaling:ws:produce_off', {
+        producer_id: audioProducer.id,
+        kind: 'audio',
+      });
 
       setProducer('audioProducer', null);
       setMedia({ audioOn: false });
@@ -89,7 +94,11 @@ export const useProduce = () => {
   const stopVideoProduce = () => {
     const { videoProducer } = useMeetingSocketStore.getState().producers;
 
-    if (videoProducer) {
+    if (socket && videoProducer) {
+      socket.emit('signaling:ws:produce_off', {
+        producer_id: videoProducer.id,
+        kind: 'audio',
+      });
       videoProducer.close();
       videoProducer.track?.stop();
       setProducer('videoProducer', null);
@@ -151,7 +160,7 @@ export const useProduce = () => {
     const { screenAudioProducer, screenVideoProducer } =
       useMeetingSocketStore.getState().producers;
 
-    if (screenVideoProducer) {
+    if (socket && screenVideoProducer) {
       screenVideoProducer.close();
       screenAudioProducer?.close();
       screenVideoProducer.track?.stop();
