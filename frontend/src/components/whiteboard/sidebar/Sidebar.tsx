@@ -8,6 +8,7 @@ import ArrowPanel from '@/components/whiteboard/sidebar/panels/ArrowPanel';
 import LinePanel from '@/components/whiteboard/sidebar/panels/LinePanel';
 import MediaPanel from '@/components/whiteboard/sidebar/panels/MediaPanel';
 import TextPanel from '@/components/whiteboard/sidebar/panels/TextPanel';
+import DrawingPanel from '@/components/whiteboard/sidebar/panels/DrawingPanel';
 
 import { StrokeStyleType } from '@/components/whiteboard/sidebar/sections/StrokeStyleSection';
 import { EdgeType } from '@/components/whiteboard/sidebar/sections/EdgesSection';
@@ -19,27 +20,35 @@ import type {
   ShapeItem,
   ImageItem,
   TextItem,
+  DrawingItem,
 } from '@/types/whiteboard';
 import {
   ARROW_SIZE_PRESETS,
   ARROW_STYLE_PRESETS,
-} from '@/components/whiteboard/sidebar/panels/arrowPresets';
+} from '@/constants/arrowPresets';
 import { TEXT_SIZE_PRESETS } from '@/constants/textPresets';
+import { DRAWING_SIZE_PRESETS } from '@/constants/drawingPresets';
 import {
   getArrowSize,
   getLineSize,
   getTextSize,
+  getDrawingSize,
   getItemStyle,
 } from '@/utils/sidebarStyleHelpers';
 
-// 사이드 바 선택된 요소 타입 (media와 text 모두 포함)
-type SelectionType = 'shape' | 'arrow' | 'line' | 'media' | 'text' | null;
+// 사이드 바 선택된 요소 타입
+type SelectionType = 'shape' | 'arrow' | 'line' | 'text' | 'drawing' | 'media' | null;
 
 export default function Sidebar() {
   // 스토어에서 선택된 아이템 정보 가져오기
   const selectedId = useCanvasStore((state) => state.selectedId);
   const items = useCanvasStore((state) => state.items);
   const updateItem = useCanvasStore((state) => state.updateItem);
+  const cursorMode = useCanvasStore((state) => state.cursorMode);
+  const drawingStroke = useCanvasStore((state) => state.drawingStroke);
+  const drawingSize = useCanvasStore((state) => state.drawingSize);
+  const setDrawingStroke = useCanvasStore((state) => state.setDrawingStroke);
+  const setDrawingSize = useCanvasStore((state) => state.setDrawingSize);
 
   // 선택된 아이템 찾기
   const selectedItem = useMemo(
@@ -63,6 +72,8 @@ export default function Sidebar() {
         return 'media';
       case 'text':
         return 'text';
+      case 'drawing':
+        return 'drawing';
       default:
         return null;
     }
@@ -102,6 +113,8 @@ export default function Sidebar() {
 
   // 선택 타입에 따른 표시될 헤더 제목
   const getHeaderTitle = () => {
+    if (cursorMode === 'draw') return 'Drawing';
+
     switch (selectionType) {
       case 'shape':
         return 'Shape';
@@ -115,13 +128,15 @@ export default function Sidebar() {
         return 'Image';
       case 'text':
         return 'Text';
+      case 'drawing':
+        return 'Drawing';
       default:
         return '';
     }
   };
 
-  // 선택된 아이템이 없거나 지원하지 않는 타입이면 사이드바 표시 안 함
-  if (!selectedItem || !selectionType) {
+  // 사이드바 표시 여부
+  if (!(selectedItem && selectionType) && cursorMode !== 'draw') {
     return null;
   }
 
@@ -329,6 +344,36 @@ export default function Sidebar() {
             onChangeTextDecoration={(textDecoration) =>
               updateItem(selectedId!, { textDecoration })
             }
+          />
+        )}
+        {/* drawing */}
+        {(cursorMode === 'draw' || selectionType === 'drawing') && (
+          <DrawingPanel
+            stroke={
+              selectedItem && selectionType === 'drawing'
+                ? (selectedItem as DrawingItem).stroke
+                : drawingStroke
+            }
+            size={
+              selectedItem && selectionType === 'drawing'
+                ? getDrawingSize(selectedItem as DrawingItem)
+                : drawingSize
+            }
+            onChangeStroke={(color) => {
+              if (selectedItem && selectionType === 'drawing') {
+                updateItem(selectedId!, { stroke: color });
+              } else {
+                setDrawingStroke(color);
+              }
+            }}
+            onChangeSize={(size) => {
+              if (selectedItem && selectionType === 'drawing') {
+                const preset = DRAWING_SIZE_PRESETS[size];
+                updateItem(selectedId!, { strokeWidth: preset.strokeWidth });
+              } else {
+                setDrawingSize(size);
+              }
+            }}
           />
         )}
       </div>

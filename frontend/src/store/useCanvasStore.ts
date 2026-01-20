@@ -76,6 +76,10 @@ interface CanvasState {
 
   // 자유 그리기
   currentDrawing: DrawingItem | null;
+  drawingStroke: string;
+  drawingSize: 'S' | 'M' | 'L';
+  setDrawingStroke: (color: string) => void;
+  setDrawingSize: (size: 'S' | 'M' | 'L') => void;
   startDrawing: (x: number, y: number) => void;
   continueDrawing: (x: number, y: number) => void;
   finishDrawing: () => void;
@@ -200,15 +204,21 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   setCursorMode: (mode) => set({ cursorMode: mode }),
 
   currentDrawing: null,
+  drawingStroke: '#343a40', // 팔레트의 검정색
+  drawingSize: 'M',
+  setDrawingStroke: (color) => set({ drawingStroke: color }),
+  setDrawingSize: (size) => set({ drawingSize: size }),
 
   // 그리기
   startDrawing: (x, y) => {
+    const state = get();
+    const sizePresets = { S: 4, M: 12, L: 20 };
     const newDrawing: DrawingItem = {
       id: uuidv4(),
       type: 'drawing',
       points: [x, y],
-      stroke: '#111827',
-      strokeWidth: 10,
+      stroke: state.drawingStroke,
+      strokeWidth: sizePresets[state.drawingSize],
       scaleX: 1,
       scaleY: 1,
       rotation: 0,

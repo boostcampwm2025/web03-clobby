@@ -1,9 +1,12 @@
-import type { ArrowItem, LineItem, TextItem } from '@/types/whiteboard';
 import type {
-  ArrowSize,
-  ArrowStyle,
-} from '@/components/whiteboard/sidebar/panels/arrowPresets';
+  ArrowItem,
+  LineItem,
+  TextItem,
+  DrawingItem,
+} from '@/types/whiteboard';
+import type { ArrowSize, ArrowStyle } from '@/constants/arrowPresets';
 import type { TextSize } from '@/constants/textPresets';
+import type { DrawingSize } from '@/constants/drawingPresets';
 
 // 현재 Arrow 사이즈 결정
 export function getArrowSize(arrow: ArrowItem): ArrowSize {
@@ -25,6 +28,13 @@ export function getTextSize(text: TextItem): TextSize {
   if (text.fontSize <= 32) return 'M';
   if (text.fontSize <= 64) return 'L';
   return 'XL';
+}
+
+// 현재 Drawing 사이즈 결정
+export function getDrawingSize(drawing: DrawingItem): DrawingSize {
+  if (drawing.strokeWidth <= 4) return 'S';
+  if (drawing.strokeWidth <= 12) return 'M';
+  return 'L';
 }
 
 // 현재 arrow/line 스타일 결정
