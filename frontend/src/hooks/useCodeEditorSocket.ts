@@ -17,7 +17,7 @@ export const useCodeEditorSocket = () => {
   const connectToTool = useCallback(
     (tool: string, ticket: string, type: 'main' | 'sub') => {
       const newSocket = io(`${TOOL_BACKEND_URL}${NAMESPACE}`, {
-        path: SOCKET_PATH,
+        path: `/${tool}`, // ???
         transports: ['websocket'],
         auth: { token: ticket, type },
       });

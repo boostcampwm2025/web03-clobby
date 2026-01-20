@@ -24,7 +24,7 @@ export default function MeetingRoom({ meetingId }: { meetingId: string }) {
   } = useMeetingStore();
   const { startAudioProduce, startVideoProduce, isReady } = useProduce();
 
-  const { joinCodeEditor, closeCodeEditor } = useCodeEditorSocket();
+  const { joinCodeEditor } = useCodeEditorSocket();
   const { socket: mainSocket } = useMeetingSocket();
 
   // 초기 입장 시 로비에서 설정한 미디어 Produce
@@ -58,7 +58,7 @@ export default function MeetingRoom({ meetingId }: { meetingId: string }) {
     return () => {
       mainSocket.off('room:request_codeeditor', handleRequestCodeEditor);
     };
-  }, [mainSocket, isCodeEditorOpen, joinCodeEditor, closeCodeEditor]);
+  }, [mainSocket, isCodeEditorOpen, joinCodeEditor]);
 
   return (
     <main className="flex h-screen w-full flex-col overflow-hidden bg-neutral-900">
