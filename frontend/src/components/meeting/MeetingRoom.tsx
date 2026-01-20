@@ -11,7 +11,12 @@ import { useProduce } from '@/hooks/useProduce';
 import { useMeetingSocketStore } from '@/store/useMeetingSocketStore';
 import { useMeetingStore } from '@/store/useMeetingStore';
 import { useUserStore } from '@/store/useUserStore';
-import { FetchRoomMembersResponse, MeetingMemberInfo } from '@/types/meeting';
+import {
+  FetchRoomMembersResponse,
+  MeetingMemberInfo,
+  ProducerInfo,
+} from '@/types/meeting';
+import { createConsumeHelpers } from '@/utils/createConsumeHelpers';
 import { useEffect } from 'react';
 
 export default function MeetingRoom({ meetingId }: { meetingId: string }) {
@@ -24,8 +29,16 @@ export default function MeetingRoom({ meetingId }: { meetingId: string }) {
     isCodeEditorOpen,
   } = useMeetingStore();
   const { startAudioProduce, startVideoProduce, isReady } = useProduce();
-  const { socket } = useMeetingSocketStore();
-  const { members, setMembers, addMember, removeMember } = useMeetingStore();
+  const { socket, device, recvTransport } = useMeetingSocketStore();
+  const {
+    members,
+    memberStreams,
+    setMembers,
+    addMember,
+    removeMember,
+    setMemberStream,
+    removeMemberStream,
+  } = useMeetingStore();
   const { userId } = useUserStore();
 
   // 초기 입장 시 로비에서 설정한 미디어 Produce
@@ -71,6 +84,32 @@ export default function MeetingRoom({ meetingId }: { meetingId: string }) {
       socket.off('room:user_closed', onUserClosed);
     };
   }, [socket]);
+
+  // produce 발생 시 consume
+  useEffect(() => {
+    if (!socket || !device || !recvTransport) return;
+
+    const { consumeOne } = createConsumeHelpers({
+      socket,
+      device,
+      recvTransport,
+    });
+    const onAlertProduced = async (producerInfo: ProducerInfo) => {
+      const { type, stream } = await consumeOne(producerInfo);
+
+      if (producerInfo.is_paused) {
+        removeMemberStream(producerInfo.user_id, type);
+        return;
+      }
+
+      setMemberStream(producerInfo.user_id, type, stream);
+    };
+    socket.on('room:alert_produced', onAlertProduced);
+
+    return () => {
+      socket.off('room:alert_produced', onAlertProduced);
+    };
+  }, [socket, device, recvTransport]);
 
   return (
     <main className="flex h-screen w-full flex-col overflow-hidden bg-neutral-900">

@@ -65,3 +65,18 @@ export interface FetchRoomMembersResponse {
   } | null;
   members: MeetingMemberInfo[];
 }
+
+export interface ProducerInfo {
+  producer_id: string;
+  user_id: string;
+  status: 'user' | 'main';
+  kind: 'audio' | 'video';
+  type: 'mic' | 'cam' | 'screen_video' | 'screen_audio';
+  nickname: string;
+  is_paused: boolean;
+}
+
+export interface MemberStream {
+  audio?: MediaStream;
+  video?: MediaStream;
+}

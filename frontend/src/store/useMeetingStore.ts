@@ -1,4 +1,4 @@
-import { MediaState, MeetingMemberInfo } from '@/types/meeting';
+import { MediaState, MeetingMemberInfo, MemberStream } from '@/types/meeting';
 import { create } from 'zustand';
 
 const INITIAL_MEDIA_STATE: MediaState = {
@@ -12,6 +12,7 @@ const INITIAL_MEDIA_STATE: MediaState = {
 interface MeetingState {
   media: MediaState;
   members: Record<string, MeetingMemberInfo>;
+  memberStreams: Record<string, MemberStream>;
   hasNewChat: boolean;
 
   isInfoOpen: boolean;
@@ -26,6 +27,10 @@ interface MeetingActions {
   setMembers: (members: MeetingMemberInfo[]) => void;
   addMember: (member: MeetingMemberInfo) => void;
   removeMember: (userId: string) => void;
+
+  setMemberStream: (userId: string, type: string, stream: MediaStream) => void;
+  removeMemberStream: (userId: string, type: string) => void;
+
   setHasNewChat: (state: boolean) => void;
 
   setIsOpen: (
@@ -44,6 +49,7 @@ interface MeetingActions {
 export const useMeetingStore = create<MeetingState & MeetingActions>((set) => ({
   media: INITIAL_MEDIA_STATE,
   members: {},
+  memberStreams: {},
   hasNewChat: false,
 
   isInfoOpen: false,
@@ -66,14 +72,40 @@ export const useMeetingStore = create<MeetingState & MeetingActions>((set) => ({
         ...state.members,
         [member.user_id]: member,
       },
+      memberStreams: {
+        [member.user_id]: {},
+      },
     })),
   removeMember: (userId) =>
     set((state) => {
       const nextMembers = { ...state.members };
       delete nextMembers[userId];
-      return { members: nextMembers };
+      const nextMemberStreams = { ...state.memberStreams };
+      delete nextMemberStreams[userId];
+      return { members: nextMembers, memberStreams: nextMemberStreams };
     }),
-  setHasNewChat: (state) => set({ hasNewChat: state }),
 
+  setMemberStream: (userId, type, stream) =>
+    set((state) => ({
+      memberStreams: {
+        ...state.memberStreams,
+        [userId]: {
+          ...state.memberStreams[userId],
+          [type]: stream,
+        },
+      },
+    })),
+  removeMemberStream: (userId, type) =>
+    set((state) => ({
+      memberStreams: {
+        ...state.memberStreams,
+        [userId]: {
+          ...state.memberStreams[userId],
+          [type]: undefined,
+        },
+      },
+    })),
+
+  setHasNewChat: (state) => set({ hasNewChat: state }),
   setIsOpen: (type, state) => set({ [type]: state }),
 }));

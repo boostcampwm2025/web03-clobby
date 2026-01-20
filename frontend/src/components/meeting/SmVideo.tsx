@@ -1,5 +1,8 @@
 import { MoreHoriIcon } from '@/assets/icons/common';
 import { MicOffIcon } from '@/assets/icons/meeting';
+import AudioPlayer from '@/components/meeting/media/AudioPlayer';
+import VideoView from '@/components/meeting/media/VideoView';
+import { useMeetingStore } from '@/store/useMeetingStore';
 import { MeetingMemberInfo } from '@/types/meeting';
 import Image from 'next/image';
 import { useState } from 'react';
@@ -14,14 +17,16 @@ export default function SmVideo({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const onMoreClick = () => setIsDropdownOpen((prev) => !prev);
 
+  const streams = useMeetingStore((state) => state.memberStreams[user_id]);
+
   return (
     <div
       className={`group flex-center relative aspect-video w-40 rounded-lg bg-neutral-700`}
     >
       {/* 영상 */}
-      {!cam?.is_paused ? (
+      {streams?.video ? (
         <div className="flex-center h-full w-full overflow-hidden rounded-lg">
-          <video></video>
+          <VideoView stream={streams.video} />
         </div>
       ) : profile_path ? (
         <Image
@@ -39,11 +44,14 @@ export default function SmVideo({
 
       {/* 이름표 */}
       <div className="absolute bottom-2 left-2 flex max-w-[calc(100%-16px)] items-center gap-1 rounded-sm bg-neutral-900 p-1">
-        {mic?.is_paused && <MicOffIcon className="h-3 w-3 shrink-0" />}
+        {!streams?.audio && <MicOffIcon className="h-3 w-3 shrink-0" />}
         <span className="ellipsis w-full text-xs font-bold text-neutral-200">
           {nickname}
         </span>
       </div>
+
+      {/* 음성 */}
+      {streams?.audio && <AudioPlayer stream={streams.audio} />}
 
       {/* 더보기 메뉴 */}
       <div
