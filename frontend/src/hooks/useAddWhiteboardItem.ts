@@ -1,20 +1,22 @@
-import { useCanvasStore } from '@/store/useCanvasStore';
+import { useLocalStore } from '@/store/useLocalStore';
+import { useItemActions } from '@/hooks/useItemActions';
 import { getCenterWorldPos } from '@/utils/coordinate';
 import { ShapeType } from '@/types/whiteboard';
 
 export const useAddWhiteboardItem = () => {
-  // Canvas Store 액션
-  const addText = useCanvasStore((state) => state.addText);
-  const addArrow = useCanvasStore((state) => state.addArrow);
-  const addLine = useCanvasStore((state) => state.addLine);
-  const addShape = useCanvasStore((state) => state.addShape);
-  const addImage = useCanvasStore((state) => state.addImage);
-  const addVideo = useCanvasStore((state) => state.addVideo);
-  const addYoutube = useCanvasStore((state) => state.addYoutube);
+  const {
+    addText,
+    addArrow,
+    addLine,
+    addShape,
+    addImage,
+    addVideo,
+    addYoutube,
+  } = useItemActions();
 
-  // Canvas Store 상태
-  const stagePos = useCanvasStore((state) => state.stagePos);
-  const stageScale = useCanvasStore((state) => state.stageScale);
+  // Local Store 상태
+  const stagePos = useLocalStore((state) => state.stagePos);
+  const stageScale = useLocalStore((state) => state.stageScale);
 
   // Text Item 추가 핸들러
   const handleAddText = () => {

@@ -1,7 +1,7 @@
-import { useCanvasStore } from '@/store/useCanvasStore';
+import { useLocalStore } from '@/store/useLocalStore';
 
 export function useItemInteraction() {
-  const cursorMode = useCanvasStore((state) => state.cursorMode);
+  const cursorMode = useLocalStore((state) => state.cursorMode);
 
   return {
     // 아이템 조작 가능 여부

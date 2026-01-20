@@ -2,7 +2,7 @@
 
 import NavButton from '../common/NavButton';
 import { ZoomOutIcon, ZoomInIcon } from '@/assets/icons/whiteboard';
-import { useCanvasStore } from '@/store/useCanvasStore';
+import { useLocalStore } from '@/store/useLocalStore';
 import {
   MIN_SCALE,
   MAX_SCALE,
@@ -10,10 +10,10 @@ import {
 } from '@/components/whiteboard/constants/canvas';
 
 export default function ZoomControls() {
-  const stageScale = useCanvasStore((state) => state.stageScale);
-  const stagePos = useCanvasStore((state) => state.stagePos);
-  const setStageScale = useCanvasStore((state) => state.setStageScale);
-  const setStagePos = useCanvasStore((state) => state.setStagePos);
+  const stageScale = useLocalStore((state) => state.stageScale);
+  const stagePos = useLocalStore((state) => state.stagePos);
+  const setStageScale = useLocalStore((state) => state.setStageScale);
+  const setStagePos = useLocalStore((state) => state.setStagePos);
 
   // 줌 인
   const handleZoomIn = () => {

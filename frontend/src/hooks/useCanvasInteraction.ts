@@ -1,5 +1,6 @@
 import { KonvaEventObject } from 'konva/lib/Node';
-import { useCanvasStore } from '@/store/useCanvasStore';
+import { useSharedStore } from '@/store/useSharedStore';
+import { useLocalStore } from '@/store/useLocalStore';
 import {
   MIN_SCALE,
   MAX_SCALE,
@@ -13,10 +14,10 @@ export const useCanvasInteraction = (
   windowWidth: number,
   windowHeight: number,
 ) => {
-  const canvasWidth = useCanvasStore((state) => state.canvasWidth);
-  const canvasHeight = useCanvasStore((state) => state.canvasHeight);
-  const setStageScale = useCanvasStore((state) => state.setStageScale);
-  const setStagePos = useCanvasStore((state) => state.setStagePos);
+  const canvasWidth = useSharedStore((state) => state.canvasWidth);
+  const canvasHeight = useSharedStore((state) => state.canvasHeight);
+  const setStageScale = useLocalStore((state) => state.setStageScale);
+  const setStagePos = useLocalStore((state) => state.setStagePos);
 
   // stage 위치를 화면 범위 내로 제한
   const constrainStagePosition = (

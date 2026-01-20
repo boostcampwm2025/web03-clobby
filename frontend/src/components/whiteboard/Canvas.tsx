@@ -7,7 +7,9 @@ import { Stage, Layer, Rect, Line } from 'react-konva';
 
 import type { WhiteboardItem, TextItem, ArrowItem } from '@/types/whiteboard';
 
-import { useCanvasStore } from '@/store/useCanvasStore';
+import { useSharedStore } from '@/store/useSharedStore';
+import { useLocalStore } from '@/store/useLocalStore';
+import { useItemActions } from '@/hooks/useItemActions';
 
 import { useWindowSize } from '@/hooks/useWindowSize';
 import { useCanvasInteraction } from '@/hooks/useCanvasInteraction';
@@ -21,16 +23,16 @@ import ItemTransformer from '@/components/whiteboard/controls/ItemTransformer';
 import ArrowHandles from '@/components/whiteboard/items/arrow/ArrowHandles';
 
 export default function Canvas() {
-  const stageScale = useCanvasStore((state) => state.stageScale);
-  const stagePos = useCanvasStore((state) => state.stagePos);
-  const canvasWidth = useCanvasStore((state) => state.canvasWidth);
-  const canvasHeight = useCanvasStore((state) => state.canvasHeight);
-  const items = useCanvasStore((state) => state.items);
-  const selectedId = useCanvasStore((state) => state.selectedId);
-  const editingTextId = useCanvasStore((state) => state.editingTextId);
-  const selectItem = useCanvasStore((state) => state.selectItem);
-  const updateItem = useCanvasStore((state) => state.updateItem);
-  const setEditingTextId = useCanvasStore((state) => state.setEditingTextId);
+  const stageScale = useLocalStore((state) => state.stageScale);
+  const stagePos = useLocalStore((state) => state.stagePos);
+  const canvasWidth = useSharedStore((state) => state.canvasWidth);
+  const canvasHeight = useSharedStore((state) => state.canvasHeight);
+  const items = useSharedStore((state) => state.items);
+  const selectedId = useLocalStore((state) => state.selectedId);
+  const editingTextId = useLocalStore((state) => state.editingTextId);
+  const selectItem = useLocalStore((state) => state.selectItem);
+  const { updateItem } = useItemActions();
+  const setEditingTextId = useLocalStore((state) => state.setEditingTextId);
 
   const stageRef = useRef<Konva.Stage | null>(null);
   const [isDraggingArrow, setIsDraggingArrow] = useState(false);
@@ -98,7 +100,7 @@ export default function Canvas() {
   });
 
   // 캔버스 드래그 가능 여부
-  const isDraggable = useCanvasStore((state) => state.cursorMode === 'move');
+  const isDraggable = useLocalStore((state) => state.cursorMode === 'move');
 
   useCanvasShortcuts({
     isArrowOrLineSelected,

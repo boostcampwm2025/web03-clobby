@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { useCanvasStore } from '@/store/useCanvasStore';
+import { useLocalStore } from '@/store/useLocalStore';
+import { useItemActions } from '@/hooks/useItemActions';
 
 interface UseCanvasShortcutsProps {
   isArrowOrLineSelected: boolean;
@@ -12,9 +13,9 @@ export const useCanvasShortcuts = ({
   selectedHandleIndex,
   deleteControlPoint,
 }: UseCanvasShortcutsProps) => {
-  const selectedId = useCanvasStore((state) => state.selectedId);
-  const editingTextId = useCanvasStore((state) => state.editingTextId);
-  const deleteItem = useCanvasStore((state) => state.deleteItem);
+  const selectedId = useLocalStore((state) => state.selectedId);
+  const editingTextId = useLocalStore((state) => state.editingTextId);
+  const { deleteItem } = useItemActions();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

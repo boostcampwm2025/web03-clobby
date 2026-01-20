@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 
-import { useCanvasStore } from '@/store/useCanvasStore';
+import { useLocalStore } from '@/store/useLocalStore';
 import { useAddWhiteboardItem } from '@/hooks/useAddWhiteboardItem';
 import { useClickOutside } from '@/hooks/useClickOutside';
 
@@ -43,8 +43,8 @@ export default function ToolbarContainer() {
   const toolbarRef = useRef<HTMLDivElement>(null);
 
   // 커서 모드 상태
-  const cursorMode = useCanvasStore((state) => state.cursorMode);
-  const setCursorMode = useCanvasStore((state) => state.setCursorMode);
+  const cursorMode = useLocalStore((state) => state.cursorMode);
+  const setCursorMode = useLocalStore((state) => state.setCursorMode);
 
   // 아이템 추가 훅
   const { handleAddText, handleAddArrow, handleAddLine } =
