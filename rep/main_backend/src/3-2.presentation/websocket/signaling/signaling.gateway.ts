@@ -483,7 +483,7 @@ export class SignalingWebsocketGateway
       // 모두에게 알림 - 화면공유가 꺼졌다고 방에 인원에게 알린다.
       const room_id: string = client.data.room_id;
       const namespace: string = `${CHANNEL_NAMESPACE.SIGNALING}:${room_id}`;
-      client.to(namespace).emit(WEBSOCKET_SIGNALING_CLIENT_EVENT_NAME.ALERT_PRODUCED, result);
+      client.to(namespace).emit(WEBSOCKET_SIGNALING_CLIENT_EVENT_NAME.SCREEN_STOP, result);
 
       return result;
     } catch (err) {

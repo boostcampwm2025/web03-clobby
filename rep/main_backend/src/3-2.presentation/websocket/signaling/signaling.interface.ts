@@ -45,6 +45,7 @@ export class MakeIssueToolTicket extends MakeToken {
     const token = await new SignJWT({
       room_id: payload.room_id,
       tool: payload.tool,
+      nickname : payload.nickname,
       socket_id: payload.socket_id,
       scope: ['tool:open'],
     })
