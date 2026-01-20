@@ -18,15 +18,15 @@ import { EVENT_STREAM_NAME } from '@/infra/event-stream/event-stream.constants';
 import { CODEEDITOR_WEBSOCKET } from '@/infra/websocket/websocket.constants';
 import { CodeeditorWebsocket } from '@/infra/websocket/codeeditor/codeeditor.service';
 
-const mockData: ToolBackendPayload = {
-  user_id: 'user1',
-  room_id: 'user2',
-  tool: 'codeeditor',
-  socket_id: 'socket1',
-  ticket: 'ticket',
-  clientType: 'main',
-  // nickname: 'test_user',
-};
+// const mockData: ToolBackendPayload = {
+//   user_id: 'user1',
+//   room_id: 'user2',
+//   tool: 'codeeditor',
+//   socket_id: 'socket1',
+//   ticket: 'ticket',
+//   clientType: 'main',
+//   // nickname: 'test_user',
+// };
 
 @WebSocketGateway({
   namespace: process.env.NODE_BACKEND_WEBSOCKET_PREFIX,
@@ -46,7 +46,7 @@ export class CodeeditorWebsocketGateway implements OnGatewayInit, OnGatewayConne
 
   constructor(
     private readonly codeeditorService: CodeeditorService,
-    // private readonly kafkaService: KafkaService,
+    private readonly kafkaService: KafkaService,
     @Inject(CODEEDITOR_WEBSOCKET) private readonly codeeditorSocket: CodeeditorWebsocket,
   ) {}
 
@@ -55,25 +55,25 @@ export class CodeeditorWebsocketGateway implements OnGatewayInit, OnGatewayConne
     this.codeeditorSocket.bindServer(server);
 
     server.use(async (socket, next) => {
-      socket.data.payload = mockData;
-      this.logger.log('웹소켓 준비되었습니다.');
-      return next();
-      // try {
-      //   const { token, type } = socket.handshake.auth as AuthType;
+      // socket.data.payload = mockData;
+      // this.logger.log('웹소켓 준비되었습니다.');
+      // return next();
+      try {
+        const { token, type } = socket.handshake.auth as AuthType;
 
-      //   if (!token) return next(new Error('TOKEN_REQUIRED'));
-      //   if (type !== 'main' && type !== 'sub') return next(new Error('INVALID_TYPE'));
+        if (!token) return next(new Error('TOKEN_REQUIRED'));
+        if (type !== 'main' && type !== 'sub') return next(new Error('INVALID_TYPE'));
 
-      //   const payload = await this.whiteboarService.guardService(token, type);
+        const payload = await this.codeeditorService.guardService(token, type);
 
-      //   // data 추가
-      //   socket.data.payload = payload;
-      //   this.logger.log('웹소켓 준비되었습니다.');
-      //   return next();
-      // } catch (err) {
-      //   this.logger.error(err);
-      //   next(new Error('인증 에러'));
-      // }
+        // data 추가
+        socket.data.payload = payload;
+        this.logger.log('웹소켓 준비되었습니다.');
+        return next();
+      } catch (err) {
+        this.logger.error(err);
+        next(new Error('인증 에러'));
+      }
     });
   }
 
@@ -97,16 +97,16 @@ export class CodeeditorWebsocketGateway implements OnGatewayInit, OnGatewayConne
     // 방에 이미 사람이 있다면, 그중 한 명에게 최신 상태(Sync Step)를 요청
     client.to(roomName).emit('request-sync');
 
-    // if (payload.clientType === 'main') {
-    //   this.kafkaService.emit(EVENT_STREAM_NAME.CODEEDITOR_ENTER, {
-    //     room_id: payload.room_id,
-    //     user_id: payload.user_id,
-    //     tool: payload.tool,
-    //     socket_id: payload.socket_id,
-    //     ticket: payload.ticket,
-    //     at: Date.now(), // 현재 보낸 시간
-    //   });
-    // }
+    if (payload.clientType === 'main') {
+      this.kafkaService.emit(EVENT_STREAM_NAME.CODEEDITOR_ENTER, {
+        room_id: payload.room_id,
+        user_id: payload.user_id,
+        tool: payload.tool,
+        socket_id: payload.socket_id,
+        ticket: payload.ticket,
+        at: Date.now(), // 현재 보낸 시간
+      });
+    }
 
     client.emit(CODEEDITOR_CLIENT_EVENT_NAME.PERMISSION, { ok: true });
   }
