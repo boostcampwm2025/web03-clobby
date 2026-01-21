@@ -19,6 +19,8 @@ import {
   FetchRoomMembersResponse,
   MeetingMemberInfo,
   ProducerInfo,
+  ProviderInfo,
+  ProviderToolInfo,
 } from '@/types/meeting';
 import { createConsumeHelpers } from '@/utils/createConsumeHelpers';
 import { useEffect } from 'react';
@@ -29,7 +31,7 @@ export default function MeetingRoom({ meetingId }: { meetingId: string }) {
     isInfoOpen,
     isMemberOpen,
     isChatOpen,
-    isWorkspaceOpen,
+    isWhiteboardOpen,
     isCodeEditorOpen,
   } = useMeetingStore();
   const { startAudioProduce, startVideoProduce, isReady } = useProduce();
@@ -96,7 +98,25 @@ export default function MeetingRoom({ meetingId }: { meetingId: string }) {
         )) as FetchRoomMembersResponse;
         setMembers(members.filter((member) => member.user_id !== userId));
 
-        // main으로 화면 공유 중인 경우 처리 구현 필요
+        if (!main) return;
+
+        const checkAndJoinTool = (
+          info: ProviderInfo | ProviderToolInfo | null,
+        ) => {
+          if (!info) return;
+
+          // tool 있는지 확인 - 타입 가드
+          if ('tool' in info && info.tool) {
+            if (info.tool === 'codeeditor' && !isCodeEditorOpen) {
+              joinCodeEditor(info.tool);
+            } else if (info.tool === 'whiteboard' && !isWhiteboardOpen) {
+              // TODO: join
+            }
+          }
+        };
+
+        checkAndJoinTool(main.main);
+        checkAndJoinTool(main.sub);
       } catch (error) {
         console.error('에러 발생:', error);
       }
@@ -188,7 +208,7 @@ export default function MeetingRoom({ meetingId }: { meetingId: string }) {
       <section className="relative flex-1 overflow-hidden">
         {/* 워크스페이스 / 코드 에디터 등의 컴포넌트가 들어갈 공간 */}
         <div className="flex h-full w-full overflow-hidden">
-          {isWorkspaceOpen && (
+          {isWhiteboardOpen && (
             <div
               className={isCodeEditorOpen ? 'h-full w-1/2' : 'h-full w-full'}
             >
@@ -196,7 +216,9 @@ export default function MeetingRoom({ meetingId }: { meetingId: string }) {
             </div>
           )}
           {isCodeEditorOpen && (
-            <div className={isWorkspaceOpen ? 'h-full w-1/2' : 'h-full w-full'}>
+            <div
+              className={isWhiteboardOpen ? 'h-full w-1/2' : 'h-full w-full'}
+            >
               <CodeEditor />
             </div>
           )}
