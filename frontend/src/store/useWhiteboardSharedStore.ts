@@ -15,6 +15,8 @@ interface SharedState {
   canvasHeight: number;
   yItems: Y.Array<WhiteboardItem> | null;
   awareness: awarenessProtocol.Awareness | null;
+  undoManager: Y.UndoManager | null;
+  yjsOrigin: string | null;
 }
 
 interface SharedActions {
@@ -23,6 +25,8 @@ interface SharedActions {
   setYjsInstances: (
     yItems: Y.Array<WhiteboardItem> | null,
     awareness: awarenessProtocol.Awareness | null,
+    undoManager?: Y.UndoManager | null,
+    yjsOrigin?: string | null,
   ) => void;
 }
 
@@ -40,6 +44,8 @@ export const useWhiteboardSharedStore = create<SharedStore>((set) => ({
   // Yjs 인스턴스 초기값
   yItems: null,
   awareness: null,
+  undoManager: null,
+  yjsOrigin: null,
 
   // Yjs 동기화 전용 액션
   setItems: (items) => set({ items }),
@@ -47,5 +53,6 @@ export const useWhiteboardSharedStore = create<SharedStore>((set) => ({
     set({ canvasWidth: width, canvasHeight: height }),
 
   // Yjs 인스턴스 설정
-  setYjsInstances: (yItems, awareness) => set({ yItems, awareness }),
+  setYjsInstances: (yItems, awareness, undoManager = null, yjsOrigin = null) =>
+    set({ yItems, awareness, undoManager, yjsOrigin }),
 }));

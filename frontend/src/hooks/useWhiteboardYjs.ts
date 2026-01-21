@@ -7,9 +7,7 @@ import { useWhiteboardAwarenessStore } from '@/store/useWhiteboardAwarenessStore
 import type { WhiteboardItem } from '@/types/whiteboard';
 
 export const useWhiteboardYjs = (socket: Socket | null) => {
-  const ydocRef = useRef<Y.Doc | null>(null);
-  const awarenessRef = useRef<awarenessProtocol.Awareness | null>(null);
-  const yItemsRef = useRef<Y.Array<WhiteboardItem> | null>(null);
+  const undoManagerRef = useRef<Y.UndoManager | null>(null);
   const cleanupRef = useRef<(() => void) | null>(null);
   const initializedRef = useRef(false);
 
@@ -33,12 +31,20 @@ export const useWhiteboardYjs = (socket: Socket | null) => {
     const yItems = ydoc.getArray<WhiteboardItem>('items');
     const awareness = new awarenessProtocol.Awareness(ydoc);
 
-    ydocRef.current = ydoc;
-    yItemsRef.current = yItems;
-    awarenessRef.current = awareness;
+    // 고유 origin 생성 (UndoManager 추적용)
+    const yjsOrigin = `local-${socket.id}`;
+
+    // UndoManager 생성
+    const undoManager = new Y.UndoManager(yItems, {
+      trackedOrigins: new Set([yjsOrigin, null]), // yjsOrigin과 null(UndoManager 자신) 추적
+      captureTimeout: 500, // 하나의 작업으로 묶을 시간(ms)
+    });
+    undoManagerRef.current = undoManager;
 
     // Store에 Yjs 인스턴스 저장
-    useWhiteboardSharedStore.getState().setYjsInstances(yItems, awareness);
+    useWhiteboardSharedStore
+      .getState()
+      .setYjsInstances(yItems, awareness, undoManager, yjsOrigin);
 
     // Backend에서 사용자 ID 받기
     socket.on('init-user', ({ userId }: { userId: string }) => {
@@ -55,15 +61,19 @@ export const useWhiteboardYjs = (socket: Socket | null) => {
     });
 
     // Yjs → Socket
-    ydoc.on('update', (update: Uint8Array, origin: Socket | null) => {
-      if (origin !== socket) {
-        socket.emit('yjs-update', update);
-      }
-    });
+    ydoc.on(
+      'update',
+      (update: Uint8Array, origin: string | Y.UndoManager | null) => {
+        // 로컬 변경(yjsOrigin) 또는 UndoManager 변경이면 전송
+        if (origin === yjsOrigin || origin === undoManager) {
+          socket.emit('yjs-update', update);
+        }
+      },
+    );
 
     // Socket → Yjs
     socket.on('yjs-update', (update: ArrayBuffer) => {
-      Y.applyUpdate(ydoc, new Uint8Array(update), socket);
+      Y.applyUpdate(ydoc, new Uint8Array(update), 'remote');
     });
 
     // Awareness 동기화
@@ -78,7 +88,7 @@ export const useWhiteboardYjs = (socket: Socket | null) => {
       awarenessProtocol.applyAwarenessUpdate(
         awareness,
         new Uint8Array(update),
-        socket,
+        'remote',
       );
     });
 
@@ -91,15 +101,7 @@ export const useWhiteboardYjs = (socket: Socket | null) => {
     // Yjs Array → SharedStore
     const handleYjsChange = () => {
       const newItems = yItems.toArray();
-
-      // 중복 제거 (Map으로 마지막 것만 유지)
-      const itemMap = new Map<string, WhiteboardItem>();
-      newItems.forEach((item) => {
-        itemMap.set(item.id, item);
-      });
-
-      const uniqueItems = Array.from(itemMap.values());
-      setItems(uniqueItems);
+      setItems(newItems);
     };
 
     yItems.observe(handleYjsChange);
@@ -127,7 +129,10 @@ export const useWhiteboardYjs = (socket: Socket | null) => {
 
     cleanupRef.current = () => {
       initializedRef.current = false;
-      useWhiteboardSharedStore.getState().setYjsInstances(null, null);
+      undoManagerRef.current?.destroy();
+      useWhiteboardSharedStore
+        .getState()
+        .setYjsInstances(null, null, null, null);
       yItems.unobserve(handleYjsChange);
       socket.off('yjs-update');
       socket.off('awareness-update');

@@ -24,13 +24,11 @@ import { extractYoutubeId } from '@/utils/youtube';
 export function useItemActions() {
   // Store에서 Yjs 인스턴스 가져옴
   const yItems = useWhiteboardSharedStore((state) => state.yItems);
+  const yjsOrigin = useWhiteboardSharedStore((state) => state.yjsOrigin);
 
   // 텍스트 추가
   const addText = (payload?: Partial<Omit<TextItem, 'id' | 'type'>>) => {
-    if (!yItems) {
-      console.warn('[useItemActions] Yjs not initialized');
-      return;
-    }
+    if (!yItems || !yItems.doc) return;
 
     const id = uuidv4();
     const newText: TextItem = {
@@ -49,13 +47,15 @@ export function useItemActions() {
       parentPolygonId: payload?.parentPolygonId,
     };
 
-    yItems.push([newText]);
+    yItems.doc.transact(() => {
+      yItems.push([newText]);
+    }, yjsOrigin);
     return id;
   };
 
   // 화살표 추가
   const addArrow = (payload?: Partial<Omit<ArrowItem, 'id' | 'type'>>) => {
-    if (!yItems) return;
+    if (!yItems || !yItems.doc) return;
 
     const id = uuidv4();
     const newArrow: ArrowItem = {
@@ -74,12 +74,14 @@ export function useItemActions() {
       tension: payload?.tension ?? 0.4,
     };
 
-    yItems.push([newArrow]);
+    yItems.doc.transact(() => {
+      yItems.push([newArrow]);
+    }, yjsOrigin);
   };
 
   // 선 추가
   const addLine = (payload?: Partial<Omit<LineItem, 'id' | 'type'>>) => {
-    if (!yItems) return;
+    if (!yItems || !yItems.doc) return;
 
     const id = uuidv4();
     const newLine: LineItem = {
@@ -96,7 +98,9 @@ export function useItemActions() {
       tension: payload?.tension ?? 0.4,
     };
 
-    yItems.push([newLine]);
+    yItems.doc.transact(() => {
+      yItems.push([newLine]);
+    }, yjsOrigin);
   };
 
   // 도형 추가
@@ -104,7 +108,7 @@ export function useItemActions() {
     type: ShapeType,
     payload?: Partial<Omit<ShapeItem, 'id' | 'type' | 'shapeType'>>,
   ) => {
-    if (!yItems) return;
+    if (!yItems || !yItems.doc) return;
 
     const id = uuidv4();
     const newShape: ShapeItem = {
@@ -121,7 +125,9 @@ export function useItemActions() {
       rotation: payload?.rotation ?? 0,
     };
 
-    yItems.push([newShape]);
+    yItems.doc.transact(() => {
+      yItems.push([newShape]);
+    }, yjsOrigin);
   };
 
   // 이미지 추가
@@ -132,7 +138,7 @@ export function useItemActions() {
     width?: number;
     height?: number;
   }) => {
-    if (!yItems) return;
+    if (!yItems || !yItems.doc) return;
 
     const id = uuidv4();
     const newImage: ImageItem = {
@@ -150,7 +156,9 @@ export function useItemActions() {
       opacity: 1,
     };
 
-    yItems.push([newImage]);
+    yItems.doc.transact(() => {
+      yItems.push([newImage]);
+    }, yjsOrigin);
   };
 
   // 비디오 추가
@@ -161,7 +169,7 @@ export function useItemActions() {
     width?: number;
     height?: number;
   }) => {
-    if (!yItems) return;
+    if (!yItems || !yItems.doc) return;
 
     const id = uuidv4();
     const newVideo: VideoItem = {
@@ -179,12 +187,14 @@ export function useItemActions() {
       opacity: 1,
     };
 
-    yItems.push([newVideo]);
+    yItems.doc.transact(() => {
+      yItems.push([newVideo]);
+    }, yjsOrigin);
   };
 
   // 유튜브 추가
   const addYoutube = (payload: { url: string; x?: number; y?: number }) => {
-    if (!yItems) return;
+    if (!yItems || !yItems.doc) return;
 
     const videoId = extractYoutubeId(payload.url);
 
@@ -213,18 +223,22 @@ export function useItemActions() {
       opacity: 1,
     };
 
-    yItems.push([newYoutube]);
+    yItems.doc.transact(() => {
+      yItems.push([newYoutube]);
+    }, yjsOrigin);
   };
 
   // 그리기 완료 후 추가
   const addDrawing = (drawing: WhiteboardItem) => {
-    if (!yItems) return;
-    yItems.push([drawing]);
+    if (!yItems || !yItems.doc) return;
+    yItems.doc.transact(() => {
+      yItems.push([drawing]);
+    }, yjsOrigin);
   };
 
   // 아이템 업데이트
   const updateItem = (id: string, changes: Partial<WhiteboardItem>) => {
-    if (!yItems) return;
+    if (!yItems || !yItems.doc) return;
 
     const items = yItems.toArray();
     const index = items.findIndex((item) => item.id === id);
@@ -232,97 +246,87 @@ export function useItemActions() {
 
     const updatedItem = { ...items[index], ...changes } as WhiteboardItem;
 
-    // 트랜잭션 적용 (delete + insert를 하나의 업데이트로)
-    const doc = yItems.doc;
-    if (!doc) return;
-
-    doc.transact(() => {
+    yItems.doc.transact(() => {
       yItems.delete(index, 1);
       yItems.insert(index, [updatedItem]);
-    });
+    }, yjsOrigin);
   };
 
   // 아이템 삭제
   const deleteItem = (id: string) => {
-    if (!yItems) return;
+    if (!yItems || !yItems.doc) return;
 
     const items = yItems.toArray();
     const index = items.findIndex((item) => item.id === id);
     if (index === -1) return;
 
-    yItems.delete(index, 1);
+    yItems.doc.transact(() => {
+      yItems.delete(index, 1);
+    }, yjsOrigin);
   };
 
   // 맨 앞으로
   const bringToFront = (id: string) => {
-    if (!yItems) return;
+    if (!yItems || !yItems.doc) return;
 
     const items = yItems.toArray();
     const index = items.findIndex((item) => item.id === id);
     if (index === -1 || index === items.length - 1) return;
 
     const item = items[index];
-    const doc = yItems.doc;
-    if (!doc) return;
 
-    doc.transact(() => {
+    yItems.doc.transact(() => {
       yItems.delete(index, 1);
       yItems.push([item]);
-    });
+    }, yjsOrigin);
   };
 
   // 맨 뒤로
   const sendToBack = (id: string) => {
-    if (!yItems) return;
+    if (!yItems || !yItems.doc) return;
 
     const items = yItems.toArray();
     const index = items.findIndex((item) => item.id === id);
     if (index === -1 || index === 0) return;
 
     const item = items[index];
-    const doc = yItems.doc;
-    if (!doc) return;
 
-    doc.transact(() => {
+    yItems.doc.transact(() => {
       yItems.delete(index, 1);
       yItems.insert(0, [item]);
-    });
+    }, yjsOrigin);
   };
 
   // 한 단계 앞으로
   const bringForward = (id: string) => {
-    if (!yItems) return;
+    if (!yItems || !yItems.doc) return;
 
     const items = yItems.toArray();
     const currentIndex = items.findIndex((item) => item.id === id);
     if (currentIndex === -1 || currentIndex === items.length - 1) return;
 
     const item = items[currentIndex];
-    const doc = yItems.doc;
-    if (!doc) return;
 
-    doc.transact(() => {
+    yItems.doc.transact(() => {
       yItems.delete(currentIndex, 1);
       yItems.insert(currentIndex + 1, [item]);
-    });
+    }, yjsOrigin);
   };
 
   // 한 단계 뒤로
   const sendBackward = (id: string) => {
-    if (!yItems) return;
+    if (!yItems || !yItems.doc) return;
 
     const items = yItems.toArray();
     const currentIndex = items.findIndex((item) => item.id === id);
     if (currentIndex <= 0) return;
 
     const item = items[currentIndex];
-    const doc = yItems.doc;
-    if (!doc) return;
 
-    doc.transact(() => {
+    yItems.doc.transact(() => {
       yItems.delete(currentIndex, 1);
       yItems.insert(currentIndex - 1, [item]);
-    });
+    }, yjsOrigin);
   };
 
   return {
