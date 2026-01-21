@@ -104,6 +104,13 @@ export class WhiteboardWebsocketGateway implements OnGatewayInit, OnGatewayConne
 
     this.logger.log(`User가 ${roomName}에 참여함`);
 
+    client.emit('init-user', { userId: payload.user_id });
+
+    console.log(payload.user_id);
+
+    // 나중에 들어왔을때 동기화 요청 (기존 사용자에게 전체 상태 요청)
+    client.to(roomName).emit('request-sync');
+
     // Kafka 이벤트 발행(로그,동기화)
     if (payload.clientType === 'main' && payload.ticket !== 'temp-ticket') {
       this.kafkaService.emit(EVENT_STREAM_NAME.WHITEBOARD_ENTER, {
@@ -185,6 +192,32 @@ export class WhiteboardWebsocketGateway implements OnGatewayInit, OnGatewayConne
       client.to(roomName).volatile.emit(WHITEBOARD_CLIENT_EVENT_NAME.REMOTE_CURSOR_MOVE, data);
     } catch (error) {
       this.logger.error(`Cursor Error: ${error.message}`);
+    }
+  }
+
+  // Yjs 업데이트 (아이템 동기화)
+  @SubscribeMessage('yjs-update')
+  handleYjsUpdate(@ConnectedSocket() client: Socket, @MessageBody() update: Buffer) {
+    try {
+      if (!update || update.length === 0) return;
+
+      const roomName = client.data.roomName;
+
+      client.to(roomName).volatile.emit('yjs-update', update);
+    } catch (error) {
+      this.logger.error(`Yjs Update Error: ${error.message}`);
+    }
+  }
+
+  // Awareness 업데이트 (커서 위치, 선택 아이템 동기화)
+  @SubscribeMessage('awareness-update')
+  handleAwarenessUpdate(@ConnectedSocket() client: Socket, @MessageBody() update: Buffer) {
+    try {
+      if (!update) return;
+
+      client.to(client.data.roomName).volatile.emit('awareness-update', update);
+    } catch (error) {
+      this.logger.error(`Awareness Update Error: ${error.message}`);
     }
   }
 }
