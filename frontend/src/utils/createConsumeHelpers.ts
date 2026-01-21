@@ -52,9 +52,9 @@ export function createConsumeHelpers({
 
     // 4) 엘리먼트 연결
     const stream = new MediaStream([consumer.track]);
-    const type = consumer.kind;
+    const kind = consumer.kind;
 
-    return { type, stream };
+    return { consumer, kind, stream };
   };
 
   return { consumeOne };

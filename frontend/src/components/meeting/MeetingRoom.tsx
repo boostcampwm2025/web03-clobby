@@ -29,10 +29,9 @@ export default function MeetingRoom({ meetingId }: { meetingId: string }) {
     isCodeEditorOpen,
   } = useMeetingStore();
   const { startAudioProduce, startVideoProduce, isReady } = useProduce();
-  const { socket, device, recvTransport } = useMeetingSocketStore();
+  const { socket, device, recvTransport, addConsumer, removeConsumer } =
+    useMeetingSocketStore();
   const {
-    members,
-    memberStreams,
     setMembers,
     addMember,
     removeMember,
@@ -77,6 +76,7 @@ export default function MeetingRoom({ meetingId }: { meetingId: string }) {
     socket.on('room:new_user', onNewUser);
     const onUserClosed = async (userId: string) => {
       removeMember(userId);
+      removeConsumer(userId);
     };
     socket.on('room:user_closed', onUserClosed);
     return () => {
@@ -95,14 +95,43 @@ export default function MeetingRoom({ meetingId }: { meetingId: string }) {
       recvTransport,
     });
     const onAlertProduced = async (producerInfo: ProducerInfo) => {
-      const { type, stream } = await consumeOne(producerInfo);
+      const {
+        user_id: producerId,
+        kind: producerKind,
+        is_paused: isPaused,
+      } = producerInfo;
 
-      if (producerInfo.is_paused) {
-        removeMemberStream(producerInfo.user_id, type);
+      const existingConsumer =
+        useMeetingSocketStore.getState().consumers[producerId]?.[producerKind];
+
+      if (isPaused) {
+        removeMemberStream(producerId, producerKind);
+
+        if (existingConsumer) {
+          await socket.emitWithAck('signaling:ws:pause', {
+            consumer_id: existingConsumer.id,
+          });
+        }
         return;
       }
 
-      setMemberStream(producerInfo.user_id, type, stream);
+      if (existingConsumer) {
+        await socket.emitWithAck('signaling:ws:resume', {
+          consumer_id: existingConsumer.id,
+        });
+
+        const stream = new MediaStream([existingConsumer.track]);
+        setMemberStream(producerId, producerKind, stream);
+      } else {
+        try {
+          const { consumer, kind, stream } = await consumeOne(producerInfo);
+
+          addConsumer(producerId, kind, consumer);
+          setMemberStream(producerId, kind, stream);
+        } catch (error) {
+          console.error('신규 컨슈머 생성 실패:', error);
+        }
+      }
     };
     socket.on('room:alert_produced', onAlertProduced);
 

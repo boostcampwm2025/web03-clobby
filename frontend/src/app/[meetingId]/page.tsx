@@ -19,7 +19,7 @@ interface JoinError {
 
 export default function MeetingPage() {
   const { socket } = useMeetingSocket();
-  const { setMediasoupTransports } = useMeetingSocketStore();
+  const { setMediasoupTransports, producers } = useMeetingSocketStore();
   const { members } = useMeetingStore();
   const { isLoggedIn, nickname, setTempUser } = useUserStore();
 

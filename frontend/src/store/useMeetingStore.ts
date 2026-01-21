@@ -1,4 +1,5 @@
 import { MediaState, MeetingMemberInfo, MemberStream } from '@/types/meeting';
+import { MediaKind } from 'mediasoup-client/types';
 import { create } from 'zustand';
 
 const INITIAL_MEDIA_STATE: MediaState = {
@@ -28,8 +29,12 @@ interface MeetingActions {
   addMember: (member: MeetingMemberInfo) => void;
   removeMember: (userId: string) => void;
 
-  setMemberStream: (userId: string, type: string, stream: MediaStream) => void;
-  removeMemberStream: (userId: string, type: string) => void;
+  setMemberStream: (
+    userId: string,
+    kind: MediaKind,
+    stream: MediaStream,
+  ) => void;
+  removeMemberStream: (userId: string, kind: MediaKind) => void;
 
   setHasNewChat: (state: boolean) => void;
 

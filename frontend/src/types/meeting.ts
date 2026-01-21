@@ -1,4 +1,4 @@
-import { Device, Producer, Transport } from 'mediasoup-client/types';
+import { Consumer, Device, Producer, Transport } from 'mediasoup-client/types';
 
 export type MediaPermission = 'unknown' | 'granted' | 'denied';
 
@@ -79,4 +79,9 @@ export interface ProducerInfo {
 export interface MemberStream {
   audio?: MediaStream;
   video?: MediaStream;
+}
+
+export interface MemberConsumer {
+  audio?: Consumer;
+  video?: Consumer;
 }
