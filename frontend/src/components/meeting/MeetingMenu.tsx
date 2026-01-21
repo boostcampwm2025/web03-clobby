@@ -34,6 +34,7 @@ export default function MeetingMenu() {
     isWhiteboardOpen,
     isCodeEditorOpen,
     setIsOpen,
+    screenSharer,
   } = useMeetingStore();
   const {
     startAudioProduce,
@@ -45,6 +46,10 @@ export default function MeetingMenu() {
   } = useProduce();
 
   const { openCodeEditor, closeCodeEditor } = useCodeEditorSocket();
+
+  const isMeSharing = media.screenShareOn;
+  const isSomeoneSharing = screenSharer !== null;
+  const isDisabledSharing = isSomeoneSharing && !isMeSharing;
 
   const toggleAudio = async () => {
     const { audioOn } = useMeetingStore.getState().media;
@@ -78,10 +83,10 @@ export default function MeetingMenu() {
   };
 
   const onScreenShareClick = async () => {
-    const { screenShareOn } = useMeetingStore.getState().media;
-    if (screenShareOn) {
+    if (isMeSharing) {
       stopScreenProduce();
     } else {
+      if (isSomeoneSharing) return;
       await startScreenProduce();
     }
   };
@@ -164,6 +169,7 @@ export default function MeetingMenu() {
           text="화면 공유"
           isActive={useMeetingStore.getState().media.screenShareOn}
           onClick={onScreenShareClick}
+          disabled={isDisabledSharing}
         />
         <MeetingButton
           icon={<WorkspaceIcon className="h-8 w-8" />}

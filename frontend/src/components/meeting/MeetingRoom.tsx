@@ -34,6 +34,7 @@ export default function MeetingRoom({ meetingId }: { meetingId: string }) {
     isChatOpen,
     isWhiteboardOpen,
     isCodeEditorOpen,
+    screenSharer,
   } = useMeetingStore();
   const { startAudioProduce, startVideoProduce, isReady } = useProduce();
   const { socket, device, recvTransport, addConsumer, removeConsumer } =
@@ -45,17 +46,13 @@ export default function MeetingRoom({ meetingId }: { meetingId: string }) {
     setMemberStream,
     removeMemberStream,
     setIsOpen,
+    setScreenSharer,
   } = useMeetingStore();
   const { userId } = useUserStore();
 
   const { joinCodeEditor } = useCodeEditorSocket();
   const { socket: mainSocket } = useMeetingSocket();
   const { codeEditorSocket } = useToolSocketStore();
-
-  const [screenSharer, setScreenSharer] = useState<{
-    id: string;
-    nickname: string;
-  } | null>(null);
 
   const screenStream = useMeetingStore((state) =>
     screenSharer ? state.memberStreams[screenSharer.id]?.video : null,
@@ -192,18 +189,16 @@ export default function MeetingRoom({ meetingId }: { meetingId: string }) {
     };
 
     const onUserClosed = async (userId: string) => {
-      setScreenSharer((prev) => (prev?.id === userId ? null : prev));
+      if (screenSharer?.id === userId) setScreenSharer(null);
 
       removeMember(userId);
       removeConsumer(userId);
     };
 
     const onScreenStop = ({ main, sub }: { main: boolean; sub: boolean }) => {
-      setScreenSharer((prev) => {
-        if (!prev) return null;
-        if (main || sub) return null;
-        return prev;
-      });
+      if (main || sub) {
+        setScreenSharer(null);
+      }
     };
 
     socket.on('room:new_user', onNewUser);
