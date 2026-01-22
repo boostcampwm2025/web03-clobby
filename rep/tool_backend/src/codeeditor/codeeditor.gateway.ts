@@ -81,10 +81,6 @@ export class CodeeditorWebsocketGateway implements OnGatewayInit, OnGatewayConne
     await client.join(roomName);
     client.data.roomName = roomName;
 
-    client.emit('init-user', {
-      userId: payload.user_id,
-    });
-
     const doc = roomDocs.get(roomName);
     if (doc) {
       this.logger.log(`[Sync] 서버에서 신규 유저 ${payload.user_id}에게 직접 데이터 전송`);

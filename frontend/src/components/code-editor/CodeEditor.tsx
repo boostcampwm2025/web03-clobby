@@ -12,6 +12,7 @@ import { AwarenessState, LanguageState } from '@/types/code-editor';
 import CodeEditorToolbar from './CodeEditorToolbar';
 import { EditorLanguage } from '@/constants/code-editor';
 import { useToolSocketStore } from '@/store/useToolSocketStore';
+import { useUserStore } from '@/store/useUserStore';
 
 type CodeEditorProps = {
   autoComplete?: boolean;
@@ -44,6 +45,7 @@ export default function CodeEditor({
   const [onlyMyCursor, setOnlyMyCursor] = useState<boolean>(false);
 
   const { codeEditorSocket: socket } = useToolSocketStore(); // 시그널링 소켓
+  const { nickname } = useUserStore();
 
   const handleMount = async (
     editor: monaco.editor.IStandaloneCodeEditor,
@@ -83,15 +85,14 @@ export default function CodeEditor({
     socketRef.current = socket;
     if (!socket) return;
 
-    socket.on('init-user', ({ userId }: { userId: string }) => {
-      awareness.setLocalState({
-        user: {
-          name: userId,
-          role: 'viewer',
-          color: colorFromClientId(ydoc.clientID).cursor,
-        },
-        cursor: null,
-      });
+    // 소켓 이벤트를 기다리지 않고 즉시 본인상태 설정
+    awareness.setLocalState({
+      user: {
+        name: nickname || '알 수 없음',
+        role: 'viewer',
+        color: colorFromClientId(ydoc.clientID).cursor,
+      },
+      cursor: null,
     });
 
     // Awareness -> Socket
