@@ -25,6 +25,7 @@ import {
   PenIcon,
   TextBoxIcon,
   EraserIcon,
+  StackIcon,
 } from '@/assets/icons/whiteboard';
 
 // Type import
@@ -181,8 +182,8 @@ export default function ToolbarContainer() {
           hvColor="bg-neutral-100"
           activeBgColor="bg-neutral-100"
         />
-
-        {/* <NavButton
+        {/* 
+        <NavButton
           icon={StackIcon}
           label="아키텍처"
           isActive={STACK_TOOLS.includes(activeTool) || activePanel === 'stack'}
