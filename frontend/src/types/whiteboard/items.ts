@@ -1,4 +1,5 @@
 import { BaseItem, TextAlignment, TextWrap } from '@/types/whiteboard/base';
+import { StackCategory } from '@/constants/stackList';
 
 // 화살표 머리 타입
 export type ArrowHeadType =
@@ -106,6 +107,7 @@ export interface VideoItem extends BaseItem {
   dash?: number[];
 }
 
+// Youtube Item
 export interface YoutubeItem extends BaseItem {
   type: 'youtube';
   // 원본 유튜브 URL
@@ -122,4 +124,18 @@ export interface YoutubeItem extends BaseItem {
   cornerRadius?: number;
   opacity?: number;
   dash?: number[];
+}
+
+// Stack Item
+export interface StackItem extends BaseItem {
+  type: 'stack';
+  src: string;
+  stackName: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotation: number;
+  opacity?: number;
+  category?: StackCategory;
 }
