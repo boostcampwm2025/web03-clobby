@@ -10,7 +10,7 @@ import { useUserStore } from '@/store/useUserStore';
 import { MeetingInfoResponse } from '@/types/meeting';
 import { api } from '@/utils/apiClient';
 import { initMediasoupTransports } from '@/utils/initMediasoupTransports';
-import { useParams } from 'next/navigation';
+import { notFound, useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
 interface JoinError {
@@ -33,6 +33,8 @@ export default function MeetingPage() {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [joinError, setJoinError] = useState<JoinError | null>(null);
   const [isJoined, setIsJoined] = useState<boolean>(false);
+
+  const router = useRouter();
 
   const onJoin = (nickname: string) => {
     setTempUser({ nickname });
@@ -115,10 +117,20 @@ export default function MeetingPage() {
 
   useEffect(() => {
     const getMeetingInfo = async () => {
-      const meetingInfo = await api.get<MeetingInfoResponse>(
-        `/rooms/${meetingId}`,
-      );
-      setMeetingInfo(meetingInfo);
+      try {
+        const meetingInfo = await api.get<MeetingInfoResponse>(
+          `/rooms/${meetingId}`,
+        );
+        setMeetingInfo(meetingInfo);
+      } catch (err: unknown) {
+        const params = new URLSearchParams({
+          title: '존재하지 않는 회의실입니다',
+          status: '409',
+          message:
+            err instanceof Error ? err.message : '회의 코드를 확인해주세요',
+        });
+        router.replace(`/error?${params.toString()}`);
+      }
     };
 
     getMeetingInfo();
