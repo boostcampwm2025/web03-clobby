@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { useCursorStyle } from '@/hooks/useCursorStyle';
 import { useItemInteraction } from '@/hooks/useItemInteraction';
 import TextItem from '@/components/whiteboard/items/text/TextItem';
@@ -34,8 +35,7 @@ interface RenderItemProps {
   onArrowDblClick?: (id: string) => void;
 }
 
-// RenderItem Component
-export default function RenderItem({
+function RenderItem({
   item,
   isSelected,
   onSelect,
@@ -194,3 +194,11 @@ export default function RenderItem({
 
   return null;
 }
+
+export default React.memo(RenderItem, (prevProps, nextProps) => {
+  // item, isSelected, onSelect, onChange 등이 변경되지 않으면 재렌더링 넘김
+  return (
+    prevProps.item === nextProps.item &&
+    prevProps.isSelected === nextProps.isSelected
+  );
+});
