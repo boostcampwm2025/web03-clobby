@@ -41,8 +41,13 @@ export default function ShapeItem({
   const lastTransformRef = useRef<number>(0);
 
   const isCircle = shapeItem.shapeType === 'circle';
-  const displayX = isCircle ? shapeItem.x + shapeItem.width / 2 : shapeItem.x;
-  const displayY = isCircle ? shapeItem.y + shapeItem.height / 2 : shapeItem.y;
+  const width = shapeItem.width || 0;
+  const height = shapeItem.height || 0;
+  const x = shapeItem.x || 0;
+  const y = shapeItem.y || 0;
+
+  const displayX = isCircle ? x + width / 2 : x;
+  const displayY = isCircle ? y + height / 2 : y;
 
   // 애니메이션 훅
   const shapeRef = useItemAnimation({
@@ -191,8 +196,8 @@ export default function ShapeItem({
   const renderText = () => {
     if (!shapeItem.text) return null;
 
-    const textWidth = shapeItem.width * 0.8;
-    const offsetX = (shapeItem.width - textWidth) / 2;
+    const textWidth = width * 0.8;
+    const offsetX = (width - textWidth) / 2;
 
     return (
       <Text
@@ -203,9 +208,9 @@ export default function ShapeItem({
         align="center"
         verticalAlign="middle"
         width={textWidth}
-        height={shapeItem.height}
-        x={isCircle ? -shapeItem.width / 2 + offsetX : offsetX}
-        y={isCircle ? -shapeItem.height / 2 : 0}
+        height={height}
+        x={isCircle ? -width / 2 + offsetX : offsetX}
+        y={isCircle ? -height / 2 : 0}
         listening={false}
         wrap="word"
         ellipsis={false}
@@ -235,8 +240,8 @@ export default function ShapeItem({
         onTransformEnd={(e) => handleTransformEnd(e, false)}
       >
         <Rect
-          width={shapeItem.width}
-          height={shapeItem.height}
+          width={width}
+          height={height}
           fill={shapeItem.fill}
           stroke={shapeItem.stroke}
           strokeWidth={shapeItem.strokeWidth}
@@ -262,8 +267,8 @@ export default function ShapeItem({
         onTransformEnd={(e) => handleTransformEnd(e, true)}
       >
         <Ellipse
-          radiusX={shapeItem.width / 2}
-          radiusY={shapeItem.height / 2}
+          radiusX={width / 2}
+          radiusY={height / 2}
           fill={shapeItem.fill}
           stroke={shapeItem.stroke}
           strokeWidth={shapeItem.strokeWidth}
