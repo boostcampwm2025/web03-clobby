@@ -24,6 +24,7 @@ resources:
 
   # ingress-nginx 관련
   - devmeet-gateway-ingress.yaml
+  - devmeet-tool-ws-gateway-ingress.yaml
   - letsencrypt-prod.yaml
 
 # 사용되는 이미지들
