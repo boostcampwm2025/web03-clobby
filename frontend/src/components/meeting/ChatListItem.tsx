@@ -2,8 +2,9 @@ import { DownloadIcon, FileIcon } from '@/assets/icons/meeting';
 import { ChatMessage } from '@/types/chat';
 import { formatFileSize, formatTimestamp } from '@/utils/formatter';
 import Image from 'next/image';
+import { memo } from 'react';
 
-export default function ChatListItem({
+export function ChatListItem({
   nickname,
   profileImg,
   createdAt,
@@ -36,7 +37,7 @@ export default function ChatListItem({
 
         {/* 댓글 내용 */}
         {content.type === 'TEXT' && (
-          <span className="rounded-sm bg-neutral-600 p-2 text-sm text-neutral-50">
+          <span className="rounded-sm bg-neutral-600 p-2 text-sm break-all whitespace-pre-wrap text-neutral-50">
             {content.text}
           </span>
         )}
@@ -73,3 +74,5 @@ export default function ChatListItem({
     </div>
   );
 }
+
+export default memo(ChatListItem);
