@@ -111,8 +111,13 @@ export const useProduce = () => {
     try {
       setIsProducing('screen', true);
 
+      // screen에 경우는 video의 설정을 적어서 보내준다. 
       stream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
+        video: {
+          frameRate : { max : 15 }, // 이건 고정하는게 좋다. 
+          width : { max : 1280 }, // 이부분은 현재 device 정보에 따라서 수정이 가능하게 하는게 좋다.  
+          height : { max : 720 } // 마찬 가지 
+        },
         audio: true,
       });
 
