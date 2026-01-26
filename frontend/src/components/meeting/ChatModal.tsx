@@ -6,11 +6,15 @@ import { useChatStore } from '@/store/useChatStore';
 import { useMeetingSocketStore } from '@/store/useMeetingSocketStore';
 import { useMeetingStore } from '@/store/useMeetingStore';
 import { useUserStore } from '@/store/useUserStore';
-import { MouseEvent, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function ChatModal() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
   const { setIsOpen } = useMeetingStore();
-  const [value, setValue] = useState('');
+
+  const [hasValue, setHasValue] = useState(false);
   const [files, setFiles] = useState([]);
 
   const { userId, nickname, profilePath } = useUserStore();
@@ -26,16 +30,47 @@ export default function ChatModal() {
 
   const onCloseClick = () => setIsOpen('isChatOpen', false);
 
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
   // 이후 form 관련 라이브러리 사용 시 수정 필요
-  const onSubmit = (e: MouseEvent<HTMLButtonElement>) => {
+  const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    sendTextMessage(value);
-    setValue('');
+    const value = textareaRef.current?.value;
+
+    if (value && value.trim().length > 0) {
+      sendTextMessage(value);
+
+      if (textareaRef.current) {
+        textareaRef.current.value = '';
+        textareaRef.current.style.height = 'auto'; // 전송하고 높이 초기화
+        setHasValue(textareaRef.current.value.trim().length > 0);
+      }
+    }
   };
 
-  // Enter 시 Submit
-  // Shift + Enter 시 줄바꿈
-  // textarea 자동 높이 조절 추가하면 좋을 것 같아요
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.nativeEvent.isComposing) return;
+
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      onSubmit(e);
+    }
+  };
+
+  // textarea 자동 높이 조절
+  const handleInput = () => {
+    const obj = textareaRef.current;
+    if (!obj) return;
+
+    obj.style.height = 'auto';
+    obj.style.height = `${obj.scrollHeight}px`;
+
+    setHasValue(obj.value.trim().length > 0);
+  };
 
   return (
     <aside className="meeting-side-modal z-6">
@@ -50,7 +85,7 @@ export default function ChatModal() {
       </div>
 
       {/* 채팅 내역 */}
-      <section className="flex-1 overflow-y-auto">
+      <section ref={scrollRef} className="flex-1 overflow-y-auto">
         {messages.map((chat) => (
           <ChatListItem key={chat.id} {...chat} />
         ))}
@@ -63,14 +98,15 @@ export default function ChatModal() {
 
         {/* 텍스트 input */}
         <textarea
-          className="w-full resize-none px-2 pt-3 pb-1 text-sm text-neutral-50 placeholder:text-neutral-400 focus:outline-none"
+          ref={textareaRef}
+          className="peer w-full resize-none px-2 pt-3 pb-1 text-sm text-neutral-50 placeholder:text-neutral-400 focus:outline-none"
           placeholder="메세지를 입력해주세요"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-        ></textarea>
+          onKeyDown={handleKeyDown}
+          onInput={handleInput}
+        />
 
         {/* 버튼 */}
-        <div className="flex justify-between p-2">
+        <div className="flex justify-between p-2 text-neutral-200 peer-placeholder-shown:text-neutral-400">
           {/* 이미지, 파일 로직 추가 후 수정 필요 */}
           <div className="flex gap-1 text-neutral-200">
             <button
@@ -86,10 +122,14 @@ export default function ChatModal() {
               <FileIcon />
             </button>
           </div>
-
           <button
             type="submit"
-            className={`rounded-sm p-1 ${value.length > 0 ? 'text-neutral-200 hover:bg-neutral-600' : 'cursor-default! text-neutral-400'}`}
+            disabled={!hasValue}
+            className={`rounded-sm p-1 ${
+              hasValue
+                ? 'cursor-pointer text-neutral-200 hover:bg-neutral-600'
+                : 'cursor-default text-neutral-400 hover:bg-transparent'
+            } `}
             onClick={onSubmit}
           >
             <SendIcon className="h-4 w-4" />
