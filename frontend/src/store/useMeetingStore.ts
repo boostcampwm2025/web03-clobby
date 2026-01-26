@@ -21,6 +21,7 @@ interface MeetingState {
   hasNewChat: boolean;
   screenSharer: { id: string; nickname: string } | null;
   speakingMembers: Record<string, boolean>;
+  orderedMemberIds: string[];
 
   isInfoOpen: boolean;
   isMemberOpen: boolean;
@@ -66,6 +67,7 @@ export const useMeetingStore = create<MeetingState & MeetingActions>((set) => ({
   hasNewChat: false,
   screenSharer: null,
   speakingMembers: {},
+  orderedMemberIds: [],
 
   isInfoOpen: false,
   isMemberOpen: false,
@@ -80,9 +82,11 @@ export const useMeetingStore = create<MeetingState & MeetingActions>((set) => ({
         (acc, cur) => ({ ...acc, [cur.user_id]: cur }),
         {},
       );
+      const newOrderedIds = members.map((m) => m.user_id);
 
       return {
         members: newMembersMap,
+        orderedMemberIds: newOrderedIds,
       };
     }),
   addMember: (member) =>
@@ -98,6 +102,7 @@ export const useMeetingStore = create<MeetingState & MeetingActions>((set) => ({
           ...state.memberStreams,
           [member.user_id]: existingStream,
         },
+        orderedMemberIds: [member.user_id, ...state.orderedMemberIds],
       };
     }),
   removeMember: (userId) =>
@@ -113,16 +118,26 @@ export const useMeetingStore = create<MeetingState & MeetingActions>((set) => ({
         members: nextMembers,
         memberStreams: nextMemberStreams,
         speakingMembers: nextSpeakingMembers,
+        orderedMemberIds: state.orderedMemberIds.filter((id) => id !== userId),
       };
     }),
   setScreenSharer: (sharer) => set(() => ({ screenSharer: sharer })),
   setSpeaking: (userId, isSpeaking) =>
-    set((state) => ({
-      speakingMembers: {
-        ...state.speakingMembers,
-        [userId]: isSpeaking,
-      },
-    })),
+    set((state) => {
+      const currentIndex = state.orderedMemberIds.indexOf(userId);
+      let nextOrderedIds = state.orderedMemberIds;
+
+      // 발언한 사람이 첫 페이지에 존재하는지 확인
+      if (isSpeaking && currentIndex > 4) {
+        const filtered = state.orderedMemberIds.filter((id) => id !== userId);
+        nextOrderedIds = [userId, ...filtered];
+      }
+
+      return {
+        speakingMembers: { ...state.speakingMembers, [userId]: isSpeaking },
+        orderedMemberIds: nextOrderedIds,
+      };
+    }),
 
   setMemberStream: (userId, type, stream) =>
     set((state) => ({

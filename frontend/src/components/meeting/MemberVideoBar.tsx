@@ -11,8 +11,13 @@ import { useEffect, useMemo, useState } from 'react';
 
 export default function MemberVideoBar() {
   const MEMBERS_PER_PAGE = 6;
-  const { members, memberStreams, setMemberStream, removeMemberStream } =
-    useMeetingStore();
+  const {
+    members,
+    memberStreams,
+    setMemberStream,
+    removeMemberStream,
+    orderedMemberIds,
+  } = useMeetingStore();
   const { socket, recvTransport, device, consumers, addConsumers } =
     useMeetingSocketStore();
   const [currentPage, setCurrentPage] = useState(1);
@@ -24,16 +29,19 @@ export default function MemberVideoBar() {
     return 1 + Math.ceil((memberCount - 5) / MEMBERS_PER_PAGE);
   }, [members]);
 
+  const sortedMembers = useMemo(() => {
+    return orderedMemberIds.map((id) => members[id]).filter(Boolean);
+  }, [orderedMemberIds, members]);
+
   // 현재 페이지에 보여야 할 멤버 리스트 계산
   const visibleMembers = useMemo(() => {
-    const memberArray = Object.values(members);
     const isFirstPage = currentPage === 1;
 
     const start = isFirstPage ? 0 : (currentPage - 2) * MEMBERS_PER_PAGE + 5;
     const end = isFirstPage ? 5 : start + MEMBERS_PER_PAGE;
 
-    return memberArray.slice(start, end);
-  }, [members, currentPage]);
+    return sortedMembers.slice(start, end);
+  }, [sortedMembers, currentPage]);
 
   const hasPrevPage = currentPage > 1;
   const hasNextPage = currentPage < totalPages;
