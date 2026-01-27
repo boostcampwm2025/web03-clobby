@@ -42,19 +42,32 @@ export function ChatListItem({
           </span>
         )}
 
-        {content.type === 'image' && (
+        {content.type === 'file' && content.category === 'image' && (
           <span className="rounded-sm bg-neutral-600 p-2">
             <Image
               width={200}
               height={200}
               className="max-h-50 w-auto object-cover"
-              src={content.src as string}
+              src={content.fileUrl}
               alt="채팅 이미지"
             />
           </span>
         )}
 
-        {content.type === 'file' && (
+        {content.type === 'file' && content.category === 'video' && (
+          <span className="rounded-sm bg-neutral-600 p-2">
+            <video
+              controls
+              preload="metadata"
+              width={200}
+              height={200}
+              className="max-h-50 w-50 object-cover"
+              src={content.fileUrl}
+            />
+          </span>
+        )}
+
+        {content.type === 'file' && content.category === 'binary' && (
           <div className="group flex items-center gap-4 rounded-sm bg-neutral-600 px-3 py-2">
             <a
               href={content.fileUrl}
