@@ -307,16 +307,15 @@ export function useItemActions() {
 
     yItems.doc.transact(() => {
       const yMaps = yItems.toArray();
+      const idsToDelete = new Set(ids);
 
-      // 인덱스를 역순으로 정렬해서 삭제
-      const indices = ids
-        .map((id) => yMaps.findIndex((yMap) => yMap.get('id') === id))
-        .filter((index) => index !== -1)
-        .sort((a, b) => b - a); // 역순 정렬
-
-      indices.forEach((index) => {
-        yItems.delete(index, 1);
-      });
+      // 역순으로 순회하면서 삭제
+      for (let index = yMaps.length - 1; index >= 0; index--) {
+        const id = yMaps[index].get('id');
+        if (id && idsToDelete.has(id as string)) {
+          yItems.delete(index, 1);
+        }
+      }
     }, yjsOrigin);
   };
 
