@@ -71,8 +71,8 @@ export function updateBoundArrows(
   });
 }
 
-function updateBindingPoint(
-  shape: ShapeItem,
+export function updateBindingPoint(
+  shape: { x: number; y: number; width: number; height: number },
   shapeCenterX: number,
   shapeCenterY: number,
   targetPoint: { x: number; y: number },
@@ -102,4 +102,69 @@ function updateBindingPoint(
       y: (intersect.y - shape.y) / shape.height,
     },
   };
+}
+
+/**
+ * 드래그 중인 아이템 정보를 바탕으로 화살표의 임시 포인트를 계산합니다. (로컬 렌더링용)
+ */
+export function getDraggingArrowPoints(
+  arrow: ArrowItem,
+  draggingId: string,
+  draggingX: number,
+  draggingY: number,
+  items: WhiteboardItem[],
+  draggingWidth?: number,
+  draggingHeight?: number,
+): number[] | null {
+  const isStartBound = arrow.startBinding?.elementId === draggingId;
+  const isEndBound = arrow.endBinding?.elementId === draggingId;
+
+  if (!isStartBound && !isEndBound) return null;
+
+  const targetShape = items.find((it) => it.id === draggingId) as ShapeItem;
+  if (!targetShape) return null;
+
+  // 드래그/변형 중인 도형의 임시 정보
+  const tempShape = {
+    ...targetShape,
+    x: draggingX,
+    y: draggingY,
+    width: draggingWidth ?? targetShape.width,
+    height: draggingHeight ?? targetShape.height,
+  };
+
+  const shapeCenterX = tempShape.x + tempShape.width / 2;
+  const shapeCenterY = tempShape.y + tempShape.height / 2;
+
+  if (!arrow.points) return null;
+  const newPoints = [...arrow.points];
+
+  if (isStartBound) {
+    const nextPoint = { x: newPoints[2], y: newPoints[3] };
+    const result = updateBindingPoint(
+      tempShape,
+      shapeCenterX,
+      shapeCenterY,
+      nextPoint,
+    );
+    newPoints[0] = result.x;
+    newPoints[1] = result.y;
+  }
+
+  if (isEndBound) {
+    const prevPoint = {
+      x: newPoints[newPoints.length - 4],
+      y: newPoints[newPoints.length - 3],
+    };
+    const result = updateBindingPoint(
+      tempShape,
+      shapeCenterX,
+      shapeCenterY,
+      prevPoint,
+    );
+    newPoints[newPoints.length - 2] = result.x;
+    newPoints[newPoints.length - 1] = result.y;
+  }
+
+  return newPoints;
 }
