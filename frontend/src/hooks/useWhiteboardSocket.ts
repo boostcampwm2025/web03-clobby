@@ -41,8 +41,7 @@ export const useWhiteboardSocket = () => {
       // 스토어에 소켓 저장(다른 컴포넌트에서도 써야함)
       setWhiteboardSocket(newSocket);
 
-      // 워크스페이스 열기
-      // 나중에 이름을 whiteboard로 변경 해야할 거 같은데 어딘가... workspace로 되어있어서
+      // 화이트보드 열기
       setIsOpen('isWhiteboardOpen', true);
     });
 

@@ -12,7 +12,7 @@ import {
   MicOffIcon,
   MicOnIcon,
   ShareIcon,
-  WorkspaceIcon,
+  WhiteboardIcon,
 } from '@/assets/icons/meeting';
 import Modal from '@/components/common/Modal';
 import MeetingButton from '@/components/meeting/MeetingButton';
@@ -48,7 +48,7 @@ export default function MeetingMenu() {
   } = useProduce();
 
   const { openCodeEditor, closeCodeEditor } = useCodeEditorSocket();
-  
+
   // 화이트보드 연결 / 해제 함수 가져오기
   const { connectWhiteboard, disconnectWhiteboard } = useWhiteboardSocket();
 
@@ -96,8 +96,8 @@ export default function MeetingMenu() {
     }
   };
 
-  // 워크스페이스(화이트보드) 버튼 클릭 핸들러
-  const onWorkspaceClick = () => {
+  // 화이트보드 버튼 클릭 핸들러
+  const onWhiteboardClick = () => {
     if (isWhiteboardOpen) {
       // 이미 열려있으면 -> 연결 끊고 닫기
       disconnectWhiteboard();
@@ -184,12 +184,12 @@ export default function MeetingMenu() {
           onClick={onScreenShareClick}
           disabled={isDisabledSharing}
         />
-        {/* 워크스페이스 버튼 */}
+        {/* 화이트보드 버튼 */}
         <MeetingButton
-          icon={<WorkspaceIcon className="h-8 w-8" />}
-          text="워크스페이스"
+          icon={<WhiteboardIcon className="h-8 w-8" />}
+          text="화이트보드"
           isActive={isWhiteboardOpen}
-          onClick={onWorkspaceClick}
+          onClick={onWhiteboardClick}
         />
         <MeetingButton
           icon={<CodeIcon className="h-8 w-8" />}

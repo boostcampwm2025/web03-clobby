@@ -9,8 +9,8 @@ export default function StackPanel({ selectedTool, onSelect }: PanelProps) {
   const handleStackClick = (stackId: string) => {
     onSelect('stack');
 
-    // TODO: 전역 스토어(useWorkspaceStore)에 현재 선택된 activeStackId 저장
-    // useWorkspaceStore.getState().setActiveStack(stackId);
+    // TODO: 전역 스토어(useWhiteboardStore)에 현재 선택된 activeStackId 저장
+    // useWhiteboardStore.getState().setActiveStack(stackId);
   };
 
   return (

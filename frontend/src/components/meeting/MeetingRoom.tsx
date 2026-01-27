@@ -300,7 +300,7 @@ export default function MeetingRoom({ meetingId }: { meetingId: string }) {
       <MemberVideoBar />
 
       <section className="relative flex-1 overflow-hidden">
-        {/* 워크스페이스 / 코드 에디터 등의 컴포넌트가 들어갈 공간 */}
+        {/* 화이트보드 / 코드 에디터 등의 컴포넌트가 들어갈 공간 */}
         <div className="flex h-full w-full overflow-hidden">
           {!screenVideoStream && !isWhiteboardOpen && !isCodeEditorOpen && (
             <MainVideo />

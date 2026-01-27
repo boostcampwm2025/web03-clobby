@@ -14,4 +14,4 @@ export { default as PinIcon } from './pinIcon.svg';
 export { default as SendIcon } from './sendIcon.svg';
 export { default as ShareIcon } from './shareIcon.svg';
 export { default as VolumnIcon } from './volumnIcon.svg';
-export { default as WorkspaceIcon } from './workspaceIcon.svg';
+export { default as WhiteboardIcon } from './whiteboardIcon.svg';
