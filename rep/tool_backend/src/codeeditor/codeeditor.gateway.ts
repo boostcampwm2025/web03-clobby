@@ -18,7 +18,7 @@ import { EVENT_STREAM_NAME } from '@/infra/event-stream/event-stream.constants';
 import { CODEEDITOR_WEBSOCKET } from '@/infra/websocket/websocket.constants';
 import { CodeeditorWebsocket } from '@/infra/websocket/codeeditor/codeeditor.service';
 import * as Y from 'yjs';
-import { CodeeditorRepository, YjsPullMessage, YjsRoomResult, YjsUpdateMessage } from '@/infra/memory/tool';
+import { CodeeditorRepository, YjsSyncServerPayload, YjsUpdateClientPayload } from '@/infra/memory/tool';
 
 
 @WebSocketGateway({
@@ -81,14 +81,12 @@ export class CodeeditorWebsocketGateway implements OnGatewayInit, OnGatewayConne
     client.data.roomName = roomName;
     
     // 메모리에 존재하면 가져오고 없으면 cache에서 가져온다.  
-    const entry = this.codeeditorRepo.ensure(roomName); // 일단 실험을 위해서 메모리로만 진행을 해보자
-
-    // 그 업데이트 본을 준다. 
-    const fullUpdate = Y.encodeStateAsUpdate(entry.doc);
+    this.codeeditorRepo.ensure(roomName); // 현재 존재하는지 확인하고 없다면 새로 생성
+    const full = this.codeeditorRepo.encodeFull(roomName); // 그 업데이트 본을 준다. 
 
     // 초기에 idx와 함께 같이 전달해준다. ( 현재 메모리에 저장된 idx )
-    client.emit('yjs-init', { update: fullUpdate, idx: entry.idx }); 
-    client.data.last_idx = entry.idx;
+    client.emit('yjs-init', { update: full.update, seq : full.seq }); 
+    client.data.last_seq = full.seq;
 
     if (payload.clientType === 'main') {
       // main이 불러오면 ydoc에 있는 캐시도 자동으로 불러오게 한다. 
@@ -131,87 +129,89 @@ export class CodeeditorWebsocketGateway implements OnGatewayInit, OnGatewayConne
   }
 
   // 업데이트 하고 싶다고 보내는 메시지
-  @UsePipes(
-  new ValidationPipe({
-    whitelist : true,
-    transform : true
-  }))
   @SubscribeMessage('yjs-update')
-  async handleYjsUpdate(
+  @UsePipes(
+    new ValidationPipe({
+      whitelist : true
+    })
+  )
+  handleYjsUpdate(
     @ConnectedSocket() client: Socket,
-    @MessageBody() updateMsg: YjsUpdateMessage, // Yjs 데이터는 바이너리
+    @MessageBody() payload : YjsUpdateClientPayload
   ) {
+    // 캐싱된 룸 이름 사용
+    const roomName = client.data.roomName;
+
     try {
-      // 캐싱된 룸 이름 사용
-      const roomName = client.data.roomName;
-      const payload: ToolBackendPayload = client.data.payload;
-
-      const entry = this.codeeditorRepo.ensure(roomName);
-
-      // 안전하게 변환
-      const updateBuf =
-        Buffer.isBuffer(updateMsg.update)
-          ? updateMsg.update
-          : updateMsg.update instanceof Uint8Array
-            ? Buffer.from(updateMsg.update)
-            : Buffer.from(updateMsg.update);
-
-      // prev_idx가 만약 entry.idx와 다르면 catchup 부터 시도하게 한다.
-      if (updateMsg.prev_idx !== entry.idx) {
-        // 클라가 가진 기준(prev_idx)부터 따라잡게 함
-        await this.codeeditorService.catchUpForm(client, updateMsg.prev_idx);
-
-        // 재전송 요구
-        return;
-      }
-      const prevIdx = entry.idx;
-
-      // 여기서 메모리 업데이트 + cache 업데이트를 진행해야 한다. 
-      Y.applyUpdate(entry.doc, updateBuf);
-
-      // redis 스트림에 업데이트 
-      const { updateIdx } = await this.codeeditorService.appendUpdateLog({
-        room_id: payload.room_id,       // room_id를 넣는다.
-        prevIdx,
-        update: updateBuf,
-        user_id: payload.user_id,
-      });
-
-      // 메모리 idx에 갱신을 시킨다.
-      entry.idx = updateIdx;
-
-      const result: YjsRoomResult = {
-        prev_idx: prevIdx,
-        update_idx: updateIdx,
-        update: updateBuf,
+      const updateBuf = this.codeeditorService.normalizeToBuffer(payload.update);
+      if ( !updateBuf ) {
+        const err: YjsSyncServerPayload = { type: 'error', ok: false, code: 'BAD_PAYLOAD' };
+        client.emit('yjs-sync', err);
+        return // 만약 잘못 보냈다면 에러를 보내야 한다. 
       };
 
-      // 브로드캐스트 (이게 나를 제외하고 전부 보내는것인지 궁금)
-      // code에 경우 최신성 보다는 정확성이 더 중요하다고 생각하기 때문에 이 부분에서 volatile을 삭제한다. 
-      client.to(roomName).emit('yjs-update', result);
+      // 클라이언트에 마지막 값과 비교
+      const missed = this.codeeditorRepo.getUpdatesSince(roomName, payload.last_seq);
 
-      client.data.last_idx = updateIdx;
+      if (missed === null) {
+        // 뒤처지면 전체를 sync해서 보낸다. 그리고 업데이트를 하고 보내면 좋겠다. 그러니까 전체 추가 후 업데이트
+        const full = this.codeeditorRepo.encodeFull(roomName);
+        const msg: YjsSyncServerPayload = {
+          type: 'full',
+          ok: true,
+          server_seq: full.seq,
+          update: Buffer.from(full.update),
+        };
+        client.emit('yjs-sync', msg); // 새롭게 전체 업데이트 한것 까지 추가해서 보내면 좋다. 
+        return;
+      }
+
+      if (missed.length > 0) {
+        // 이것도 그냥 업데이트 하고 patch로 보내면 좋을것 같다. 
+        const msg: YjsSyncServerPayload = {
+          type: 'patch',
+          ok: true,
+          from_seq: missed[0].seq,
+          to_seq: missed[missed.length - 1].seq,
+          updates: missed.map((u) => Buffer.from(u.update)),
+          server_seq: this.codeeditorRepo.ensure(roomName).seq,
+        };
+        client.emit('yjs-sync', msg);
+        return;
+      }
+
+      // 다른 클라들에게 브로드캐스트 
+      const serverSeq = this.codeeditorRepo.applyAndAppendUpdate(
+        roomName,
+        new Uint8Array(updateBuf),
+      );
+
+      // idx만 변경
+      const ack: YjsSyncServerPayload = { type: 'ack', ok: true, server_seq: serverSeq };
+      client.emit('yjs-sync', ack);
+
+      // yjs에 대해서 업데이트 이건 정상적인 업데이트가 맞긴 하다. 
+      client.to(roomName).emit('yjs-update', {
+        seq: serverSeq,
+        update: updateBuf,
+      });
     } catch (error) {
-      this.logger.error(`Yjs Update Error: ${error.message}`);
+      this.logger.error(`Yjs Update Error: ${error?.message ?? error}`);
+      const msg: YjsSyncServerPayload = { type: 'error', ok: false, code: 'INTERNAL', message: error?.message };
+      client.emit('yjs-sync', msg);
     }
-  };
+  }
 
-  // 누락본 보내기 
-  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
-  @SubscribeMessage('yjs-pull')
-  async handleYjsPull(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() msg: YjsPullMessage,
-  ) {
+  @SubscribeMessage('awareness-update')
+  handleAwarenessUpdate(@ConnectedSocket() client: Socket, @MessageBody() update: Buffer) {
     try {
-      const fromIdx = msg.from_idx ?? '0-0';
-      await this.codeeditorService.catchUpForm(client, fromIdx);
-    } catch (err: any) {
-      this.logger.error(`yjs-pull error: ${err?.message ?? err}`);
-      client.emit('yjs-catchup', { ok: false });
-    };
-  };
-  
+      if (!update) return;
+
+      client.to(client.data.roomName).volatile.emit('awareness-update', update);
+    } catch (error) {
+      this.logger.error(`Awareness Update Error: ${error.message}`);
+    }
+  }
 
   // 이 부분은 잠시 비활성화 할 예정입니다.
   // @SubscribeMessage('request-sync')
@@ -229,15 +229,4 @@ export class CodeeditorWebsocketGateway implements OnGatewayInit, OnGatewayConne
 
   //   this.logger.log('doc length', doc?.getText('monaco').length);
   // }
-
-  @SubscribeMessage('awareness-update')
-  handleAwarenessUpdate(@ConnectedSocket() client: Socket, @MessageBody() update: Buffer) {
-    try {
-      if (!update) return;
-
-      client.to(client.data.roomName).volatile.emit('awareness-update', update);
-    } catch (error) {
-      this.logger.error(`Awareness Update Error: ${error.message}`);
-    }
-  }
 }

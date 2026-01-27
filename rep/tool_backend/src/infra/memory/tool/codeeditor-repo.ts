@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DEFAULT_IDX, YjsRepository, YjsRoomEntry } from './yjs-repo';
+import { UpdateEntry, YJS_ENTITY_MAX_NUMBER, YjsRepository, YjsRoomEntry } from './yjs-repo';
 import * as Y from 'yjs';
 
 // 두 repo는 현재 동일하다 
@@ -12,28 +12,79 @@ export class CodeeditorRepository implements YjsRepository {
     return this.roomDocs.get(room_id);
   };
 
-  // 방 정보가 없으면 새로 생성 ( 일단 캐시를 추가하면 이 루트도 일단 정리될 예정이다. )
-  ensure(roomId: string): YjsRoomEntry {
-    let entry = this.roomDocs.get(roomId);
+  // 방 정보가 없으면 새로 생성
+  ensure(room_id: string): YjsRoomEntry {
+    let entry = this.roomDocs.get(room_id);
     if (!entry) {
-      entry = { doc: new Y.Doc(), idx: DEFAULT_IDX };
-      this.roomDocs.set(roomId, entry);
+      const ringSize = YJS_ENTITY_MAX_NUMBER; // 1000
+      entry = {
+        doc: new Y.Doc(),
+        seq: 0,
+        ringSize,
+        ring: new Array<UpdateEntry | undefined>(ringSize),
+      };
+      this.roomDocs.set(room_id, entry);
     }
     return entry;
-  };
-
-  // 일단 caching이 나오면 의미가 있어질 예정입니다 일단은 스킵
-  set(room_id: string, entry : YjsRoomEntry): void {
-    this.roomDocs.set(room_id, entry);
-  };
-
-  // 새로운 idx를 적용 ( 안정성을 위해서 ensure을 했다만  )
-  setIdx(roomId: string, idx: string): void {
-    const entry = this.ensure(roomId); // 문제는 없을거다 아마 
-    entry.idx = idx;
   }
 
+  // docs를 update하고 seq를 증가시키고 링버퍼를 고정한다. 
+  applyAndAppendUpdate(room_id: string, update: Uint8Array): number {
+    const entry = this.ensure(room_id);
+
+    // doc 업데이트
+    Y.applyUpdate(entry.doc, update);
+
+    // 서버 seq 증가 (단조 증가)
+    entry.seq += 1;
+
+    // 링버퍼에 저장 (고정 배열 + mod)
+    const slot = entry.seq % entry.ringSize;
+    entry.ring[slot] = { seq: entry.seq, update };
+
+    return entry.seq;
+  };
+  
+  // 현재 repo에 정보를 업데이트 해준다 null이면 full sync
+  getUpdatesSince(room_id: string, last_seq: number): UpdateEntry[] | null {
+    const entry = this.ensure(room_id);
+
+    // 이미 최신이면 줄 게 없음
+    if (last_seq >= entry.seq) return [];
+
+    // 링버퍼가 커버하는 최소 seq 계산
+    // 예) seq=1500, ringSize=1000 -> 커버 범위는 (501..1500)
+    const minSeqKept = Math.max(1, entry.seq - entry.ringSize + 1);
+
+    // 요청이 너무 오래돼서 링에 없음 -> full sync 유도
+    if (last_seq + 1 < minSeqKept) return null;
+
+    // last_seq+1 부터 entry.seq 까지 순서대로 복원
+    const updates: UpdateEntry[] = [];
+    for (let s = last_seq + 1; s <= entry.seq; s++) {
+      const slot = s % entry.ringSize;
+      const item = entry.ring[slot];
+
+      if (!item || item.seq !== s) {
+        return null; // 중간 누락 -> full sync로
+      }
+
+      updates.push(item);
+    }
+
+    return updates;
+  };
+
+  // null이라면 전체를 반환한다. 
+  encodeFull(room_id: string): { seq: number; update: Uint8Array } {
+    const entry = this.ensure(room_id);
+    const full = Y.encodeStateAsUpdate(entry.doc);
+    return { seq: entry.seq, update: full };
+  }
+
+  // room_id 삭제 ( 나중에 구현 )
   delete(room_id: string): void {
     this.roomDocs.delete(room_id);
-  }
+  }  
+
 }
