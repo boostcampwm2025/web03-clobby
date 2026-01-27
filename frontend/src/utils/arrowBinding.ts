@@ -1,9 +1,14 @@
 import type { ArrowItem, ShapeItem, WhiteboardItem } from '@/types/whiteboard';
-import { getIntersectingPoint } from '@/utils/geom';
+import {
+  getIntersectingPoint,
+  rotatePoint,
+  type Shape,
+  type Point,
+} from '@/utils/geom';
 
 const ARROW_MARGIN = 10; // 화살표와 도형 사이의 간격
 
-//도형  위치 변경시 연결된 화살표들의 바인딩 포인트를 업데이트
+//도형  위치 변경시 연결된 화살표들의 부착 지점을 업데이트
 export function updateBoundArrows(
   shapeId: string,
   updatedShape: ShapeItem,
@@ -18,10 +23,23 @@ export function updateBoundArrows(
         item.endBinding?.elementId === shapeId),
   ) as ArrowItem[];
 
-  const shapeCenterX = updatedShape.x + updatedShape.width / 2;
-  const shapeCenterY = updatedShape.y + updatedShape.height / 2;
+  // 도형의 실제 중심점 계산
+  const rotation = updatedShape.rotation || 0;
+  const center = rotatePoint(
+    {
+      x: updatedShape.x + updatedShape.width / 2,
+      y: updatedShape.y + updatedShape.height / 2,
+    },
+    { x: updatedShape.x, y: updatedShape.y },
+    rotation,
+  );
+
+  const shapeCenterX = center.x;
+  const shapeCenterY = center.y;
 
   boundArrows.forEach((arrow) => {
+    if (!arrow.points || arrow.points.length < 4) return;
+
     const newPoints = [...arrow.points];
     let hasChange = false;
 
@@ -72,10 +90,10 @@ export function updateBoundArrows(
 }
 
 export function updateBindingPoint(
-  shape: { x: number; y: number; width: number; height: number },
+  shape: Shape,
   shapeCenterX: number,
   shapeCenterY: number,
-  targetPoint: { x: number; y: number },
+  targetPoint: Point,
 ) {
   // 도형 경계와의 교차점 계산
   const intersect = getIntersectingPoint(
@@ -84,6 +102,8 @@ export function updateBindingPoint(
       y: shape.y,
       width: shape.width,
       height: shape.height,
+      rotation: shape.rotation || 0,
+      type: shape.shapeType || shape.type,
     },
     targetPoint,
   );
@@ -104,9 +124,6 @@ export function updateBindingPoint(
   };
 }
 
-/**
- * 드래그 중인 아이템 정보를 바탕으로 화살표의 임시 포인트를 계산합니다. (로컬 렌더링용)
- */
 export function getDraggingArrowPoints(
   arrow: ArrowItem,
   draggingId: string,
@@ -115,6 +132,7 @@ export function getDraggingArrowPoints(
   items: WhiteboardItem[],
   draggingWidth?: number,
   draggingHeight?: number,
+  draggingRotation?: number,
 ): number[] | null {
   const isStartBound = arrow.startBinding?.elementId === draggingId;
   const isEndBound = arrow.endBinding?.elementId === draggingId;
@@ -124,17 +142,29 @@ export function getDraggingArrowPoints(
   const targetShape = items.find((it) => it.id === draggingId) as ShapeItem;
   if (!targetShape) return null;
 
-  // 드래그/변형 중인 도형의 임시 정보
+  const rotation =
+    draggingRotation !== undefined
+      ? draggingRotation
+      : targetShape.rotation || 0;
   const tempShape = {
     ...targetShape,
     x: draggingX,
     y: draggingY,
     width: draggingWidth ?? targetShape.width,
     height: draggingHeight ?? targetShape.height,
+    rotation,
   };
+  const center = rotatePoint(
+    {
+      x: tempShape.x + tempShape.width / 2,
+      y: tempShape.y + tempShape.height / 2,
+    },
+    { x: tempShape.x, y: tempShape.y },
+    rotation,
+  );
 
-  const shapeCenterX = tempShape.x + tempShape.width / 2;
-  const shapeCenterY = tempShape.y + tempShape.height / 2;
+  const shapeCenterX = center.x;
+  const shapeCenterY = center.y;
 
   if (!arrow.points) return null;
   const newPoints = [...arrow.points];
@@ -142,7 +172,10 @@ export function getDraggingArrowPoints(
   if (isStartBound) {
     const nextPoint = { x: newPoints[2], y: newPoints[3] };
     const result = updateBindingPoint(
-      tempShape,
+      {
+        ...tempShape,
+        type: tempShape.shapeType,
+      },
       shapeCenterX,
       shapeCenterY,
       nextPoint,
@@ -157,7 +190,10 @@ export function getDraggingArrowPoints(
       y: newPoints[newPoints.length - 3],
     };
     const result = updateBindingPoint(
-      tempShape,
+      {
+        ...tempShape,
+        type: tempShape.shapeType,
+      },
       shapeCenterX,
       shapeCenterY,
       prevPoint,

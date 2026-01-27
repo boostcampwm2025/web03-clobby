@@ -67,6 +67,7 @@ export default function Canvas() {
     y: number;
     width?: number;
     height?: number;
+    rotation?: number;
   } | null>(null);
 
   const size = useElementSize(containerRef);
@@ -286,6 +287,7 @@ export default function Canvas() {
                 items,
                 localDraggingPos.width,
                 localDraggingPos.height,
+                localDraggingPos.rotation,
               );
               if (tempPoints && Array.isArray(tempPoints)) {
                 displayItem = {
@@ -334,12 +336,14 @@ export default function Canvas() {
                       y: number;
                       width?: number;
                       height?: number;
+                      rotation?: number;
                     };
                     setLocalDraggingPos({
                       x: geoItem.x,
                       y: geoItem.y,
                       width: geoItem.width,
                       height: geoItem.height,
+                      rotation: geoItem.rotation,
                     });
                   } else {
                     setLocalDraggingPos(null);
@@ -351,9 +355,9 @@ export default function Canvas() {
                     prev ? { ...prev, x, y } : { x, y },
                   );
                 }}
-                onTransformMove={(id, x, y, w, h) => {
+                onTransformMove={(id, x, y, w, h, rotation) => {
                   setLocalDraggingId(id);
-                  setLocalDraggingPos({ x, y, width: w, height: h });
+                  setLocalDraggingPos({ x, y, width: w, height: h, rotation });
                 }}
                 onDragEnd={() => {
                   if (item.type === 'arrow' || item.type === 'line') {
@@ -385,6 +389,7 @@ export default function Canvas() {
               y={snapIndicator.y}
               width={snapIndicator.width}
               height={snapIndicator.height}
+              rotation={snapIndicator.rotation}
               stroke="#0096FF"
               strokeWidth={3}
               cornerRadius={3}

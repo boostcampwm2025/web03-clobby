@@ -38,6 +38,7 @@ interface RenderItemProps {
     y: number,
     w: number,
     h: number,
+    rotation: number,
   ) => void;
   onDragEnd?: () => void;
   onArrowDblClick?: (id: string) => void;
@@ -147,7 +148,9 @@ function RenderItem({
         onMouseLeave={handleMouseLeave}
         onDragStart={onDragStart}
         onDragMove={(x, y) => onDragMove?.(item.id, x, y)}
-        onTransformMove={(x, y, w, h) => onTransformMove?.(item.id, x, y, w, h)}
+        onTransformMove={(x, y, w, h, rotation) =>
+          onTransformMove?.(item.id, x, y, w, h, rotation)
+        }
         onDragEnd={onDragEnd}
       />
     );

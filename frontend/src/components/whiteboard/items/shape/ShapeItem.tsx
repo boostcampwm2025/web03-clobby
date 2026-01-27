@@ -22,7 +22,13 @@ interface ShapeItemProps {
 
   onDragStart?: () => void;
   onDragMove?: (x: number, y: number) => void;
-  onTransformMove?: (x: number, y: number, w: number, h: number) => void;
+  onTransformMove?: (
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    rotation: number,
+  ) => void;
   onDragEnd?: () => void;
 }
 
@@ -73,8 +79,9 @@ export default function ShapeItem({
 
       const newX = group.x();
       const newY = group.y();
+      const newRotation = group.rotation();
 
-      onTransformMove?.(newX, newY, newWidth, newHeight);
+      onTransformMove?.(newX, newY, newWidth, newHeight, newRotation);
 
       // 2. 텍스트 자동 크기 조절 (있는 경우)
       if (!shapeItem.text) return;

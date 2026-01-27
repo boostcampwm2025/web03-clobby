@@ -31,6 +31,7 @@ export function useArrowHandles({
     y: number;
     width: number;
     height: number;
+    rotation?: number;
   } | null>(null);
 
   // 현재 부착된 타겟 정보 (드래그 종료 시 저장용)
@@ -107,7 +108,13 @@ export function useArrowHandles({
         y: sy,
         position,
       } = getNearestSnapPoint(
-        { x: shape.x, y: shape.y, width: shape.width, height: shape.height },
+        {
+          x: shape.x,
+          y: shape.y,
+          width: shape.width,
+          height: shape.height,
+          rotation: shape.rotation,
+        },
         { x, y },
       );
 
@@ -124,6 +131,7 @@ export function useArrowHandles({
             y: shape.y,
             width: shape.width,
             height: shape.height,
+            rotation: shape.rotation,
           },
         };
       }
@@ -131,10 +139,11 @@ export function useArrowHandles({
 
     if (foundSnap) {
       setSnapIndicator({
-        x: foundSnap.x - 5,
-        y: foundSnap.y - 5,
-        width: 10,
-        height: 10,
+        x: foundSnap.shapeBox.x,
+        y: foundSnap.shapeBox.y,
+        width: foundSnap.shapeBox.width,
+        height: foundSnap.shapeBox.height,
+        rotation: foundSnap.shapeBox.rotation,
       });
       currentSnapTarget.current = {
         elementId: foundSnap.elementId,
