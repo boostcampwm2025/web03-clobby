@@ -7,7 +7,6 @@ import {
   OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
-  WebSocketServer,
   WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
@@ -17,6 +16,7 @@ import { KafkaService } from '@/infra/event-stream/kafka/event-stream.service';
 import { EVENT_STREAM_NAME } from '@/infra/event-stream/event-stream.constants';
 import { WHITEBOARD_WEBSOCKET } from '@/infra/websocket/websocket.constants';
 import { WhiteboardWebsocket } from '@/infra/websocket/whiteboard/whiteboard.service';
+import { WhiteboardRepository } from '@/infra/memory/tool';
 
 @WebSocketGateway({
   namespace: process.env.NODE_BACKEND_WEBSOCKET_WHITEBOARD,
@@ -29,14 +29,12 @@ import { WhiteboardWebsocket } from '@/infra/websocket/whiteboard/whiteboard.ser
   pingTimeout: 20 * 1000,
 })
 export class WhiteboardWebsocketGateway implements OnGatewayInit, OnGatewayConnection {
-  @WebSocketServer()
-  private readonly server: Server;
-
   private readonly logger = new Logger(WhiteboardWebsocketGateway.name);
 
   constructor(
     private readonly whiteboardService: WhiteboardService,
     private readonly kafkaService: KafkaService,
+    private readonly whiteboardRepo: WhiteboardRepository,
     @Inject(WHITEBOARD_WEBSOCKET) private readonly whiteboardSocket: WhiteboardWebsocket,
   ) {}
 
@@ -103,6 +101,13 @@ export class WhiteboardWebsocketGateway implements OnGatewayInit, OnGatewayConne
     client.data.roomName = roomName;
 
     this.logger.log(`User가 ${roomName}에 참여함`);
+
+    client.emit('init-user', { userId: payload.user_id });
+
+    console.log(payload.user_id);
+
+    // 나중에 들어왔을때 동기화 요청 (기존 사용자에게 전체 상태 요청)
+    client.to(roomName).emit('request-sync');
 
     // Kafka 이벤트 발행(로그,동기화)
     if (payload.clientType === 'main' && payload.ticket !== 'temp-ticket') {
@@ -185,6 +190,32 @@ export class WhiteboardWebsocketGateway implements OnGatewayInit, OnGatewayConne
       client.to(roomName).volatile.emit(WHITEBOARD_CLIENT_EVENT_NAME.REMOTE_CURSOR_MOVE, data);
     } catch (error) {
       this.logger.error(`Cursor Error: ${error.message}`);
+    }
+  }
+
+  // Yjs 업데이트 (아이템 동기화)
+  @SubscribeMessage('yjs-update')
+  handleYjsUpdate(@ConnectedSocket() client: Socket, @MessageBody() update: Buffer) {
+    try {
+      if (!update || update.length === 0) return;
+
+      const roomName = client.data.roomName;
+
+      client.to(roomName).volatile.emit('yjs-update', update);
+    } catch (error) {
+      this.logger.error(`Yjs Update Error: ${error.message}`);
+    }
+  }
+
+  // Awareness 업데이트 (커서 위치, 선택 아이템 동기화)
+  @SubscribeMessage('awareness-update')
+  handleAwarenessUpdate(@ConnectedSocket() client: Socket, @MessageBody() update: Buffer) {
+    try {
+      if (!update) return;
+
+      client.to(client.data.roomName).volatile.emit('awareness-update', update);
+    } catch (error) {
+      this.logger.error(`Awareness Update Error: ${error.message}`);
     }
   }
 }
