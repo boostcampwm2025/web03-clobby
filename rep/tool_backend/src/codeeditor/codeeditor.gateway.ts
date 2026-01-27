@@ -7,6 +7,7 @@ import {
   OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
+  WebSocketServer,
   WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
@@ -19,6 +20,7 @@ import { CodeeditorWebsocket } from '@/infra/websocket/codeeditor/codeeditor.ser
 import * as Y from 'yjs';
 import { CodeeditorRepository } from '@/infra/memory/tool';
 
+
 @WebSocketGateway({
   namespace: process.env.NODE_BACKEND_WEBSOCKET_CODEEDITOR,
   path: process.env.NODE_BACKEND_WEBSOCKET_PREFIX,
@@ -30,12 +32,16 @@ import { CodeeditorRepository } from '@/infra/memory/tool';
   pingTimeout: 20 * 1000, // ping pong 허용 시간 ( 20초 )
 })
 export class CodeeditorWebsocketGateway implements OnGatewayInit, OnGatewayConnection {
+
+  @WebSocketServer()
+  private readonly server: Server;
+
   private readonly logger = new Logger();
 
   constructor(
     private readonly codeeditorService: CodeeditorService,
     private readonly kafkaService: KafkaService,
-    private readonly codeeditorRepo: CodeeditorRepository,
+    private readonly codeeditorRepo : CodeeditorRepository,
     @Inject(CODEEDITOR_WEBSOCKET) private readonly codeeditorSocket: CodeeditorWebsocket,
   ) {}
 
@@ -73,19 +79,17 @@ export class CodeeditorWebsocketGateway implements OnGatewayInit, OnGatewayConne
     const roomName = this.codeeditorService.makeNamespace(payload.room_id); // 방가입
     await client.join(roomName);
     client.data.roomName = roomName;
+    
+    // 메모리에 존재하면 가져오고 없으면 cache에서 가져온다.  
+    const entry = this.codeeditorRepo.ensure(roomName); // 일단 실험을 위해서 메모리로만 진행을 해보자
 
-    // 메모리에 존재하면 가져오고 없으면 cache에서 가져온다.
-    const doc = this.codeeditorRepo.get(roomName);
-    if (doc) {
-      this.logger.log(`[Sync] 서버에서 신규 유저 ${payload.user_id}에게 직접 데이터 전송`);
-      const fullUpdate = Y.encodeStateAsUpdate(doc);
-      client.emit('yjs-update', fullUpdate); // 방 전체가 아닌 '나'에게만 전송
-    } else {
-      // 아무도 없어서 Doc이 없다면, 다른 사람에게 요청 (최초 생성 시나리오)
-      client.to(roomName).emit('request-sync');
-    }
+    // 그 업데이트 본을 준다. 
+    const fullUpdate = Y.encodeStateAsUpdate(entry.doc);
+    client.emit('yjs-init', fullUpdate); // 클라이언트에게 yjs 초기 문서를 전달해준다. 
 
     if (payload.clientType === 'main') {
+      // main이 불러오면 ydoc에 있는 캐시도 자동으로 불러오게 한다. 
+
       this.kafkaService.emit(EVENT_STREAM_NAME.CODEEDITOR_ENTER, {
         room_id: payload.room_id,
         user_id: payload.user_id,
@@ -104,6 +108,7 @@ export class CodeeditorWebsocketGateway implements OnGatewayInit, OnGatewayConne
     if (!roomName) return;
 
     // TODO: 방에 아무도 없을 때 삭제
+
   }
 
   @SubscribeMessage(CODEEDITOR_EVENT_NAME.HEALTH_CHECK)
@@ -122,6 +127,16 @@ export class CodeeditorWebsocketGateway implements OnGatewayInit, OnGatewayConne
     }
   }
 
+  // 클라이언트가 서버에게 업데이트 완료했다고 보내는 메시지
+  // 클라이언트가 초기값을 받고 그 동안에 이루어진 작업을 요청하는 것이다. 
+  @SubscribeMessage('yjs-init-ack')
+  handleYjsInitAck(
+    
+  ) {
+
+  };
+
+  // 업데이트 하고 싶다고 보내는 메시지
   @SubscribeMessage('yjs-update')
   handleYjsUpdate(
     @ConnectedSocket() client: Socket,
@@ -133,33 +148,37 @@ export class CodeeditorWebsocketGateway implements OnGatewayInit, OnGatewayConne
       // 캐싱된 룸 이름 사용
       const roomName = client.data.roomName;
 
-      let doc = this.codeeditorRepo.get(roomName);
-      if (!doc) {
-        doc = new Y.Doc();
-        this.codeeditorRepo.set(roomName, doc);
-      }
+      const entry = this.codeeditorRepo.get(roomName);
+      if (!entry) return;
 
-      Y.applyUpdate(doc, new Uint8Array(update));
+      // 여기서 메모리 업데이트 + cache 업데이트를 진행해야 한다. 
+      Y.applyUpdate(entry.doc, new Uint8Array(update));
 
-      // 브로드캐스트
-      client.to(roomName).volatile.emit('yjs-update', update);
+      // 브로드캐스트 (이게 나를 제외하고 전부 보내는것인지 궁금)
+      // code에 경우 최신성 보다는 정확성이 더 중요하다고 생각하기 때문에 이 부분에서 volatile을 삭제한다. 
+      client.to(roomName).emit('yjs-update', update);
     } catch (error) {
       this.logger.error(`Yjs Update Error: ${error.message}`);
     }
-  }
+  };
+  
 
-  @SubscribeMessage('request-sync')
-  handleRequestSync(@ConnectedSocket() client: Socket) {
-    const roomName = client.data.roomName;
-    const doc = this.codeeditorRepo.get(roomName);
+  // 이 부분은 잠시 비활성화 할 예정입니다.
+  // @SubscribeMessage('request-sync')
+  // handleRequestSync(@ConnectedSocket() client: Socket) {
+  //   const roomName = client.data.roomName;
+  //   let doc = this.codeeditorRepo.get(roomName);
 
-    if (!doc) return;
+  //   if (!doc) {
+  //     doc = new Y.Doc();
+  //     this.codeeditorRepo.set(roomName, doc);
+  //   };
 
-    const fullUpdate = Y.encodeStateAsUpdate(doc);
-    client.emit('yjs-update', fullUpdate);
+  //   const fullUpdate = Y.encodeStateAsUpdate(doc);
+  //   client.emit('yjs-update', fullUpdate);
 
-    this.logger.log('doc length', doc?.getText('monaco').length);
-  }
+  //   this.logger.log('doc length', doc?.getText('monaco').length);
+  // }
 
   @SubscribeMessage('awareness-update')
   handleAwarenessUpdate(@ConnectedSocket() client: Socket, @MessageBody() update: Buffer) {
