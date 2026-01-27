@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useMemo, useEffect } from 'react';
+import { useRef, useState, useMemo, useEffect, useCallback } from 'react';
 
 import Konva from 'konva';
 import { Stage, Layer, Rect, Line } from 'react-konva';
@@ -181,26 +181,52 @@ export default function Canvas() {
     deleteControlPoint,
   });
 
-  const handleItemChange = (
-    id: string,
-    newAttributes: Partial<WhiteboardItem>,
-  ) => {
-    performTransaction(() => {
-      updateItem(id, newAttributes);
+  const handleItemChange = useCallback(
+    (id: string, newAttributes: Partial<WhiteboardItem>) => {
+      performTransaction(() => {
+        updateItem(id, newAttributes);
 
-      // 도형에 연결된 화살표 업데이트
-      const isGeometryChanged = GEOMETRY_KEYS.some(
-        (key) => key in newAttributes,
-      );
-      if (!isGeometryChanged) return;
+        // 도형에 연결된 화살표 업데이트
+        const isGeometryChanged = GEOMETRY_KEYS.some(
+          (key) => key in newAttributes,
+        );
+        if (!isGeometryChanged) return;
 
-      const changedItem = items.find((item) => item.id === id);
-      if (!changedItem || changedItem.type !== 'shape') return;
+        const changedItem = items.find((item) => item.id === id);
+        if (!changedItem || changedItem.type !== 'shape') return;
 
-      const updatedShape = { ...changedItem, ...newAttributes } as ShapeItem;
-      updateBoundArrows(id, updatedShape, items, updateItem);
-    });
-  };
+        const updatedShape = { ...changedItem, ...newAttributes } as ShapeItem;
+        updateBoundArrows(id, updatedShape, items, updateItem);
+      });
+    },
+    [items, updateItem, performTransaction],
+  );
+
+  const handleDragMoveItem = useCallback((id: string, x: number, y: number) => {
+    setLocalDraggingId(id);
+    setLocalDraggingPos((prev) => (prev ? { ...prev, x, y } : { x, y }));
+  }, []);
+
+  const handleTransformMoveItem = useCallback(
+    (
+      id: string,
+      x: number,
+      y: number,
+      w: number,
+      h: number,
+      rotation: number,
+    ) => {
+      setLocalDraggingId(id);
+      setLocalDraggingPos({ x, y, width: w, height: h, rotation });
+    },
+    [],
+  );
+
+  const handleDragEndItem = useCallback(() => {
+    setIsDraggingArrow(false);
+    setLocalDraggingId(null);
+    setLocalDraggingPos(null);
+  }, []);
 
   // width={0} height={0}으로 canvas 렌더링 방지
   if (size.width === 0 || size.height === 0) {
@@ -266,71 +292,75 @@ export default function Canvas() {
           />
 
           {/* 아이템 렌더링 */}
-          {items.map((item) => {
-            // 드래그 중인 아이템의 실시간 위치
-            let displayItem = item;
-            if (localDraggingId === item.id && localDraggingPos) {
-              displayItem = {
-                ...item,
-                x: localDraggingPos.x,
-                y: localDraggingPos.y,
-              } as WhiteboardItem;
-            }
+          {(() => {
+            const draggingTargetShape =
+              localDraggingId && localDraggingPos
+                ? (items.find((it) => it.id === localDraggingId) as ShapeItem)
+                : null;
 
-            // 화살표인 경우, 부착 대상이 드래그 중인지 확인하고 계산
-            if (item.type === 'arrow' && localDraggingId && localDraggingPos) {
-              const tempPoints = getDraggingArrowPoints(
-                item as ArrowItem,
-                localDraggingId,
-                localDraggingPos.x,
-                localDraggingPos.y,
-                items,
-                localDraggingPos.width,
-                localDraggingPos.height,
-                localDraggingPos.rotation,
-              );
-              if (tempPoints && Array.isArray(tempPoints)) {
+            return items.map((item) => {
+              // 드래그 중인 아이템의 실시간 위치
+              let displayItem = item;
+              if (localDraggingId === item.id && localDraggingPos) {
                 displayItem = {
-                  ...displayItem,
-                  points: tempPoints,
+                  ...item,
+                  x: localDraggingPos.x,
+                  y: localDraggingPos.y,
                 } as WhiteboardItem;
               }
-            }
 
-            // 핸들 드래그 중인 화살표
-            if (
-              displayItem.id === selectedId &&
-              (displayItem.type === 'arrow' || displayItem.type === 'line') &&
-              draggingPoints &&
-              Array.isArray(draggingPoints)
-            ) {
-              displayItem = {
-                ...displayItem,
-                points: draggingPoints,
-              } as WhiteboardItem;
-            }
-
-            return (
-              <RenderItem
-                key={item.id}
-                item={displayItem}
-                isSelected={item.id === selectedId}
-                onSelect={selectItem}
-                onChange={(newAttributes) =>
-                  handleItemChange(item.id, newAttributes)
+              // 화살표인 경우, 부착 대상이 드래그 중인지 확인하고 계산
+              if (
+                item.type === 'arrow' &&
+                localDraggingId &&
+                localDraggingPos &&
+                draggingTargetShape
+              ) {
+                const tempPoints = getDraggingArrowPoints(
+                  item as ArrowItem,
+                  localDraggingId,
+                  localDraggingPos.x,
+                  localDraggingPos.y,
+                  draggingTargetShape,
+                  localDraggingPos.width,
+                  localDraggingPos.height,
+                  localDraggingPos.rotation,
+                );
+                if (tempPoints && Array.isArray(tempPoints)) {
+                  displayItem = {
+                    ...displayItem,
+                    points: tempPoints,
+                  } as WhiteboardItem;
                 }
-                onArrowDblClick={handleArrowDblClick}
-                onShapeDblClick={handleShapeDblClick}
-                onDragStart={() => {
-                  if (item.type === 'arrow' || item.type === 'line') {
-                    setIsDraggingArrow(true);
-                  }
-                  setLocalDraggingId(item.id);
-                  if (
-                    item.type === 'shape' ||
-                    item.type === 'text' ||
-                    item.type === 'image'
-                  ) {
+              }
+
+              // 핸들 드래그 중인 화살표
+              if (
+                displayItem.id === selectedId &&
+                (displayItem.type === 'arrow' || displayItem.type === 'line') &&
+                draggingPoints &&
+                Array.isArray(draggingPoints)
+              ) {
+                displayItem = {
+                  ...displayItem,
+                  points: draggingPoints,
+                } as WhiteboardItem;
+              }
+
+              return (
+                <RenderItem
+                  key={item.id}
+                  item={displayItem}
+                  isSelected={item.id === selectedId}
+                  onSelect={selectItem}
+                  onChange={handleItemChange}
+                  onArrowDblClick={handleArrowDblClick}
+                  onShapeDblClick={handleShapeDblClick}
+                  onDragStart={() => {
+                    if (item.type === 'arrow' || item.type === 'line') {
+                      setIsDraggingArrow(true);
+                    }
+                    setLocalDraggingId(item.id);
                     const geoItem = item as {
                       x: number;
                       y: number;
@@ -345,30 +375,14 @@ export default function Canvas() {
                       height: geoItem.height,
                       rotation: geoItem.rotation,
                     });
-                  } else {
-                    setLocalDraggingPos(null);
-                  }
-                }}
-                onDragMove={(id, x, y) => {
-                  setLocalDraggingId(id);
-                  setLocalDraggingPos((prev) =>
-                    prev ? { ...prev, x, y } : { x, y },
-                  );
-                }}
-                onTransformMove={(id, x, y, w, h, rotation) => {
-                  setLocalDraggingId(id);
-                  setLocalDraggingPos({ x, y, width: w, height: h, rotation });
-                }}
-                onDragEnd={() => {
-                  if (item.type === 'arrow' || item.type === 'line') {
-                    setIsDraggingArrow(false);
-                  }
-                  setLocalDraggingId(null);
-                  setLocalDraggingPos(null);
-                }}
-              />
-            );
-          })}
+                  }}
+                  onDragMove={handleDragMoveItem}
+                  onTransformMove={handleTransformMoveItem}
+                  onDragEnd={handleDragEndItem}
+                />
+              );
+            });
+          })()}
           {isArrowOrLineSelected && selectedItem && !isDraggingArrow && (
             <ArrowHandles
               arrow={selectedItem as ArrowItem}

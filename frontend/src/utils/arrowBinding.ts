@@ -129,7 +129,7 @@ export function getDraggingArrowPoints(
   draggingId: string,
   draggingX: number,
   draggingY: number,
-  items: WhiteboardItem[],
+  targetShape: ShapeItem,
   draggingWidth?: number,
   draggingHeight?: number,
   draggingRotation?: number,
@@ -139,7 +139,6 @@ export function getDraggingArrowPoints(
 
   if (!isStartBound && !isEndBound) return null;
 
-  const targetShape = items.find((it) => it.id === draggingId) as ShapeItem;
   if (!targetShape) return null;
 
   const rotation =

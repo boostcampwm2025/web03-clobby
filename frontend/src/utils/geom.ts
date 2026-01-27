@@ -13,7 +13,7 @@ export interface Point {
   y: number;
 }
 
-// 점 회전 변환 도우미
+// 점 회전 변환
 export function rotatePoint(
   point: Point,
   center: Point,
