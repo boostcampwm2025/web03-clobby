@@ -24,6 +24,11 @@ export interface TextItem extends BaseItem {
   width: number;
 }
 
+export interface ArrowBinding {
+  elementId: string;
+  position: { x: number; y: number };
+}
+
 export interface ArrowItem extends BaseItem {
   type: 'arrow';
   points: number[];
@@ -35,6 +40,8 @@ export interface ArrowItem extends BaseItem {
   startHeadType?: ArrowHeadType;
   endHeadType?: ArrowHeadType;
   chevronSpacing?: number;
+  startBinding?: ArrowBinding;
+  endBinding?: ArrowBinding;
 }
 
 export interface LineItem extends BaseItem {
