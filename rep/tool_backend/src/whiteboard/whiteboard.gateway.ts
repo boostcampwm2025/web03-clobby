@@ -29,13 +29,12 @@ import { WhiteboardRepository } from '@/infra/memory/tool';
   pingTimeout: 20 * 1000,
 })
 export class WhiteboardWebsocketGateway implements OnGatewayInit, OnGatewayConnection {
-
   private readonly logger = new Logger(WhiteboardWebsocketGateway.name);
 
   constructor(
     private readonly whiteboardService: WhiteboardService,
     private readonly kafkaService: KafkaService,
-    private readonly whiteboardRepo : WhiteboardRepository,
+    private readonly whiteboardRepo: WhiteboardRepository,
     @Inject(WHITEBOARD_WEBSOCKET) private readonly whiteboardSocket: WhiteboardWebsocket,
   ) {}
 

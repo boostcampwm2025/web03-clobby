@@ -19,7 +19,6 @@ import { CodeeditorWebsocket } from '@/infra/websocket/codeeditor/codeeditor.ser
 import * as Y from 'yjs';
 import { CodeeditorRepository } from '@/infra/memory/tool';
 
-
 @WebSocketGateway({
   namespace: process.env.NODE_BACKEND_WEBSOCKET_CODEEDITOR,
   path: process.env.NODE_BACKEND_WEBSOCKET_PREFIX,
@@ -31,13 +30,12 @@ import { CodeeditorRepository } from '@/infra/memory/tool';
   pingTimeout: 20 * 1000, // ping pong 허용 시간 ( 20초 )
 })
 export class CodeeditorWebsocketGateway implements OnGatewayInit, OnGatewayConnection {
-
   private readonly logger = new Logger();
 
   constructor(
     private readonly codeeditorService: CodeeditorService,
     private readonly kafkaService: KafkaService,
-    private readonly codeeditorRepo : CodeeditorRepository,
+    private readonly codeeditorRepo: CodeeditorRepository,
     @Inject(CODEEDITOR_WEBSOCKET) private readonly codeeditorSocket: CodeeditorWebsocket,
   ) {}
 
@@ -75,8 +73,8 @@ export class CodeeditorWebsocketGateway implements OnGatewayInit, OnGatewayConne
     const roomName = this.codeeditorService.makeNamespace(payload.room_id); // 방가입
     await client.join(roomName);
     client.data.roomName = roomName;
-    
-    // 메모리에 존재하면 가져오고 없으면 cache에서 가져온다.  
+
+    // 메모리에 존재하면 가져오고 없으면 cache에서 가져온다.
     const doc = this.codeeditorRepo.get(roomName);
     if (doc) {
       this.logger.log(`[Sync] 서버에서 신규 유저 ${payload.user_id}에게 직접 데이터 전송`);
