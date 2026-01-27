@@ -37,6 +37,7 @@ export default function MeetingMenu() {
     setIsOpen,
     screenSharer,
   } = useMeetingStore();
+  const screenShareOn = useMeetingStore((state) => state.media.screenShareOn);
 
   const {
     startAudioProduce,
@@ -52,9 +53,8 @@ export default function MeetingMenu() {
   // 화이트보드 연결 / 해제 함수 가져오기
   const { connectWhiteboard, disconnectWhiteboard } = useWhiteboardSocket();
 
-  const isMeSharing = media.screenShareOn;
   const isSomeoneSharing = screenSharer !== null;
-  const isDisabledSharing = isSomeoneSharing && !isMeSharing;
+  const isDisabledSharing = isSomeoneSharing && !screenShareOn;
 
   const toggleAudio = async () => {
     const { audioOn } = useMeetingStore.getState().media;
@@ -88,7 +88,7 @@ export default function MeetingMenu() {
   };
 
   const onScreenShareClick = async () => {
-    if (isMeSharing) {
+    if (screenShareOn) {
       stopScreenProduce();
     } else {
       if (isSomeoneSharing) return;
@@ -179,8 +179,14 @@ export default function MeetingMenu() {
         />
         <MeetingButton
           icon={<ShareIcon className="h-8 w-8" />}
-          text="화면 공유"
-          isActive={useMeetingStore.getState().media.screenShareOn}
+          text={
+            screenShareOn
+              ? '공유 중지'
+              : isDisabledSharing
+                ? '화면 공유 중'
+                : '화면 공유'
+          }
+          isActive={screenShareOn}
           onClick={onScreenShareClick}
           disabled={isDisabledSharing}
         />

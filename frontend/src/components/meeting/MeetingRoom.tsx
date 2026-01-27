@@ -204,7 +204,8 @@ export default function MeetingRoom({ meetingId }: { meetingId: string }) {
     };
 
     const onUserClosed = async (userId: string) => {
-      if (screenSharer?.id === userId) setScreenSharer(null);
+      const currentScreenSharer = useMeetingStore.getState().screenSharer?.id;
+      if (currentScreenSharer === userId) setScreenSharer(null);
 
       removeMember(userId);
       removeConsumer(userId);
