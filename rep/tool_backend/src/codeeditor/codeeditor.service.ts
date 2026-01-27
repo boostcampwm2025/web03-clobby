@@ -126,6 +126,8 @@ export class CodeeditorService {
       this.codeeditorRepo.applyAndAppendUpdate(roomName, new Uint8Array(uBuf));
     };
 
+    this.logger.log("redis에서 데이터를 가져왔습니다.");
+
     // 마지막 stream 까지 업데이트 시킨다. 
     return this.codeeditorRepo.encodeFull(roomName);
   };
@@ -155,10 +157,9 @@ export class CodeeditorService {
     // 추후 여러 pod 대비 lock을 추가해야 한다. ( 지금은 스킵 )
 
     try {
-      const snapU8 = this.codeeditorRepo.encodeSnapshot(roomName); // snapshot을 만든다. 
+      const snapU8 = this.codeeditorRepo.encodeSnapshot(roomName); // snapshot을 만든다. ( 성능 병목 현상이 뜨는 장소 )
       const snapB64 = encodeB64(snapU8);
       const ts = String(Date.now());
-
 
       const streamKey = this.streamKey(room_id);
       const latest = await this.redis.xRevRange(streamKey, '+', '-', { COUNT: 1 });
@@ -173,9 +174,10 @@ export class CodeeditorService {
         [CACHE_CODEEDITOR_SNAPSHOT_KEY_NAME.TX]: ts
       });
 
-      (tx as any).sendCommand(['XTRIM', streamKey, 'MAXLEN', '~', String(STREAM_MAXLEN)]); // 원자성 보장
+      tx.xTrim(streamKey, 'MAXLEN', STREAM_MAXLEN, { strategyModifier: '~' }); // 원자성 보장
 
       const res = await tx.exec();
+      this.logger.log("스냅샷을 찍었습니다.")
       if ( !res ) return;
     } catch (err) {
       this.logger.error(err);
