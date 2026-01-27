@@ -124,7 +124,8 @@ export default function ShapeItem({
           const textWidth = newWidth * 0.8;
 
           textNode.width(textWidth);
-          textNode.height(NaN);
+          // @ts-expect-error 라이브러리 타입 정의에는 없지만 실제로 'auto' 값을 허용함
+          textNode.height('auto');
 
           const requiredHeight = textNode.height() + 8;
 

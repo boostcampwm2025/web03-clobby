@@ -93,7 +93,8 @@ export default function ItemTransformer({
               const newTextWidth = (newBox.width / stageScale) * 0.8;
 
               textNode.width(newTextWidth);
-              textNode.height(NaN);
+              // @ts-expect-error 라이브러리 타입 정의에는 없지만 실제로 'auto' 값을 허용함
+              textNode.height('auto');
 
               // 텍스트 실제 높이 계산
               const requiredTextHeight = textNode.height() + 8;
