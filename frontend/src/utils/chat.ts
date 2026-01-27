@@ -119,7 +119,7 @@ export function mapRecvPayloadToChatMessage(
       filename: payload.filename,
       size: payload.size,
       category: payload.category,
-      fileUrl: payload.thumnail_url,
+      fileUrl: payload.thumbnail_url,
     },
   };
 }

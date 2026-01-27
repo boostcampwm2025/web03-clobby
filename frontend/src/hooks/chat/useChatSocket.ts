@@ -19,7 +19,7 @@ type FileMessagePayload = {
   type: 'file';
   file_id: string;
   filename: string;
-  thumnail_url: string;
+  thumbnail_url: string;
   size: number;
   category: FileCategory;
 };
