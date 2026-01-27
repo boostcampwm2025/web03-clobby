@@ -172,6 +172,35 @@ export default function ShapeTextArea({
       textarea.removeEventListener('input', adjustHeight);
     };
   }, []);
+
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+
+      // 사이드바 클릭은 무시 (편집 유지)
+      if (target.closest('aside')) {
+        return;
+      }
+
+      // textarea 외부 클릭 시 저장 및 닫기
+      if (ref.current && e.target !== ref.current) {
+        onChange(text);
+        onClose();
+      }
+    };
+
+    // 외부 영역 클릭 시 textarea가 즉시 blur 되면서 onChange가 누락되는 문제가 있어
+    // 이벤트 등록 시점을 다음 이벤트 루프로 미룸
+    const timer = setTimeout(() => {
+      window.addEventListener('mousedown', handleOutsideClick);
+    });
+
+    return () => {
+      window.removeEventListener('mousedown', handleOutsideClick);
+      clearTimeout(timer);
+    };
+  }, [onChange, onClose, text]);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // Esc: 완료
     if (e.key === 'Escape') {
@@ -179,12 +208,6 @@ export default function ShapeTextArea({
       onChange(text);
       onClose();
     }
-    // Enter: 줄바꿈 (기본 동작 허용)
-  };
-
-  const handleBlur = () => {
-    onChange(text);
-    onClose();
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -245,7 +268,6 @@ export default function ShapeTextArea({
       value={text}
       onChange={handleChange}
       onKeyDown={handleKeyDown}
-      onBlur={handleBlur}
       spellCheck={false}
       className="absolute z-1000 m-0 box-border resize-none overflow-hidden border-none bg-transparent p-0 break-all whitespace-pre-wrap outline-none focus:outline-none"
     />
