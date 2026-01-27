@@ -122,7 +122,7 @@ export const useMeetingStore = create<MeetingState & MeetingActions>((set) => ({
       }
 
       const remainingIds = state.orderedMemberIds.filter(
-        (id) => !state.pinnedMemberIds.includes(id),
+        (id) => !state.pinnedMemberIds.includes(id) && id !== userId,
       );
 
       const nextOrderedIds = [
@@ -163,6 +163,8 @@ export const useMeetingStore = create<MeetingState & MeetingActions>((set) => ({
   setScreenSharer: (sharer) => set(() => ({ screenSharer: sharer })),
   setSpeaking: (userId, isSpeaking) =>
     set((state) => {
+      const lastSpeakerUpdate = isSpeaking ? { lastSpeakerId: userId } : {};
+
       // 말하기를 멈췄을 때나, 고정된 유저는 계산에서 제외
       if (!isSpeaking && state.pinnedMemberIds.includes(userId)) {
         return {
@@ -184,6 +186,7 @@ export const useMeetingStore = create<MeetingState & MeetingActions>((set) => ({
       return {
         speakingMembers: { ...state.speakingMembers, [userId]: isSpeaking },
         orderedMemberIds: nextOrderedIds,
+        ...lastSpeakerUpdate,
       };
     }),
   togglePin: (userId) =>
