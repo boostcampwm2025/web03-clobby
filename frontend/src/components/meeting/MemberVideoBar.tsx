@@ -11,14 +11,9 @@ import { useEffect, useMemo, useState } from 'react';
 
 export default function MemberVideoBar() {
   const MEMBERS_PER_PAGE = 6;
-  const {
-    members,
-    memberStreams,
-    setMemberStream,
-    removeMemberStream,
-    orderedMemberIds,
-  } = useMeetingStore();
-  const { socket, recvTransport, device, consumers, addConsumers } =
+  const { members, setMemberStream, removeMemberStream, orderedMemberIds } =
+    useMeetingStore();
+  const { socket, recvTransport, device, addConsumers } =
     useMeetingSocketStore();
   const [currentPage, setCurrentPage] = useState(1);
 

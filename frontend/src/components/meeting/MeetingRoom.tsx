@@ -39,17 +39,9 @@ export default function MeetingRoom({ meetingId }: { meetingId: string }) {
     screenSharer,
   } = useMeetingStore();
   const { startAudioProduce, startVideoProduce, isReady } = useProduce();
+  const { socket, device, recvTransport, addConsumer, removeConsumer } =
+    useMeetingSocketStore();
   const {
-    producers,
-    consumers,
-    socket,
-    device,
-    recvTransport,
-    addConsumer,
-    removeConsumer,
-  } = useMeetingSocketStore();
-  const {
-    members,
     setMembers,
     addMember,
     removeMember,
@@ -139,9 +131,6 @@ export default function MeetingRoom({ meetingId }: { meetingId: string }) {
             'type' in info &&
             (info.type === 'screen_audio' || info.type === 'screen_video')
           ) {
-            console.log(
-              `[화면 공유 감지] ${info.nickname}님의 공유를 수신합니다.`,
-            );
             setScreenSharer({ id: info.user_id, nickname: info.nickname });
 
             const screenProducerInfo: ProducerInfo = {
@@ -277,9 +266,6 @@ export default function MeetingRoom({ meetingId }: { meetingId: string }) {
             producerType === 'screen_video' ||
             producerType === 'screen_audio'
           ) {
-            console.log(
-              `[실시간 화면 공유 감지] ${producerNickname}님이 공유를 시작했습니다.`,
-            );
             setScreenSharer({ id: userId, nickname: producerNickname });
           }
         } catch (error) {

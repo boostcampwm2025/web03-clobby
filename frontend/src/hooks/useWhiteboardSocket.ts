@@ -35,9 +35,6 @@ export const useWhiteboardSocket = () => {
 
     // 연결 성공 시
     newSocket.on('connect', () => {
-      // 연결 성공 테스트 -> TODO 추후 삭제 예정
-      console.log('Whiteboard 소켓 연결 성공 : ', newSocket.id);
-
       // 스토어에 소켓 저장(다른 컴포넌트에서도 써야함)
       setWhiteboardSocket(newSocket);
 
@@ -52,7 +49,6 @@ export const useWhiteboardSocket = () => {
 
     // 연결 해제 시
     newSocket.on('disconnect', (reason) => {
-      console.log('Whiteboard 연결 끊김 : ', reason);
       setWhiteboardSocket(null);
     });
 

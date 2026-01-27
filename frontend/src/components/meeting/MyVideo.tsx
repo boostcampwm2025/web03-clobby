@@ -1,4 +1,3 @@
-import { MoreHoriIcon } from '@/assets/icons/common';
 import { MicOffIcon } from '@/assets/icons/meeting';
 import VideoView from '@/components/meeting/media/VideoView';
 import { useClickOutside } from '@/hooks/useClickOutside';
