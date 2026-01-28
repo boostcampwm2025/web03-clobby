@@ -192,11 +192,28 @@ export default function Canvas() {
     (e: Konva.KonvaEventObject<WheelEvent>) => {
       handleWheel(e);
 
-      // wheel 이후 stage에 커스텀 이벤트 발생
       const stage = stageRef.current;
-      if (stage) {
-        stage.fire('stageTransformChange');
+      if (!stage) return;
+
+      // wheel 후 커서 위치 업데이트
+      const pointerPos = stage.getPointerPosition();
+      if (pointerPos) {
+        const transform = stage.getAbsoluteTransform().copy().invert();
+        const canvasPos = transform.point(pointerPos);
+
+        const awareness = useWhiteboardSharedStore.getState().awareness;
+        if (awareness) {
+          const currentState = awareness.getLocalState();
+          if (currentState) {
+            awareness.setLocalState({
+              ...currentState,
+              cursor: { x: canvasPos.x, y: canvasPos.y },
+            });
+          }
+        }
       }
+
+      stage.fire('stageTransformChange');
     },
     [handleWheel],
   );
