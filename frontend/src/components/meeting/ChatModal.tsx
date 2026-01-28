@@ -11,6 +11,7 @@ import { mapRecvPayloadToChatMessage } from '@/utils/chat';
 import { formatFileSize } from '@/utils/formatter';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
+import ToastMessage from '../common/ToastMessage';
 
 type PendingFile = {
   file: File;
@@ -18,6 +19,8 @@ type PendingFile = {
   preview?: string;
   mediaType: 'image' | 'video' | 'file';
 };
+
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
 export default function ChatModal() {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -28,6 +31,7 @@ export default function ChatModal() {
 
   const [hasValue, setHasValue] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
+  const [showSizeError, setShowSizeError] = useState(false);
 
   const { userId, nickname, profilePath } = useUserStore();
   const messages = useChatStore((s) => s.messages);
@@ -47,7 +51,21 @@ export default function ChatModal() {
     const selectedFiles = Array.from(e.target.files || []);
     if (selectedFiles.length === 0) return;
 
-    const newFiles = selectedFiles.map((file) => {
+    const oversizedFiles = selectedFiles.filter((f) => f.size > MAX_FILE_SIZE);
+    if (oversizedFiles.length > 0) {
+      setShowSizeError(true);
+      setTimeout(() => setShowSizeError(false), 3000);
+    }
+
+    const validFiles = selectedFiles.filter((f) => f.size <= MAX_FILE_SIZE);
+
+    // 만약 모든 파일이 용량 초과라면 여기서 초기화
+    if (validFiles.length === 0) {
+      e.target.value = '';
+      return;
+    }
+
+    const newFiles = validFiles.map((file) => {
       const isImageOrVideo =
         file.type.startsWith('image/') || file.type.startsWith('video/');
 
@@ -134,9 +152,11 @@ export default function ChatModal() {
   const handleInput = () => {
     const obj = textareaRef.current;
     if (!obj) return;
+    const maxHeight = 120;
 
     obj.style.height = 'auto';
-    obj.style.height = `${obj.scrollHeight}px`;
+    obj.style.height =
+      obj.scrollHeight > maxHeight ? `${maxHeight}px` : `${obj.scrollHeight}px`;
 
     setHasValue(obj.value.trim().length > 0);
   };
@@ -151,6 +171,10 @@ export default function ChatModal() {
 
   return (
     <aside className="meeting-side-modal z-6">
+      {showSizeError && (
+        <ToastMessage message="100MB를 초과하는 파일은 업로드할 수 없습니다." />
+      )}
+
       <div className="flex-center relative h-12 w-full bg-neutral-800">
         <span className="font-bold text-neutral-200">채팅</span>
         <button
