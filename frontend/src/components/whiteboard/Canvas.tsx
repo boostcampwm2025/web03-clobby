@@ -1,17 +1,26 @@
 'use client';
 
-import { useRef, useState, useMemo, useEffect } from 'react';
+import { useRef, useState, useMemo, useEffect, useCallback } from 'react';
 
 import Konva from 'konva';
 import { Stage, Layer, Rect, Line } from 'react-konva';
 
-import type { WhiteboardItem, TextItem, ArrowItem } from '@/types/whiteboard';
+import type {
+  WhiteboardItem,
+  TextItem,
+  ArrowItem,
+  ShapeItem,
+} from '@/types/whiteboard';
 
 import { useWhiteboardSharedStore } from '@/store/useWhiteboardSharedStore';
 import { useWhiteboardLocalStore } from '@/store/useWhiteboardLocalStore';
 import { useWhiteboardAwarenessStore } from '@/store/useWhiteboardAwarenessStore';
 import { useItemActions } from '@/hooks/useItemActions';
 import { cn } from '@/utils/cn';
+import {
+  updateBoundArrows,
+  getDraggingArrowPoints,
+} from '@/utils/arrowBinding';
 
 import { useElementSize } from '@/hooks/useElementSize';
 import { useClickOutside } from '@/hooks/useClickOutside';
@@ -22,9 +31,12 @@ import { useCanvasMouseEvents } from '@/hooks/useCanvasMouseEvents';
 
 import RenderItem from '@/components/whiteboard/items/RenderItem';
 import TextArea from '@/components/whiteboard/items/text/TextArea';
+import ShapeTextArea from '@/components/whiteboard/items/shape/ShapeTextArea';
 import ItemTransformer from '@/components/whiteboard/controls/ItemTransformer';
 import RemoteSelectionLayer from '@/components/whiteboard/remote/RemoteSelectionLayer';
 import ArrowHandles from '@/components/whiteboard/items/arrow/ArrowHandles';
+
+const GEOMETRY_KEYS = ['x', 'y', 'width', 'height', 'rotation'] as const;
 
 export default function Canvas() {
   const stageScale = useWhiteboardLocalStore((state) => state.stageScale);
@@ -35,7 +47,7 @@ export default function Canvas() {
   const selectedId = useWhiteboardLocalStore((state) => state.selectedId);
   const editingTextId = useWhiteboardLocalStore((state) => state.editingTextId);
   const selectItem = useWhiteboardLocalStore((state) => state.selectItem);
-  const { updateItem } = useItemActions();
+  const { updateItem, performTransaction } = useItemActions();
   const setEditingTextId = useWhiteboardLocalStore(
     (state) => state.setEditingTextId,
   );
@@ -49,6 +61,14 @@ export default function Canvas() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDraggingArrow, setIsDraggingArrow] = useState(false);
   const [isDraggingCanvas, setIsDraggingCanvas] = useState(false);
+  const [localDraggingId, setLocalDraggingId] = useState<string | null>(null);
+  const [localDraggingPos, setLocalDraggingPos] = useState<{
+    x: number;
+    y: number;
+    width?: number;
+    height?: number;
+    rotation?: number;
+  } | null>(null);
 
   const size = useElementSize(containerRef);
 
@@ -66,7 +86,10 @@ export default function Canvas() {
 
   const editingItem = useMemo(
     () =>
-      items.find((item) => item.id === editingTextId) as TextItem | undefined,
+      items.find((item) => item.id === editingTextId) as
+        | TextItem
+        | ShapeItem
+        | undefined,
     [items, editingTextId],
   );
 
@@ -90,11 +113,18 @@ export default function Canvas() {
     handleArrowDblClick,
     deleteControlPoint,
     draggingPoints,
+    snapIndicator,
   } = useArrowHandles({
     arrow: isArrowOrLineSelected ? (selectedItem as ArrowItem) : null,
+    items,
     stageRef,
     updateItem,
   });
+
+  // 도형 더블클릭 핸들러 (텍스트 편집 모드)
+  const handleShapeDblClick = (id: string) => {
+    setEditingTextId(id);
+  };
 
   // 선택 해제 핸들러
   const handleCheckDeselect = (
@@ -151,12 +181,52 @@ export default function Canvas() {
     deleteControlPoint,
   });
 
-  const handleItemChange = (
-    id: string,
-    newAttributes: Partial<WhiteboardItem>,
-  ) => {
-    updateItem(id, newAttributes);
-  };
+  const handleItemChange = useCallback(
+    (id: string, newAttributes: Partial<WhiteboardItem>) => {
+      performTransaction(() => {
+        updateItem(id, newAttributes);
+
+        // 도형에 연결된 화살표 업데이트
+        const isGeometryChanged = GEOMETRY_KEYS.some(
+          (key) => key in newAttributes,
+        );
+        if (!isGeometryChanged) return;
+
+        const changedItem = items.find((item) => item.id === id);
+        if (!changedItem || changedItem.type !== 'shape') return;
+
+        const updatedShape = { ...changedItem, ...newAttributes } as ShapeItem;
+        updateBoundArrows(id, updatedShape, items, updateItem);
+      });
+    },
+    [items, updateItem, performTransaction],
+  );
+
+  const handleDragMoveItem = useCallback((id: string, x: number, y: number) => {
+    setLocalDraggingId(id);
+    setLocalDraggingPos((prev) => (prev ? { ...prev, x, y } : { x, y }));
+  }, []);
+
+  const handleTransformMoveItem = useCallback(
+    (
+      id: string,
+      x: number,
+      y: number,
+      w: number,
+      h: number,
+      rotation: number,
+    ) => {
+      setLocalDraggingId(id);
+      setLocalDraggingPos({ x, y, width: w, height: h, rotation });
+    },
+    [],
+  );
+
+  const handleDragEndItem = useCallback(() => {
+    setIsDraggingArrow(false);
+    setLocalDraggingId(null);
+    setLocalDraggingPos(null);
+  }, []);
 
   // width={0} height={0}으로 canvas 렌더링 방지
   if (size.width === 0 || size.height === 0) {
@@ -222,38 +292,97 @@ export default function Canvas() {
           />
 
           {/* 아이템 렌더링 */}
-          {items.map((item) => {
-            // 드래그 중인 화살표/선이면 draggingPoints 적용
-            const displayItem =
-              item.id === selectedId &&
-              (item.type === 'arrow' || item.type === 'line') &&
-              draggingPoints
-                ? { ...item, points: draggingPoints }
-                : item;
+          {(() => {
+            const draggingTargetShape =
+              localDraggingId && localDraggingPos
+                ? (items.find((it) => it.id === localDraggingId) as ShapeItem)
+                : null;
 
-            return (
-              <RenderItem
-                key={item.id}
-                item={displayItem}
-                isSelected={item.id === selectedId}
-                onSelect={selectItem}
-                onChange={(newAttributes) =>
-                  handleItemChange(item.id, newAttributes)
+            return items.map((item) => {
+              // 드래그 중인 아이템의 실시간 위치
+              let displayItem = item;
+              if (localDraggingId === item.id && localDraggingPos) {
+                displayItem = {
+                  ...item,
+                  x: localDraggingPos.x,
+                  y: localDraggingPos.y,
+                } as WhiteboardItem;
+              }
+
+              // 화살표인 경우, 부착 대상이 드래그 중인지 확인하고 계산
+              if (
+                item.type === 'arrow' &&
+                localDraggingId &&
+                localDraggingPos &&
+                draggingTargetShape
+              ) {
+                const tempPoints = getDraggingArrowPoints(
+                  item as ArrowItem,
+                  localDraggingId,
+                  localDraggingPos.x,
+                  localDraggingPos.y,
+                  draggingTargetShape,
+                  localDraggingPos.width,
+                  localDraggingPos.height,
+                  localDraggingPos.rotation,
+                );
+                if (tempPoints && Array.isArray(tempPoints)) {
+                  displayItem = {
+                    ...displayItem,
+                    points: tempPoints,
+                  } as WhiteboardItem;
                 }
-                onArrowDblClick={handleArrowDblClick}
-                onDragStart={() => {
-                  if (item.type === 'arrow' || item.type === 'line') {
-                    setIsDraggingArrow(true);
-                  }
-                }}
-                onDragEnd={() => {
-                  if (item.type === 'arrow' || item.type === 'line') {
-                    setIsDraggingArrow(false);
-                  }
-                }}
-              />
-            );
-          })}
+              }
+
+              // 핸들 드래그 중인 화살표
+              if (
+                displayItem.id === selectedId &&
+                (displayItem.type === 'arrow' || displayItem.type === 'line') &&
+                draggingPoints &&
+                Array.isArray(draggingPoints)
+              ) {
+                displayItem = {
+                  ...displayItem,
+                  points: draggingPoints,
+                } as WhiteboardItem;
+              }
+
+              return (
+                <RenderItem
+                  key={item.id}
+                  item={displayItem}
+                  isSelected={item.id === selectedId}
+                  onSelect={selectItem}
+                  onChange={handleItemChange}
+                  onArrowDblClick={handleArrowDblClick}
+                  onShapeDblClick={handleShapeDblClick}
+                  onDragStart={() => {
+                    if (item.type === 'arrow' || item.type === 'line') {
+                      setIsDraggingArrow(true);
+                    }
+                    setLocalDraggingId(item.id);
+                    const geoItem = item as {
+                      x: number;
+                      y: number;
+                      width?: number;
+                      height?: number;
+                      rotation?: number;
+                    };
+                    setLocalDraggingPos({
+                      x: geoItem.x,
+                      y: geoItem.y,
+                      width: geoItem.width,
+                      height: geoItem.height,
+                      rotation: geoItem.rotation,
+                    });
+                  }}
+                  onDragMove={handleDragMoveItem}
+                  onTransformMove={handleTransformMoveItem}
+                  onDragEnd={handleDragEndItem}
+                />
+              );
+            });
+          })()}
           {isArrowOrLineSelected && selectedItem && !isDraggingArrow && (
             <ArrowHandles
               arrow={selectedItem as ArrowItem}
@@ -264,6 +393,20 @@ export default function Canvas() {
               onEndDrag={handleArrowEndDrag}
               onDragEnd={handleHandleDragEnd}
               draggingPoints={draggingPoints}
+            />
+          )}
+
+          {/* 부착 표시 */}
+          {snapIndicator && (
+            <Rect
+              x={snapIndicator.x}
+              y={snapIndicator.y}
+              width={snapIndicator.width}
+              height={snapIndicator.height}
+              rotation={snapIndicator.rotation}
+              stroke="#0096FF"
+              strokeWidth={3}
+              cornerRadius={3}
             />
           )}
 
@@ -297,10 +440,10 @@ export default function Canvas() {
       </Stage>
 
       {/* 텍스트 편집 모드 */}
-      {editingTextId && editingItem && (
+      {editingTextId && editingItem && editingItem.type === 'text' && (
         <TextArea
           textId={editingTextId}
-          textItem={editingItem}
+          textItem={editingItem as TextItem}
           stageRef={stageRef}
           onChange={(newText) => {
             updateItem(editingTextId, { text: newText });
@@ -308,6 +451,30 @@ export default function Canvas() {
           onClose={() => {
             setEditingTextId(null);
             selectItem(null);
+          }}
+        />
+      )}
+
+      {/* 도형 텍스트 편집 모드 */}
+      {editingTextId && editingItem && editingItem.type === 'shape' && (
+        <ShapeTextArea
+          shapeId={editingTextId}
+          shapeItem={editingItem as ShapeItem}
+          stageRef={stageRef}
+          onChange={(newText) => {
+            updateItem(editingTextId, { text: newText });
+          }}
+          onClose={() => {
+            setEditingTextId(null);
+            selectItem(null);
+          }}
+          onSizeChange={(width, height, newY, newX, newText) => {
+            const updates: Partial<ShapeItem> = { width, height };
+            if (newY !== undefined) updates.y = newY;
+            if (newX !== undefined) updates.x = newX;
+            if (newText !== undefined) updates.text = newText;
+
+            updateItem(editingTextId, updates);
           }}
         />
       )}

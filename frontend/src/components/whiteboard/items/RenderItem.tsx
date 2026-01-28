@@ -11,6 +11,7 @@ import DrawingItem from '@/components/whiteboard/items/drawing/DrawingItem';
 import ImageItem from '@/components/whiteboard/items/image/ImageItem';
 import VideoItem from '@/components/whiteboard/items/video/VideoItem';
 import YoutubeItem from '@/components/whiteboard/items/youtube/YoutubeItem';
+import StackItem from '@/components/whiteboard/items/stack/StackItem';
 
 import type {
   TextItem as TextItemType,
@@ -21,6 +22,7 @@ import type {
   ImageItem as ImageItemType,
   VideoItem as VideoItemType,
   YoutubeItem as YoutubeItemType,
+  StackItem as StackItemType,
   WhiteboardItem,
 } from '@/types/whiteboard';
 
@@ -29,10 +31,20 @@ interface RenderItemProps {
   item: WhiteboardItem;
   isSelected: boolean;
   onSelect: (id: string) => void;
-  onChange: (newAttributes: Partial<WhiteboardItem>) => void;
+  onChange: (id: string, newAttributes: Partial<WhiteboardItem>) => void;
   onDragStart?: () => void;
+  onDragMove?: (id: string, x: number, y: number) => void;
+  onTransformMove?: (
+    id: string,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    rotation: number,
+  ) => void;
   onDragEnd?: () => void;
   onArrowDblClick?: (id: string) => void;
+  onShapeDblClick?: (id: string) => void;
 }
 
 function RenderItem({
@@ -41,8 +53,11 @@ function RenderItem({
   onSelect,
   onChange,
   onDragStart,
+  onDragMove,
+  onTransformMove,
   onDragEnd,
   onArrowDblClick,
+  onShapeDblClick,
 }: RenderItemProps) {
   // 아이템 인터랙션 상태
   const { isDraggable, isListening } = useItemInteraction();
@@ -59,7 +74,7 @@ function RenderItem({
         isListening={isListening}
         isSelected={isSelected}
         onSelect={() => onSelect(item.id)}
-        onChange={onChange}
+        onChange={(attrs) => onChange(item.id, attrs)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onDragStart={onDragStart}
@@ -75,7 +90,7 @@ function RenderItem({
         item={arrowItem}
         isSelected={isSelected}
         onSelect={onSelect}
-        onChange={onChange}
+        onChange={(attrs) => onChange(item.id, attrs)}
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
         onArrowDblClick={onArrowDblClick}
@@ -92,7 +107,7 @@ function RenderItem({
         isListening={isListening}
         isSelected={isSelected}
         onSelect={() => onSelect(item.id)}
-        onChange={onChange}
+        onChange={(attrs) => onChange(item.id, attrs)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onDragStart={onDragStart}
@@ -111,7 +126,7 @@ function RenderItem({
         isListening={isListening}
         isSelected={isSelected}
         onSelect={() => onSelect(item.id)}
-        onChange={onChange}
+        onChange={(attrs) => onChange(item.id, attrs)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onDragStart={onDragStart}
@@ -129,10 +144,15 @@ function RenderItem({
         isListening={isListening}
         isSelected={isSelected}
         onSelect={() => onSelect(item.id)}
-        onChange={onChange}
+        onChange={(attrs) => onChange(item.id, attrs)}
+        onDblClick={() => onShapeDblClick?.(item.id)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onDragStart={onDragStart}
+        onDragMove={(x, y) => onDragMove?.(item.id, x, y)}
+        onTransformMove={(x, y, w, h, rotation) =>
+          onTransformMove?.(item.id, x, y, w, h, rotation)
+        }
         onDragEnd={onDragEnd}
       />
     );
@@ -147,7 +167,7 @@ function RenderItem({
         isListening={isListening}
         isSelected={isSelected}
         onSelect={() => onSelect(item.id)}
-        onChange={onChange}
+        onChange={(attrs) => onChange(item.id, attrs)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onDragStart={onDragStart}
@@ -165,7 +185,7 @@ function RenderItem({
         isListening={isListening}
         isSelected={isSelected}
         onSelect={() => onSelect(item.id)}
-        onChange={onChange}
+        onChange={(attrs) => onChange(item.id, attrs)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onDragStart={onDragStart}
@@ -183,7 +203,25 @@ function RenderItem({
         isListening={isListening}
         isSelected={isSelected}
         onSelect={() => onSelect(item.id)}
-        onChange={onChange}
+        onChange={(attrs) => onChange(item.id, attrs)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+      />
+    );
+  }
+
+  if (item.type === 'stack') {
+    const stackItem = item as StackItemType;
+    return (
+      <StackItem
+        stackItem={stackItem}
+        isDraggable={isDraggable}
+        isListening={isListening}
+        isSelected={isSelected}
+        onSelect={() => onSelect(item.id)}
+        onChange={(attrs) => onChange(item.id, attrs)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onDragStart={onDragStart}
