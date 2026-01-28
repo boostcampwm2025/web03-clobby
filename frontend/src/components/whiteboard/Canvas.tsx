@@ -353,7 +353,9 @@ export default function Canvas() {
                   item={displayItem}
                   isSelected={item.id === selectedId}
                   onSelect={selectItem}
-                  onChange={handleItemChange}
+                  onChange={(newAttributes) =>
+                    handleItemChange(item.id, newAttributes)
+                  }
                   onArrowDblClick={handleArrowDblClick}
                   onShapeDblClick={handleShapeDblClick}
                   onDragStart={() => {
