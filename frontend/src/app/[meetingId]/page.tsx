@@ -23,7 +23,6 @@ export default function MeetingPage() {
   const { setMediasoupTransports } = useMeetingSocketStore();
   const { isLoggedIn, setTempUser } = useUserStore();
 
-  const setMeetingId = useMeetingStore((s) => s.setMeetingId);
   const { meetingId } = useParams<{ meetingId: string }>();
 
   const [meetingInfo, setMeetingInfo] = useState<MeetingInfoResponse | null>(
@@ -38,8 +37,8 @@ export default function MeetingPage() {
   const router = useRouter();
 
   useEffect(() => {
-    setMeetingId(meetingId);
-  }, [meetingId, setMeetingId]);
+    useMeetingStore.getState().setMeetingId(meetingId);
+  }, [meetingId]);
 
   const onJoin = (nickname: string) => {
     setTempUser({ nickname });
