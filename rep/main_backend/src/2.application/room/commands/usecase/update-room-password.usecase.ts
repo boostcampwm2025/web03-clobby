@@ -38,8 +38,9 @@ export class UdpateRoomPasswordUsecase<T, CT> {
     const roomInfo : UpdateRoomInfoResult | undefined = await this.selectUserInfoInRoomFromDb.select({ attributeName : dto.code, attributeValue : dto.user_id }); // 열의 이름을 여기서는 코드로 사용할 예정이고 user_id에 경우는 인덱스로 사용할 예정 
     if ( !roomInfo ) throw new NotAllowUpdatePassword();
 
-    // 2. 비밀번호를 해쉬화 한다. 
-    const password_hash = await this.hashPassword.makeHash(dto.new_password);
+    // 2. 비밀번호를 해쉬화 한다.
+    let password_hash : string | null = null;
+    if ( dto.new_password ) password_hash = await this.hashPassword.makeHash(dto.new_password);
 
     // 3. 비밀번호를 db에 저장한다.
     const inserted : boolean = await this.updateRoomPasswordToDb.update({ uniqueValue : roomInfo.room_id, updateColName : dto.user_id, updateValue : password_hash });

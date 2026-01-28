@@ -275,7 +275,7 @@ export class UpdateRoomPasswordToMysql extends UpdateValueToDb<Pool> {
   private async updateValue({
     db, room_id, user_id, password_hash
   } : {
-    db : Pool, room_id : string, user_id : string, password_hash : string
+    db : Pool, room_id : string, user_id : string, password_hash : string | null
   }) : Promise<boolean> {
     
     const tableName : string = DB_TABLE_NAME.ROOMS;
@@ -290,18 +290,23 @@ export class UpdateRoomPasswordToMysql extends UpdateValueToDb<Pool> {
       LIMIT 1
     `;
 
-    const [ result ] = await db.execute<ResultSetHeader>(sql, [ password_hash, room_id, user_id ]);
+    // 안전하게 매핑
+    const normalized =
+    password_hash && password_hash.trim().length > 0
+      ? password_hash
+      : null;
+    const [ result ] = await db.execute<ResultSetHeader>(sql, [ normalized, room_id, user_id ]);
 
     return result && result.affectedRows ? true : false;
   };
 
   // uniqueValue는 room_id updateColName은 user_id이고 updateValue는 비밀번호 해쉬
-  async update({ uniqueValue, updateColName, updateValue, }: { uniqueValue: string; updateColName: string; updateValue: any; }): Promise<boolean> {
+  async update({ uniqueValue, updateColName, updateValue, }: { uniqueValue: string; updateColName: string; updateValue: string | null; }): Promise<boolean> {
     
     const db: Pool = this.db;
     const room_id : string = uniqueValue;
     const user_id : string = updateColName;
-    const password_hash : string = updateValue;
+    const password_hash : string | null = updateValue;
 
     const updated : boolean = await this.updateValue({ db, room_id, user_id, password_hash });
     return updated;
