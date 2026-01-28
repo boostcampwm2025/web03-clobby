@@ -94,7 +94,7 @@ export function mapRecvPayloadToChatMessage(
   payload: RecvMessagePayload,
 ): ChatMessage {
   const base = {
-    id: payload.type === 'file' ? payload.file_id : crypto.randomUUID(),
+    id: crypto.randomUUID(),
     userId: payload.user_id,
     nickname: payload.nickname,
     profileImg: payload.profileImg,
