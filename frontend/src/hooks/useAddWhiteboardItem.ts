@@ -219,8 +219,8 @@ export const useAddWhiteboardItem = () => {
   // Stack Item 추가 핸들러
   const handleAddStack = (icon: StackIconInfo) => {
     const worldPos = getViewportCenter();
-    const width = 60;
-    const height = 60;
+    const width = 240;
+    const height = 240;
 
     addStack({
       src: icon.src,
