@@ -60,6 +60,7 @@ export default function Canvas() {
 
   const stageRef = useRef<Konva.Stage | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isInitialMount = useRef(true);
   const [isDraggingArrow, setIsDraggingArrow] = useState(false);
   const [isDraggingCanvas, setIsDraggingCanvas] = useState(false);
   const [localDraggingId, setLocalDraggingId] = useState<string | null>(null);
@@ -80,6 +81,29 @@ export default function Canvas() {
   } | null>(null);
 
   const size = useElementSize(containerRef);
+
+  // 초기 Stage 위치 설정
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (
+      !stage ||
+      !isInitialMount.current ||
+      size.width === 0 ||
+      size.height === 0
+    )
+      return;
+
+    // 캔버스를 화면 정가운데 배치
+    const centerPos = {
+      x: (size.width - canvasWidth) / 2,
+      y: (size.height - canvasHeight) / 2,
+    };
+
+    stage.position(centerPos);
+    stage.batchDraw();
+    setViewportSize(size.width, size.height);
+    isInitialMount.current = false;
+  }, [size.width, size.height, canvasWidth, canvasHeight, setViewportSize]);
 
   // viewport 업데이트
   useEffect(() => {
@@ -111,7 +135,7 @@ export default function Canvas() {
       stage.off('wheel', throttledUpdate);
       if (rafId) cancelAnimationFrame(rafId);
     };
-  }, [stageScale, stagePos]);
+  }, []);
 
   // 화면에 보이는 아이템만 필터링
   const visibleItems = useMemo(() => {
@@ -323,8 +347,6 @@ export default function Canvas() {
         width={size.width}
         height={size.height}
         draggable={isDraggable}
-        x={stagePos.x}
-        y={stagePos.y}
         scaleX={stageScale}
         scaleY={stageScale}
         pixelRatio={pixelRatio}
