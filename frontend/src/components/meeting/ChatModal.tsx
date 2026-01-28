@@ -1,4 +1,4 @@
-import { CloseIcon, ImageIcon } from '@/assets/icons/common';
+import { CloseIcon } from '@/assets/icons/common';
 import { FileIcon, SendIcon } from '@/assets/icons/meeting';
 import ChatListItem from '@/components/meeting/ChatListItem';
 import { useChatSender } from '@/hooks/chat/useChatSender';
@@ -268,19 +268,6 @@ export default function ChatModal() {
               multiple
               onChange={onFileChange}
             />
-            <button
-              type="button"
-              disabled={uploading}
-              className="rounded-sm p-1 hover:bg-neutral-600"
-              onClick={() => {
-                if (fileInputRef.current) {
-                  fileInputRef.current.accept = 'image/*,video/*';
-                  fileInputRef.current.click();
-                }
-              }}
-            >
-              <ImageIcon className="h-4 w-4" />
-            </button>
 
             <button
               type="button"
