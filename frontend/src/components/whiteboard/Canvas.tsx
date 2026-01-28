@@ -54,6 +54,8 @@ export default function Canvas() {
   const setViewportSize = useWhiteboardLocalStore(
     (state) => state.setViewportSize,
   );
+  const setStageScale = useWhiteboardLocalStore((state) => state.setStageScale);
+  const setStagePos = useWhiteboardLocalStore((state) => state.setStagePos);
   const cursorMode = useWhiteboardLocalStore((state) => state.cursorMode);
   const myUserId = useWhiteboardAwarenessStore((state) => state.myUserId);
 
@@ -102,11 +104,21 @@ export default function Canvas() {
     stage.position(centerPos);
     stage.batchDraw();
     setViewportSize(size.width, size.height);
+    setStagePos(centerPos);
+    setStageScale(1);
 
     useWhiteboardLocalStore.getState().setStageRef(stageRef);
 
     isInitialMount.current = false;
-  }, [size.width, size.height, canvasWidth, canvasHeight, setViewportSize]);
+  }, [
+    size.width,
+    size.height,
+    canvasWidth,
+    canvasHeight,
+    setViewportSize,
+    setStagePos,
+    setStageScale,
+  ]);
 
   // viewport 업데이트
   useEffect(() => {
