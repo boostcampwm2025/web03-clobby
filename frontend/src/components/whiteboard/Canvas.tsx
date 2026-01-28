@@ -188,6 +188,19 @@ export default function Canvas() {
     size.height,
   );
 
+  const handleWheelWithEvent = useCallback(
+    (e: Konva.KonvaEventObject<WheelEvent>) => {
+      handleWheel(e);
+
+      // wheel 이후 stage에 커스텀 이벤트 발생
+      const stage = stageRef.current;
+      if (stage) {
+        stage.fire('stageTransformChange');
+      }
+    },
+    [handleWheel],
+  );
+
   const editingItem = useMemo(
     () =>
       items.find((item) => item.id === editingTextId) as
@@ -360,7 +373,7 @@ export default function Canvas() {
         height={size.height}
         draggable={isDraggable}
         pixelRatio={pixelRatio}
-        onWheel={handleWheel}
+        onWheel={handleWheelWithEvent}
         onDragStart={() => setIsDraggingCanvas(true)}
         onDragMove={handleDragMove}
         onDragEnd={(e) => {

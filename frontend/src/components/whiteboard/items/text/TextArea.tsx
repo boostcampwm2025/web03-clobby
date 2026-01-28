@@ -162,7 +162,7 @@ export default function TextArea({
     // Stage 이벤트 구독 (pan/zoom 시 위치 업데이트)
     stage.on('dragmove', updatePosition);
     stage.on('dragend', updatePosition);
-    stage.on('wheel', updatePosition);
+    stage.on('stageTransformChange', updatePosition);
 
     window.addEventListener('mousedown', handleOutsideClick);
 
@@ -172,7 +172,7 @@ export default function TextArea({
       window.removeEventListener('mousedown', handleOutsideClick);
       stage.off('dragmove', updatePosition);
       stage.off('dragend', updatePosition);
-      stage.off('wheel', updatePosition);
+      stage.off('stageTransformChange', updatePosition);
     };
   }, [textId, textItem, onChange, onClose, onBoundsChange, stageRef]);
 

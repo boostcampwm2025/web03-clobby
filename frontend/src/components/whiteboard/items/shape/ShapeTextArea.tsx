@@ -217,13 +217,13 @@ export default function ShapeTextArea({
     // Stage 이벤트 구독
     stage.on('dragmove', updatePosition);
     stage.on('dragend', updatePosition);
-    stage.on('wheel', updatePosition);
+    stage.on('stageTransformChange', updatePosition);
 
     return () => {
       textarea.removeEventListener('input', onInput);
       stage.off('dragmove', updatePosition);
       stage.off('dragend', updatePosition);
-      stage.off('wheel', updatePosition);
+      stage.off('stageTransformChange', updatePosition);
     };
   }, [
     shapeId,
