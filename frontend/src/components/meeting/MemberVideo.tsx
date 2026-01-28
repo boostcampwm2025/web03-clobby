@@ -5,7 +5,6 @@ import VideoView from '@/components/meeting/media/VideoView';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import { useMeetingStore } from '@/store/useMeetingStore';
 import { MeetingMemberInfo } from '@/types/meeting';
-import Image from 'next/image';
 import { useRef, useState } from 'react';
 
 export default function MemberVideo({

@@ -3,9 +3,10 @@
 import { useUserStore } from '@/store/useUserStore';
 import { apiWithToken } from '@/utils/apiClient';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { LogoIcon } from '@/assets/icons/common';
 import ProfileImg from '@/components/common/ProfileImg';
+import { useClickOutside } from '@/hooks/useClickOutside';
 
 interface UserResponse {
   email: string;
@@ -47,6 +48,9 @@ export default function Header() {
     window.location.href = '/';
   };
 
+  const profileBtnRef = useRef<HTMLButtonElement | null>(null);
+  useClickOutside(profileBtnRef, onProfileClick, isProfileOpen);
+
   return (
     <header className="fixed top-0 left-0 z-5 flex h-16 w-screen items-center justify-between border-b border-neutral-200 bg-white px-6">
       <Link href="/">
@@ -56,6 +60,7 @@ export default function Header() {
       {isLoaded &&
         (isLoggedIn ? (
           <button
+            ref={profileBtnRef}
             className="relative h-10 w-10 rounded-full bg-neutral-200"
             onClick={onProfileClick}
           >

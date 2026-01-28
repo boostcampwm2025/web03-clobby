@@ -6,7 +6,6 @@ import { useVoiceActivity } from '@/hooks/useVoiceActivity';
 import { useMeetingSocketStore } from '@/store/useMeetingSocketStore';
 import { useMeetingStore } from '@/store/useMeetingStore';
 import { useUserStore } from '@/store/useUserStore';
-import Image from 'next/image';
 import { useMemo, useRef, useState } from 'react';
 
 export default function MyVideo({ width = '160px' }: { width?: string }) {
