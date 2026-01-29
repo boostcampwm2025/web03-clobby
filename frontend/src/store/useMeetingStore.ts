@@ -13,6 +13,9 @@ const INITIAL_MEDIA_STATE: MediaState = {
   screenShareOn: false,
   cameraPermission: 'unknown',
   micPermission: 'unknown',
+  speakerId: '',
+  micId: '',
+  cameraId: '',
 };
 
 const INITIAL_MEETING_INFO: MeetingInfo = {
@@ -48,6 +51,7 @@ interface MeetingState {
   isChatOpen: boolean;
   isWhiteboardOpen: boolean;
   isCodeEditorOpen: boolean;
+  isCodeEditorOpening: boolean;
   isInfoLoaded: boolean;
 }
 
@@ -60,6 +64,9 @@ interface MeetingActions {
   setSpeaking: (userId: string, isSpeaking: boolean) => void;
   togglePin: (userId: string) => void;
   setMeetingInfo: (info: Partial<MeetingInfo>) => void;
+  setSpeakerId: (speakerId: string) => void;
+  setMicId: (micId: string) => void;
+  setCameraId: (camId: string) => void;
 
   setMemberStream: (
     userId: string,
@@ -81,6 +88,7 @@ interface MeetingActions {
     >,
     state: boolean,
   ) => void;
+  setIsCodeEditorOpening: (state: boolean) => void;
 }
 
 export const useMeetingStore = create<MeetingState & MeetingActions>((set) => ({
@@ -101,6 +109,7 @@ export const useMeetingStore = create<MeetingState & MeetingActions>((set) => ({
   isWhiteboardOpen: false,
   isCodeEditorOpen: false,
   isInfoLoaded: false,
+  isCodeEditorOpening: false,
 
   setMedia: (media) => set((prev) => ({ media: { ...prev.media, ...media } })),
   setMembers: (members) =>
@@ -240,7 +249,13 @@ export const useMeetingStore = create<MeetingState & MeetingActions>((set) => ({
         },
       },
     })),
+  setSpeakerId: (speakerId) =>
+    set((state) => ({ media: { ...state.media, speakerId } })),
+  setMicId: (micId) => set((state) => ({ media: { ...state.media, micId } })),
+  setCameraId: (cameraId) =>
+    set((state) => ({ media: { ...state.media, cameraId } })),
 
   setHasNewChat: (state) => set({ hasNewChat: state }),
   setIsOpen: (type, state) => set({ [type]: state }),
+  setIsCodeEditorOpening: (state) => set({ isCodeEditorOpening: state }),
 }));

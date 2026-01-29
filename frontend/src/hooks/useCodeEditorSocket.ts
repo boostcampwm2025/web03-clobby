@@ -15,18 +15,21 @@ export const useCodeEditorSocket = () => {
 
   const connectToTool = useCallback(
     (tool: string, ticket: string, type: 'main' | 'sub') => {
+      const currentSocket = useToolSocketStore.getState().codeEditorSocket;
+      if (currentSocket?.connected) return;
+
       const meetingId = useMeetingStore.getState().meetingInfo.meetingId;
-      const newSocket = io(
-        `${TOOL_BACKEND_URL}/${tool}`,
-        {
-          path: `${NAMESPACE}`,
-          transports: ['websocket'],
-          auth: { token: ticket, type },
-          query: { room_code : meetingId }
-        },
-      );
+
+      const newSocket = io(`${TOOL_BACKEND_URL}/${tool}`, {
+        path: `${NAMESPACE}`,
+        transports: ['websocket'],
+        auth: { token: ticket, type },
+        query: { room_code: meetingId },
+      });
 
       newSocket.on('connect', () => {
+        // console.log(`${tool} 소켓 연결 성공 (타입: ${type})`);
+
         if (tool === 'codeeditor') {
           setCodeEditorSocket(newSocket);
           setIsOpen('isCodeEditorOpen', true);
@@ -59,6 +62,8 @@ export const useCodeEditorSocket = () => {
   const joinCodeEditor = useCallback(
     (tool: string) => {
       if (!mainSocket) return;
+
+      // console.log(`${tool} 티켓 발급 요청 중...`);
 
       mainSocket.emit(
         'signaling:ws:connect_tool',

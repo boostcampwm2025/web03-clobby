@@ -40,8 +40,8 @@ export interface ArrowItem extends BaseItem {
   startHeadType?: ArrowHeadType;
   endHeadType?: ArrowHeadType;
   chevronSpacing?: number;
-  startBinding?: ArrowBinding;
-  endBinding?: ArrowBinding;
+  startBinding?: ArrowBinding | null;
+  endBinding?: ArrowBinding | null;
 }
 
 export interface LineItem extends BaseItem {
@@ -92,41 +92,6 @@ export interface ShapeItem extends BaseItem {
 export interface ImageItem extends BaseItem {
   type: 'image';
   src: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  rotation: number;
-  stroke?: string;
-  strokeWidth?: number;
-  cornerRadius?: number;
-  opacity?: number;
-  dash?: number[];
-}
-
-// Video Item
-export interface VideoItem extends BaseItem {
-  type: 'video';
-  src: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  rotation: number;
-  stroke?: string;
-  strokeWidth?: number;
-  cornerRadius?: number;
-  opacity?: number;
-  dash?: number[];
-}
-
-// youtube Item
-export interface YoutubeItem extends BaseItem {
-  type: 'youtube';
-  // 원본 유튜브 URL
-  url: string;
-  // 유튜브 비디오 ID : 썸네일 표시용
-  videoId: string;
   x: number;
   y: number;
   width: number;

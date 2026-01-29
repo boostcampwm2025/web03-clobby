@@ -8,7 +8,7 @@ export const useProduce = () => {
   // device를 가져오도록 수정했습니다.
   const { socket, sendTransport, setProducer, setIsProducing, device } =
     useMeetingSocketStore();
-  const { setMedia } = useMeetingStore();
+  const { media, setMedia } = useMeetingStore();
 
   // sendTransport가 초기화 된 이후 createProduceHelper 선언
   const helpers = useMemo(() => {
@@ -30,6 +30,7 @@ export const useProduce = () => {
       setIsProducing('audio', true);
 
       const constraints = {
+        deviceId: media.micId ? { exact: media.micId } : undefined,
         echoCancellation: true,
         autoGainControl: true,
         sampleRate: 48000,
@@ -82,7 +83,9 @@ export const useProduce = () => {
     try {
       setIsProducing('video', true);
 
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: media.cameraId ? { deviceId: { exact: media.cameraId } } : true,
+      });
       const videoTrack = stream.getVideoTracks()[0];
 
       const videoProducer = await helpers.produceCam(videoTrack);
@@ -125,12 +128,12 @@ export const useProduce = () => {
     try {
       setIsProducing('screen', true);
 
-      // screen에 경우는 video의 설정을 적어서 보내준다. 
+      // screen에 경우는 video의 설정을 적어서 보내준다.
       stream = await navigator.mediaDevices.getDisplayMedia({
         video: {
-          frameRate : { max : 15 }, // 이건 고정하는게 좋다. 
-          width : { max : 1280 }, // 이부분은 나중에 회의실 등 상황에 따라서 조정이 가능하다 ( 이거 보다 크면 다운스케일 적용 회의 방이나 분위기에 따라 다름 ) 
-          height : { max : 720 } // 마찬 가지 
+          frameRate: { max: 15 }, // 이건 고정하는게 좋다.
+          width: { max: 1280 }, // 이부분은 나중에 회의실 등 상황에 따라서 조정이 가능하다 ( 이거 보다 크면 다운스케일 적용 회의 방이나 분위기에 따라 다름 )
+          height: { max: 720 }, // 마찬 가지
         },
         audio: true,
       });
@@ -154,13 +157,11 @@ export const useProduce = () => {
       });
 
       setMedia({ screenShareOn: true });
-    } catch (error) {
+    } catch {
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
       }
       stopScreenProduce();
-
-      console.error('화면 공유 시작 실패:', error);
     } finally {
       setIsProducing('screen', false);
     }

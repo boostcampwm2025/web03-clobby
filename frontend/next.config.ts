@@ -14,6 +14,16 @@ const nextConfig: NextConfig = {
         hostname: 'owl-cloud-local-disk.s3.ap-northeast-2.amazonaws.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'owl-cloud-deploy-disk.s3.ap-northeast-2.amazonaws.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'owl-cloud-test-disk.s3.ap-northeast-2.amazonaws.com',
+        pathname: '/**',
+      },
     ],
   },
 
