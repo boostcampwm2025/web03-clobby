@@ -74,11 +74,10 @@ export const useWhiteboardYjs = (socket: Socket | null) => {
 
   const undoManagerRef = useRef<Y.UndoManager | null>(null);
 
-  // ✅ 서버 seq 추적 (request-sync 복구에 사용)
+  // 서버 seq 추적 (request-sync 복구에 사용)
   const serverSeqRef = useRef<number>(0);
   const syncingRef = useRef(false);
 
-  // ✅ ready는 “한 번만”
   const readySentRef = useRef(false);
 
   const setItems = useWhiteboardSharedStore((state) => state.setItems);
@@ -174,8 +173,7 @@ export const useWhiteboardYjs = (socket: Socket | null) => {
       // permission 받은 이후 ready 보내는 게 가장 안정적
       sendReadyOnce();
     };
-    socket.on(WHITEBOARD_CLIENT_EVENT_NAME.PERMISSION as any, onPermission);
-    // ↑ 타입 안 맞으면 as any 제거하고 상수 타입 맞춰줘
+    socket.on(WHITEBOARD_CLIENT_EVENT_NAME.PERMISSION, onPermission);
 
     // ✅ 재연결 시 ready 다시 보내야 함
     const onReconnect = () => {
@@ -193,7 +191,7 @@ export const useWhiteboardYjs = (socket: Socket | null) => {
     socket.on('user-disconnected', onUserDisconnected);
 
     // 내 소켓이 끊어졌을 때 처리
-    const onDisconnect = (reason: string) => {
+    const onDisconnect = () => {
       if (awareness) {
         awareness.setLocalState(null);
       }
@@ -229,11 +227,7 @@ export const useWhiteboardYjs = (socket: Socket | null) => {
       });
     };
 
-    // 프로젝트에 맞는 네이밍으로 바꿔줘 (없으면 store에 추가하는 게 정석)
-    // @ts-ignore
-    useWhiteboardLocalStore
-      .getState()
-      .setCursorCallback?.(updateAwarenessCursor);
+    useWhiteboardLocalStore.getState().setCursorCallback(updateAwarenessCursor);
 
     // -------------------------
     // Server -> Client : yjs-init
@@ -427,7 +421,7 @@ export const useWhiteboardYjs = (socket: Socket | null) => {
     }) => {
       const states = awareness.getStates();
 
-      // 추가/업데이트된 사용자만 처리함
+      // 추가/업데이트된 사용자 처리
       [...added, ...updated].forEach((clientId) => {
         if (clientId === ydoc.clientID) return;
 
@@ -440,6 +434,20 @@ export const useWhiteboardYjs = (socket: Socket | null) => {
             cursor: state.cursor || null,
             selectedId: state.selectedId || null,
           });
+        }
+      });
+
+      // 타임아웃된 사용자 제거
+      const currentUsers = useWhiteboardAwarenessStore.getState().users;
+      const activeUserIds = new Set<string>();
+
+      states.forEach((s) => {
+        if (s?.user?.id) activeUserIds.add(s.user.id);
+      });
+
+      currentUsers.forEach((_, userId) => {
+        if (!activeUserIds.has(userId)) {
+          useWhiteboardAwarenessStore.getState().removeUser(userId);
         }
       });
     };
@@ -460,8 +468,7 @@ export const useWhiteboardYjs = (socket: Socket | null) => {
         .getState()
         .setYjsInstances(null, null, null, null);
       useWhiteboardLocalStore.getState().setAwarenessCallback(null);
-      // @ts-ignore
-      useWhiteboardLocalStore.getState().setCursorCallback?.(null);
+      useWhiteboardLocalStore.getState().setCursorCallback(null);
 
       yItems.unobserveDeep(schedule);
 
@@ -469,7 +476,7 @@ export const useWhiteboardYjs = (socket: Socket | null) => {
       awareness.off('change', onAwarenessChange);
 
       socket.off('init-user', onInitUser);
-      socket.off(WHITEBOARD_CLIENT_EVENT_NAME.PERMISSION as any, onPermission);
+      socket.off(WHITEBOARD_CLIENT_EVENT_NAME.PERMISSION, onPermission);
 
       socket.off('yjs-init', onYjsInit);
       socket.off('yjs-update', onYjsUpdate);
