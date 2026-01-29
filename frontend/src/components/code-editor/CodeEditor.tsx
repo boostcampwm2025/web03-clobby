@@ -8,7 +8,15 @@ import * as awarenessProtocol from 'y-protocols/awareness';
 import { Socket } from 'socket.io-client';
 
 import { colorFromClientId, injectCursorStyles } from '@/utils/code-editor';
-import { AwarenessState, LanguageState } from '@/types/code-editor';
+import {
+  AwarenessState,
+  LanguageState,
+  YjsInitPayload,
+  YjsRemoteUpdate,
+  YjsSyncReqPayload,
+  YjsSyncServerPayload,
+  YjsUpdateClientPayload,
+} from '@/types/code-editor';
 import CodeEditorToolbar from './CodeEditorToolbar';
 import { EditorLanguage } from '@/constants/code-editor';
 import { useToolSocketStore } from '@/store/useToolSocketStore';
@@ -29,59 +37,6 @@ type CodeEditorProps = {
  * - client -> server: 'yjs-sync-req' { last_seq, reason? }
  * - client -> server: 'yjs-ready' (리스너 준비 완료 후 init 요청)
  */
-
-type YjsInitPayload = {
-  update: ArrayBuffer;
-  seq: number;
-  origin?: 'INIT';
-};
-
-type YjsRemoteUpdateSingle = { seq: number; update: ArrayBuffer };
-type YjsRemoteUpdateBatch = {
-  from_seq: number;
-  to_seq: number;
-  updates: ArrayBuffer[];
-};
-type YjsRemoteUpdate = YjsRemoteUpdateSingle | YjsRemoteUpdateBatch;
-
-type YjsSyncOrigin = 'UPDATE_REJECTED' | 'SYNC_REQ' | 'INIT';
-
-type YjsSyncServerPayload =
-  | { type: 'ack'; ok: true; server_seq: number; origin?: YjsSyncOrigin }
-  | {
-      type: 'patch';
-      ok: true;
-      from_seq: number;
-      to_seq: number;
-      updates: ArrayBuffer[];
-      server_seq: number;
-      origin: YjsSyncOrigin;
-    }
-  | {
-      type: 'full';
-      ok: true;
-      server_seq: number;
-      update: ArrayBuffer;
-      origin: YjsSyncOrigin;
-    }
-  | {
-      type: 'error';
-      ok: false;
-      code: 'BAD_PAYLOAD' | 'ROOM_NOT_FOUND' | 'INTERNAL';
-      message?: string;
-      origin?: YjsSyncOrigin;
-    };
-
-type YjsSyncReqPayload = {
-  last_seq: number;
-  reason?: 'SEQ_GAP' | 'MANUAL' | 'UNKNOWN' | 'INIT';
-};
-
-type YjsUpdateClientPayload = {
-  last_seq: number;
-  update?: Uint8Array;
-  updates?: Uint8Array[];
-};
 
 export default function CodeEditor({
   autoComplete = true,
