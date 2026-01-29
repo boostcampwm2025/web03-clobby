@@ -421,7 +421,7 @@ export const useWhiteboardYjs = (socket: Socket | null) => {
     }) => {
       const states = awareness.getStates();
 
-      // 추가/업데이트된 사용자만 처리함
+      // 추가/업데이트된 사용자 처리
       [...added, ...updated].forEach((clientId) => {
         if (clientId === ydoc.clientID) return;
 
@@ -434,6 +434,20 @@ export const useWhiteboardYjs = (socket: Socket | null) => {
             cursor: state.cursor || null,
             selectedId: state.selectedId || null,
           });
+        }
+      });
+
+      // 타임아웃된 사용자 제거
+      const currentUsers = useWhiteboardAwarenessStore.getState().users;
+      const activeUserIds = new Set<string>();
+
+      states.forEach((s) => {
+        if (s?.user?.id) activeUserIds.add(s.user.id);
+      });
+
+      currentUsers.forEach((_, userId) => {
+        if (!activeUserIds.has(userId)) {
+          useWhiteboardAwarenessStore.getState().removeUser(userId);
         }
       });
     };
