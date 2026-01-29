@@ -17,8 +17,25 @@ export const useAddWhiteboardItem = () => {
   } = useItemActions();
 
   const getViewportCenter = () => {
-    const { stagePos, stageScale, viewportWidth, viewportHeight } =
+    const stageRef = useWhiteboardLocalStore.getState().stageRef;
+    const stage = stageRef?.current;
+
+    if (!stage) {
+      const { stagePos, stageScale, viewportWidth, viewportHeight } =
+        useWhiteboardLocalStore.getState();
+      return getCenterWorldPos(
+        stagePos,
+        stageScale,
+        viewportWidth,
+        viewportHeight,
+      );
+    }
+
+    const stagePos = stage.position();
+    const stageScale = stage.scaleX();
+    const { viewportWidth, viewportHeight } =
       useWhiteboardLocalStore.getState();
+
     return getCenterWorldPos(
       stagePos,
       stageScale,

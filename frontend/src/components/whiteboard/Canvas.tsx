@@ -36,12 +36,11 @@ import ShapeTextArea from '@/components/whiteboard/items/shape/ShapeTextArea';
 import ItemTransformer from '@/components/whiteboard/controls/ItemTransformer';
 import RemoteSelectionLayer from '@/components/whiteboard/remote/RemoteSelectionLayer';
 import ArrowHandles from '@/components/whiteboard/items/arrow/ArrowHandles';
+import Portal from '@/components/common/Portal';
 
 const GEOMETRY_KEYS = ['x', 'y', 'width', 'height', 'rotation'] as const;
 
 export default function Canvas() {
-  const stageScale = useWhiteboardLocalStore((state) => state.stageScale);
-  const stagePos = useWhiteboardLocalStore((state) => state.stagePos);
   const canvasWidth = useWhiteboardSharedStore((state) => state.canvasWidth);
   const canvasHeight = useWhiteboardSharedStore((state) => state.canvasHeight);
   const items = useWhiteboardSharedStore((state) => state.items);
@@ -55,11 +54,14 @@ export default function Canvas() {
   const setViewportSize = useWhiteboardLocalStore(
     (state) => state.setViewportSize,
   );
+  const setStageScale = useWhiteboardLocalStore((state) => state.setStageScale);
+  const setStagePos = useWhiteboardLocalStore((state) => state.setStagePos);
   const cursorMode = useWhiteboardLocalStore((state) => state.cursorMode);
   const myUserId = useWhiteboardAwarenessStore((state) => state.myUserId);
 
   const stageRef = useRef<Konva.Stage | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isInitialMount = useRef(true);
   const [isDraggingArrow, setIsDraggingArrow] = useState(false);
   const [isDraggingCanvas, setIsDraggingCanvas] = useState(false);
   const [localDraggingId, setLocalDraggingId] = useState<string | null>(null);
@@ -80,6 +82,43 @@ export default function Canvas() {
   } | null>(null);
 
   const size = useElementSize(containerRef);
+
+  // 초기 Stage 위치 설정
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (
+      !stage ||
+      !isInitialMount.current ||
+      size.width === 0 ||
+      size.height === 0
+    )
+      return;
+
+    // 캔버스를 화면 정가운데 배치
+    const centerPos = {
+      x: (size.width - canvasWidth) / 2,
+      y: (size.height - canvasHeight) / 2,
+    };
+
+    stage.scale({ x: 1, y: 1 });
+    stage.position(centerPos);
+    stage.batchDraw();
+    setViewportSize(size.width, size.height);
+    setStagePos(centerPos);
+    setStageScale(1);
+
+    useWhiteboardLocalStore.getState().setStageRef(stageRef);
+
+    isInitialMount.current = false;
+  }, [
+    size.width,
+    size.height,
+    canvasWidth,
+    canvasHeight,
+    setViewportSize,
+    setStagePos,
+    setStageScale,
+  ]);
 
   // viewport 업데이트
   useEffect(() => {
@@ -111,34 +150,43 @@ export default function Canvas() {
       stage.off('wheel', throttledUpdate);
       if (rafId) cancelAnimationFrame(rafId);
     };
-  }, [stageScale, stagePos]);
+  }, []);
 
   // 화면에 보이는 아이템만 필터링
   const visibleItems = useMemo(() => {
     if (!viewportRect) return items;
     const filtered = filterVisibleItems(items, viewportRect);
 
-    console.log(
-      `[화이트보드] 전체: ${items.length} / 렌더링: ${filtered.length}`,
-    );
-
     return filtered;
   }, [items, viewportRect]);
 
   // 줌 레벨에 따른 pixelRatio 조절
-  const pixelRatio = useMemo(() => {
-    let ratio: number;
-    if (stageScale >= 1.5) ratio = window.devicePixelRatio;
-    else if (stageScale >= 1) ratio = 1.5;
-    else if (stageScale >= 0.5) ratio = 1;
-    else if (stageScale >= 0.3) ratio = 0.5;
-    else ratio = 0.25;
+  const [pixelRatio, setPixelRatio] = useState(window.devicePixelRatio);
 
-    console.log(
-      `[화이트보드] scale: ${stageScale.toFixed(2)} / pixelRatio: ${ratio}`,
-    );
-    return ratio;
-  }, [stageScale]);
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+
+    const updatePixelRatio = () => {
+      const scale = stage.scaleX();
+      let ratio: number;
+      if (scale >= 1.5) ratio = window.devicePixelRatio;
+      else if (scale >= 1) ratio = 1.5;
+      else if (scale >= 0.5) ratio = 1;
+      else if (scale >= 0.3) ratio = 0.5;
+      else ratio = 0.25;
+
+      setPixelRatio(ratio);
+    };
+
+    updatePixelRatio();
+
+    stage.on('wheel', updatePixelRatio);
+
+    return () => {
+      stage.off('wheel', updatePixelRatio);
+    };
+  }, []);
 
   // viewport 크기를 store에 업데이트
   useEffect(() => {
@@ -150,6 +198,36 @@ export default function Canvas() {
   const { handleWheel, handleDragMove, handleDragEnd } = useCanvasInteraction(
     size.width,
     size.height,
+  );
+
+  const handleWheelWithEvent = useCallback(
+    (e: Konva.KonvaEventObject<WheelEvent>) => {
+      handleWheel(e);
+
+      const stage = stageRef.current;
+      if (!stage) return;
+
+      // wheel 후 커서 위치 업데이트
+      const pointerPos = stage.getPointerPosition();
+      if (pointerPos) {
+        const transform = stage.getAbsoluteTransform().copy().invert();
+        const canvasPos = transform.point(pointerPos);
+
+        const awareness = useWhiteboardSharedStore.getState().awareness;
+        if (awareness) {
+          const currentState = awareness.getLocalState();
+          if (currentState) {
+            awareness.setLocalState({
+              ...currentState,
+              cursor: { x: canvasPos.x, y: canvasPos.y },
+            });
+          }
+        }
+      }
+
+      stage.fire('stageTransformChange');
+    },
+    [handleWheel],
   );
 
   const editingItem = useMemo(
@@ -310,7 +388,7 @@ export default function Canvas() {
     <div
       ref={containerRef}
       className={cn(
-        'h-full w-full overflow-hidden bg-neutral-100',
+        'h-full w-full flex-none overflow-hidden bg-neutral-100',
         cursorMode === 'select' && 'cursor-default',
         cursorMode === 'move' && !isDraggingCanvas && 'cursor-grab',
         cursorMode === 'move' && isDraggingCanvas && 'cursor-grabbing',
@@ -323,12 +401,8 @@ export default function Canvas() {
         width={size.width}
         height={size.height}
         draggable={isDraggable}
-        x={stagePos.x}
-        y={stagePos.y}
-        scaleX={stageScale}
-        scaleY={stageScale}
         pixelRatio={pixelRatio}
-        onWheel={handleWheel}
+        onWheel={handleWheelWithEvent}
         onDragStart={() => setIsDraggingCanvas(true)}
         onDragMove={handleDragMove}
         onDragEnd={(e) => {
@@ -512,42 +586,46 @@ export default function Canvas() {
 
       {/* 텍스트 편집 모드 */}
       {editingTextId && editingItem && editingItem.type === 'text' && (
-        <TextArea
-          textId={editingTextId}
-          textItem={editingItem as TextItem}
-          stageRef={stageRef}
-          onChange={(newText) => {
-            updateItem(editingTextId, { text: newText });
-          }}
-          onClose={() => {
-            setEditingTextId(null);
-            selectItem(null);
-          }}
-        />
+        <Portal>
+          <TextArea
+            textId={editingTextId}
+            textItem={editingItem as TextItem}
+            stageRef={stageRef}
+            onChange={(newText) => {
+              updateItem(editingTextId, { text: newText });
+            }}
+            onClose={() => {
+              setEditingTextId(null);
+              selectItem(null);
+            }}
+          />
+        </Portal>
       )}
 
       {/* 도형 텍스트 편집 모드 */}
       {editingTextId && editingItem && editingItem.type === 'shape' && (
-        <ShapeTextArea
-          shapeId={editingTextId}
-          shapeItem={editingItem as ShapeItem}
-          stageRef={stageRef}
-          onChange={(newText) => {
-            updateItem(editingTextId, { text: newText });
-          }}
-          onClose={() => {
-            setEditingTextId(null);
-            selectItem(null);
-          }}
-          onSizeChange={(width, height, newY, newX, newText) => {
-            const updates: Partial<ShapeItem> = { width, height };
-            if (newY !== undefined) updates.y = newY;
-            if (newX !== undefined) updates.x = newX;
-            if (newText !== undefined) updates.text = newText;
+        <Portal>
+          <ShapeTextArea
+            shapeId={editingTextId}
+            shapeItem={editingItem as ShapeItem}
+            stageRef={stageRef}
+            onChange={(newText) => {
+              updateItem(editingTextId, { text: newText });
+            }}
+            onClose={() => {
+              setEditingTextId(null);
+              selectItem(null);
+            }}
+            onSizeChange={(width, height, newY, newX, newText) => {
+              const updates: Partial<ShapeItem> = { width, height };
+              if (newY !== undefined) updates.y = newY;
+              if (newX !== undefined) updates.x = newX;
+              if (newText !== undefined) updates.text = newText;
 
-            updateItem(editingTextId, updates);
-          }}
-        />
+              updateItem(editingTextId, updates);
+            }}
+          />
+        </Portal>
       )}
     </div>
   );
