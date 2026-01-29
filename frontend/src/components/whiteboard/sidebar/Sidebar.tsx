@@ -205,7 +205,7 @@ export default function Sidebar() {
             e.stopPropagation();
             setIsCollapsed(false);
           }}
-          className="sidebar-toggle absolute top-1/2 left-2 z-5 flex h-20 w-8 -translate-y-1/2 items-center justify-center rounded-r-lg border border-l-0 border-neutral-200 bg-white p-1 shadow-lg transition-all select-none hover:bg-neutral-100"
+          className="sidebar-toggle absolute top-1/2 left-2 z-5 flex h-20 w-8 -translate-y-1/2 items-center justify-center rounded-lg border border-neutral-200 bg-white p-1 shadow-sm transition-all select-none hover:bg-neutral-100"
           title="사이드바 열기"
         >
           <ChevronRightPipeIcon className="h-6 w-6 text-neutral-600" />
