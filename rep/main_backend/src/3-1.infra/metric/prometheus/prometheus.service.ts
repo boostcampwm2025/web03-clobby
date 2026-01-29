@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { collectDefaultMetrics, Counter, Histogram, Registry } from "prom-client";
+import { collectDefaultMetrics, Counter, Gauge, Histogram, Registry } from "prom-client";
 
 
 @Injectable()
@@ -11,6 +11,12 @@ export class PrometheusService {
   readonly httpRequestsTotal: Counter<string>;
   // 지연시간
   readonly httpRequestDuration: Histogram<string>;
+
+  // websocket 관련 metrics
+  readonly wsConnectionsCurrent: Gauge<string>;
+  readonly wsConnectionsTotal: Counter<string>;
+  readonly wsDisconnectsTotal: Counter<string>;
+  readonly wsEventDuration: Histogram<string>;
     
   constructor(
     config : ConfigService
@@ -44,6 +50,36 @@ export class PrometheusService {
       buckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2, 5],
       registers: [this.registry],
     }); // 지연 시간
+
+    // 현재 웹소켓 연결수
+    this.wsConnectionsCurrent = new Gauge({
+      name: 'ws_connections_current',
+      help: '현재 활동중인 웹소켓 연결 수',
+      labelNames: ['namespace'] as const,
+      registers: [this.registry],
+    });
+
+    this.wsConnectionsTotal = new Counter({
+      name: 'ws_connections_total',
+      help: '웹소켓이 연결된 총 개수',
+      labelNames: ['namespace'] as const,
+      registers: [this.registry],
+    });
+
+    this.wsDisconnectsTotal = new Counter({
+      name: 'ws_disconnects_total',
+      help: '웹소켓 연결이 끊어진 총 개수',
+      labelNames: ['namespace', 'reason'] as const,
+      registers: [this.registry],
+    });
+
+    this.wsEventDuration = new Histogram({
+      name: 'ws_event_duration_seconds',
+      help: '웹소켓에 이벤트 핸들링에 소요되는 시간',
+      labelNames: ['namespace', 'event', 'status'] as const,
+      buckets: [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2],
+      registers: [this.registry],
+    });
 
   };
 

@@ -12,6 +12,7 @@ import { HttpMetricsInterceptor } from "./prometheus/prometheus.intercepter";
     HttpMetricsInterceptor
   ],
   exports : [
+    PrometheusService,
     HttpMetricsInterceptor
   ]
 })
