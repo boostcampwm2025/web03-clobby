@@ -36,8 +36,6 @@ export function getItemBoundingBox(item: WhiteboardItem): Rect {
   switch (item.type) {
     case 'shape':
     case 'image':
-    case 'video':
-    case 'youtube':
       return {
         x: item.x,
         y: item.y,
