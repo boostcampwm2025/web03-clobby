@@ -311,6 +311,9 @@ export default function Canvas() {
     handleMouseMove,
     handleMouseUp,
     handleMouseLeave,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
     currentDrawing,
   } = useCanvasMouseEvents({
     onDeselect: handleCheckDeselect,
@@ -413,7 +416,9 @@ export default function Canvas() {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
-        onTouchStart={handleCheckDeselect}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         <Layer
           clipX={0}
