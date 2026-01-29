@@ -67,6 +67,7 @@ export function ChatListItem({
               className="w-auto object-cover"
               src={content.fileUrl as string}
               alt={content.filename}
+              unoptimized
             />
 
             <button
