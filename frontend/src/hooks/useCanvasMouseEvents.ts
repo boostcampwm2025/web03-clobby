@@ -1,7 +1,6 @@
 import Konva from 'konva';
 import { useRef } from 'react';
 import { useWhiteboardLocalStore } from '@/store/useWhiteboardLocalStore';
-import { useWhiteboardSharedStore } from '@/store/useWhiteboardSharedStore';
 import { useDrawing } from '@/hooks/useDrawing';
 import { useEraser } from '@/hooks/useEraser';
 
@@ -35,15 +34,9 @@ export function useCanvasMouseEvents({
     const transform = stage.getAbsoluteTransform().copy().invert();
     const canvasPos = transform.point(pointerPos);
 
-    const awareness = useWhiteboardSharedStore.getState().awareness;
-    if (!awareness) return;
-
-    const currentState = awareness.getLocalState();
-    if (currentState) {
-      awareness.setLocalState({
-        ...currentState,
-        cursor: { x: canvasPos.x, y: canvasPos.y },
-      });
+    const cursorCallback = useWhiteboardLocalStore.getState().cursorCallback;
+    if (cursorCallback) {
+      cursorCallback({ x: canvasPos.x, y: canvasPos.y });
     }
   };
 
