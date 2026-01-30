@@ -307,10 +307,10 @@ export default function Canvas() {
 
   // 마우스 이벤트 통합 훅
   const {
-    handleMouseDown,
-    handleMouseMove,
-    handleMouseUp,
-    handleMouseLeave,
+    handlePointerDown,
+    handlePointerMove,
+    handlePointerUp,
+    handlePointerLeave,
     currentDrawing,
   } = useCanvasMouseEvents({
     onDeselect: handleCheckDeselect,
@@ -409,11 +409,13 @@ export default function Canvas() {
           handleDragEnd(e);
           setIsDraggingCanvas(false);
         }}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseLeave}
-        onTouchStart={handleCheckDeselect}
+        onMouseDown={handlePointerDown}
+        onMouseMove={handlePointerMove}
+        onMouseUp={handlePointerUp}
+        onMouseLeave={handlePointerLeave}
+        onTouchStart={handlePointerDown}
+        onTouchMove={handlePointerMove}
+        onTouchEnd={handlePointerUp}
       >
         <Layer
           clipX={0}

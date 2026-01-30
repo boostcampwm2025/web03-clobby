@@ -189,7 +189,7 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="absolute top-1/2 left-2 z-5 flex w-60 -translate-y-1/2 flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white p-4 shadow-xl"
+      className="absolute top-1/2 left-2 z-5 flex w-60 -translate-y-1/2 flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white p-4 shadow-xl select-none"
       style={{ maxHeight: 'calc(100vh - 220px)' }}
     >
       {/* Sidebar Title */}
@@ -440,9 +440,7 @@ export default function Sidebar() {
                 textDecoration: format.textDecoration,
               })
             }
-            onChangeLayer={() => {
-              if (editingTextId) handleLayerChange;
-            }}
+            onChangeLayer={handleLayerChange}
           />
         )}
 
