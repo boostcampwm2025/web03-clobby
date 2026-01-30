@@ -49,6 +49,7 @@ import { CHANNEL_NAMESPACE } from '@infra/channel/channel.constants';
 import { GetRoomMembersResult } from '@app/room/queries/dto';
 import { SIGNALING_WEBSOCKET } from '@infra/websocket/websocket.constants';
 import { SignalingWebsocket } from '@infra/websocket/signaling/signaling.service';
+import { PrometheusService } from '@/3-1.infra/metric/prometheus/prometheus.service';
 
 @WebSocketGateway({
   namespace: WEBSOCKET_NAMESPACE.SIGNALING,
@@ -74,6 +75,7 @@ export class SignalingWebsocketGateway
     private readonly jwtGuard: JwtWsGuard,
     private readonly signalingService: SignalingWebsocketService,
     @Inject(SIGNALING_WEBSOCKET) private readonly signalingSocket: SignalingWebsocket,
+    private readonly prom : PrometheusService,
   ) {}
 
   // onGatewayInit으로 websocket 연결됐을때 사용할 함수
@@ -106,6 +108,9 @@ export class SignalingWebsocketGateway
 
   // 연결하자 마자 바로 해야 하는 하는 것 정의 가능 -> access_token을 보내준다.
   async handleConnection(client: Socket) {
+    const ns : string = client.nsp.name; // 여기서는 /signal이 될 예정이다.
+    this.prom.wsConnectionsCurrent.labels(ns).inc();
+    this.prom.wsConnectionsTotal.labels(ns).inc();
     const access_token: string = client.data.user.access_token;
     if (access_token) client.emit(WEBSOCKET_AUTH_CLIENT_EVENT_NAME.ACCESS_TOKEN, { access_token });
   }

@@ -24,6 +24,7 @@ import {
   YjsSyncServerPayload,
   YjsUpdateClientPayload,
 } from '@/infra/memory/tool';
+import { PrometheusService } from '@/infra/metric/prometheus/prometheus.service';
 
 @WebSocketGateway({
   namespace: process.env.NODE_BACKEND_WEBSOCKET_CODEEDITOR,
@@ -46,6 +47,7 @@ export class CodeeditorWebsocketGateway implements OnGatewayInit, OnGatewayConne
     private readonly kafkaService: KafkaService,
     private readonly codeeditorRepo: CodeeditorRepository,
     @Inject(CODEEDITOR_WEBSOCKET) private readonly codeeditorSocket: CodeeditorWebsocket,
+    private readonly prom : PrometheusService
   ) {}
 
   // 연결을 했을때
@@ -74,6 +76,10 @@ export class CodeeditorWebsocketGateway implements OnGatewayInit, OnGatewayConne
 
   // 연결 완료 후
   async handleConnection(client: Socket) {
+    const ns : string = client.nsp.name; // 여기서는 /signal이 될 예정이다.
+    this.prom.wsConnectionsCurrent.labels(ns).inc();
+    this.prom.wsConnectionsTotal.labels(ns).inc();
+    
     const payload: ToolBackendPayload = client.data.payload;
     if (!payload) {
       client.disconnect(true);
