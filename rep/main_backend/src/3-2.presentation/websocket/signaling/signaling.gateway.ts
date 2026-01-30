@@ -1,5 +1,5 @@
 // 시그널링 서버의 역할이라고 할 수 있을 것 같다.
-import { Inject, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Inject, Logger, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -49,8 +49,11 @@ import { CHANNEL_NAMESPACE } from '@infra/channel/channel.constants';
 import { GetRoomMembersResult } from '@app/room/queries/dto';
 import { SIGNALING_WEBSOCKET } from '@infra/websocket/websocket.constants';
 import { SignalingWebsocket } from '@infra/websocket/signaling/signaling.service';
-import { PrometheusService } from '@/3-1.infra/metric/prometheus/prometheus.service';
+import { PrometheusService } from '@infra/metric/prometheus/prometheus.service';
+import { WsMetricsInterceptor } from '@infra/metric/prometheus/prometheus.intercepter';
 
+
+@UseInterceptors(WsMetricsInterceptor)
 @WebSocketGateway({
   namespace: WEBSOCKET_NAMESPACE.SIGNALING,
   path: WEBSOCKET_PATH, // http 핸드세이킹이 있을때 붙게 되는
