@@ -62,6 +62,8 @@ dev:meet는 분리된 협업 도구로 인한 비효율을 하나의 흐름으�
 - 화면 공유 및 발표자 전환 지원
 - 참여자 수 증가 시에도 안정적인 미디어 처리
 
+![Image](https://github.com/user-attachments/assets/ea3a08ba-6bdc-4936-8b77-14e7b6f5c7d1)
+
 ### 2️⃣ 실시간 동기화 코드 에디터
 
 - 기능
