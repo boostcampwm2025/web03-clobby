@@ -12,6 +12,7 @@ import { formatFileSize } from '@/utils/formatter';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import { ChatListItem } from './ChatListItem';
+import { useChatScroll } from '@/hooks/chat/useChatScroll';
 
 type PendingFile = {
   file: File;
@@ -48,25 +49,8 @@ export default function ChatModal() {
 
   const { uploadFile, uploading, percent } = useFileUpload(socket);
 
-  const checkIsNearBottom = () => {
-    const container = scrollRef.current;
-    if (!container) return false;
-
-    const threshold = 150;
-    return (
-      container.scrollHeight - container.scrollTop - container.clientHeight <
-      threshold
-    );
-  };
-
-  // 사용자가 직접 스크롤할 때 호출되는 함수
-  const handleScroll = () => {
-    if (!showScrollBtn) return;
-
-    if (checkIsNearBottom()) {
-      if (showScrollBtn) setScrollBtn(false);
-    }
-  };
+  const { handleScroll, scrollToBottom, isAtBottomRef } =
+    useChatScroll(scrollRef);
 
   // 파일 선택 핸들러
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -118,7 +102,7 @@ export default function ChatModal() {
     if (!scrollRef.current || messages.length === 0) return;
 
     if (isFirstRender.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      scrollToBottom();
       isFirstRender.current = false;
       return;
     }
@@ -126,23 +110,13 @@ export default function ChatModal() {
     const lastMessage = messages[messages.length - 1];
     const isMyMessage = lastMessage.userId === userId;
 
-    const threshold = 150;
-    const isNearBottom =
-      scrollRef.current.scrollHeight -
-        scrollRef.current.scrollTop -
-        scrollRef.current.clientHeight <
-      threshold;
-
-    if (isMyMessage || isNearBottom) {
-      // 스크롤 이동 -> DOM 직접 조작은 cascading render를 유발하지 않음
-      scrollRef.current.scrollTo({
-        top: scrollRef.current.scrollHeight,
-        behavior: isMyMessage ? 'auto' : 'smooth',
-      });
-      if (showScrollBtn) setScrollBtn(false);
+    if (isMyMessage || isAtBottomRef.current) {
+      scrollToBottom(isMyMessage);
+      setScrollBtn(false);
     } else {
       setScrollBtn(true);
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages, userId]);
 
@@ -242,11 +216,9 @@ export default function ChatModal() {
             key={chat.id}
             {...chat}
             onImageLoad={() => {
-              if (!checkIsNearBottom()) return;
-              scrollRef.current?.scrollTo({
-                top: scrollRef.current.scrollHeight,
-                behavior: 'smooth',
-              });
+              if (isAtBottomRef.current) {
+                scrollToBottom(true);
+              }
             }}
           />
         ))}
@@ -254,7 +226,7 @@ export default function ChatModal() {
         {showScrollBtn && (
           <button
             onClick={() => {
-              scrollRef.current!.scrollTop = scrollRef.current!.scrollHeight;
+              scrollToBottom(true);
               setScrollBtn(false);
             }}
             className="absolute bottom-30 left-1/2 -translate-x-1/2 rounded-full bg-blue-600 px-4 py-2 text-xs text-white shadow-lg"
