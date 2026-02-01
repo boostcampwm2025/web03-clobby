@@ -110,6 +110,13 @@ export default function ChatModal() {
     const lastMessage = messages[messages.length - 1];
     const isMyMessage = lastMessage.userId === userId;
 
+    const isImageMessage =
+      lastMessage.content.type === 'file' &&
+      lastMessage.content.category === 'image';
+
+    // 이미지면 여기서 스크롤하지 않음
+    if (isImageMessage) return;
+
     if (isMyMessage || isAtBottomRef.current) {
       scrollToBottom(isMyMessage);
       setScrollBtn(false);
@@ -216,7 +223,7 @@ export default function ChatModal() {
             key={chat.id}
             {...chat}
             onImageLoad={() => {
-              if (isAtBottomRef.current) {
+              if (isAtBottomRef.current || chat.userId === userId) {
                 scrollToBottom(true);
               }
             }}
