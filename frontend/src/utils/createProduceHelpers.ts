@@ -49,19 +49,19 @@ export function createProduceHelper(sendTransport: Transport, device: Device) {
 
   // 가능하면 VP9 안되면 VP8로 전달
   const produceScreenVideo = (track: MediaStreamTrack) => {
-    // const vp9 = findVp9Codec();
+    const vp9 = findVp9Codec();
     // vp9은 조건 부로 써보자
-    // if (vp9) {
-    //   return sendTransport.produce({
-    //     track,
-    //     appData: { type: 'screen_video' },
-    //     codec: vp9,
-    //     encodings: [
-    //       { maxBitrate: 1_800_000 }, // cam 보다는 더 높아야 한다. (상황에 따라서 SVC를 사용할 수 있게 해주면 좋다.) ( SVC는 좀 더 나중에 세밀한 조정때 유용하다. )
-    //     ],
-    //     codecOptions: { videoGoogleStartBitrate: 400 },
-    //   });
-    // } // vp9은 실험을 통해서 진행을 해야 한다.
+    if (vp9) {
+      return sendTransport.produce({
+        track,
+        appData: { type: 'screen_video' },
+        codec: vp9,
+        encodings: [
+          { maxBitrate: 2_500_000 }, // cam 보다는 더 높아야 한다. (상황에 따라서 SVC를 사용할 수 있게 해주면 좋다.) ( SVC는 좀 더 나중에 세밀한 조정때 유용하다. )
+        ],
+        codecOptions: { videoGoogleStartBitrate: 400 },
+      });
+    } // vp9은 실험을 통해서 진행을 해야 한다.
 
     return sendTransport.produce({
       track,
