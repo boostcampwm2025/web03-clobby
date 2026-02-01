@@ -9,6 +9,6 @@ scrape_configs:
       - targets: ["localhost:8080"]
 
   - job_name: tool-backend
-    metrics_path: /api/metrics
+    metrics_path: /tool/metrics
     static_configs:
-      - targets: ["localhost:8000"]    
+      - targets: ["localhost:8000"]
