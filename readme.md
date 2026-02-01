@@ -1,6 +1,6 @@
 # 🖥️ dev:meet - 코드와 설계, 대화의 맥락이 하나로 이어지는 공간
 
-<img width="7680" height="4320" alt="Image" src="https://github.com/user-attachments/assets/d31ac372-65a2-420c-8957-a568f2aba90c" />
+<img width="1470" height="719" alt="Image" src="https://github.com/user-attachments/assets/acf519a7-d1be-4633-98b3-40361483a6c2" />
 
 ## 🛎️ 서비스 소개
 
@@ -157,28 +157,22 @@ cd devmeet
 
 ```bash
 # 소켓 통신 및 공통 서버 기본 주소
-# 예: https://api.devmeet.p-e.kr
-NEXT_PUBLIC_SERVER_URL=""
+NEXT_PUBLIC_SERVER_URL="http://localhost:8080"
 
 # REST API 호출에 사용되는 API 서버 주소
-# 예: https://api.devmeet.p-e.kr
-NEXT_PUBLIC_API_SERVER_URL=""
+NEXT_PUBLIC_API_SERVER_URL="http://localhost:8080/api"
 
 # 실시간 협업 툴(코드 에디터, 화이트보드) 백엔드 기본 주소
-# 예: https://tool.devmeet.p-e.kr
-NEXT_PUBLIC_TOOL_BACKEND_URL=""
+NEXT_PUBLIC_TOOL_BACKEND_URL="http://localhost:8000"
 
 # WebSocket 공통 prefix
-# 예: /ws
-NEXT_PUBLIC_TOOL_BACKEND_WEBSOCKET_PREFIX=""
+NEXT_PUBLIC_TOOL_BACKEND_WEBSOCKET_PREFIX="/tool/ws"
 
 # 실시간 코드 에디터 WebSocket 엔드포인트
-# 예: /code-editor
-NEXT_PUBLIC_TOOL_BACKEND_WEBSOCKET_CODEEDITOR=""
+NEXT_PUBLIC_TOOL_BACKEND_WEBSOCKET_CODEEDITOR="/codeeditor"
 
 # 화이트보드 WebSocket 엔드포인트
-# 예: /whiteboard
-NEXT_PUBLIC_TOOL_BACKEND_WEBSOCKET_WHITEBOARD=""
+NEXT_PUBLIC_TOOL_BACKEND_WEBSOCKET_WHITEBOARD="/whiteboard"
 ```
 
 </details>
@@ -191,68 +185,69 @@ NEXT_PUBLIC_TOOL_BACKEND_WEBSOCKET_WHITEBOARD=""
   </summary>
 
 ```bash
-# 기본 서버 설정
-NODE_PORT=
-NODE_HOST=""
-NODE_ENV=""
-NODE_BACKEND_PREFIX=""
-NODE_BACKEND_WEBSOCKET_PREFIX=""
-NODE_BACKEND_SERVER=""
-NODE_FRONTEND_SERVER=""
+NODE_PORT=8080
+NODE_HOST="0.0.0.0"
+NODE_ENV="deployment"
+
+NODE_BACKEND_PREFIX="api"
+NODE_BACKEND_WEBSOCKET_PREFIX="/api/ws"
+
+NODE_BACKEND_SERVER="http://localhost:8080"
+NODE_FRONTEND_SERVER="http://localhost:3000"
 
 # CORS 설정
-NODE_ALLOWED_ORIGIN=
-NODE_ALLOWED_METHODS=
-NODE_ALLOWED_HEADERS=
-NODE_ALLOWED_CREDENTIALS=
-NODE_ALLOWED_EXPOSE_HEADERS=
+NODE_ALLOWED_ORIGIN="http://localhost:3000"
+NODE_ALLOWED_METHODS="GET,POST,PUT,DELETE,PATCH"
+NODE_ALLOWED_HEADERS="Content-Type, Accept, Authorization"
+NODE_ALLOWED_CREDENTIALS="true"
+NODE_ALLOWED_EXPOSE_HEADERS="x-access-token"
 
 # Database 설정
-NODE_APP_DATABASE_HOST=
-NODE_APP_DATABASE_PORT=
-NODE_APP_DATABASE_NAME=""
-NODE_APP_DATABASE_USER=
-NODE_APP_DATABASE_PASSWORD=
+NODE_APP_DATABASE_HOST="데이터베이스 host (예: 127.0.0.1)"
+NODE_APP_DATABASE_PORT="데이터베이스 port (예: 3306)"
+NODE_APP_DATABASE_NAME="데이터베이스 이름 (예: db)"
+NODE_APP_DATABASE_USER="데이터베이스 사용자명"
+NODE_APP_DATABASE_PASSWORD="데이터베이스 비밀번호"
 
 # Redis 설정
-NODE_APP_REDIS_URL=
-NODE_APP_REDIS_PASSWORD=
+NODE_APP_REDIS_URL="redis://localhost:6379"
+NODE_APP_REDIS_PASSWORD="레디스 비밀번호"
 
 # JWT 설정
-NODE_APP_JWT_ACCESS_SECRET_KEY=
-NODE_APP_JWT_ACCESS_EXPIRED_TIME=""
-NODE_APP_JWT_REFRESH_SECRET_KEY=""
-NODE_APP_JWT_REFRESH_EXPIRED_TIME=""
-NODE_APP_JWT_ISSUE_NAME=""
-NODE_APP_JWT_AUDIENCE_NAME=""
+NODE_APP_JWT_ACCESS_SECRET_KEY="access token secret"
+NODE_APP_JWT_ACCESS_EXPIRED_TIME="5m"
+NODE_APP_JWT_REFRESH_SECRET_KEY="refresh token secret"
+NODE_APP_JWT_REFRESH_EXPIRED_TIME="7d"
+NODE_APP_JWT_ISSUE_NAME="jwt issuer"
+NODE_APP_JWT_AUDIENCE_NAME="jwt audience"
 NODE_APP_JWT_ALGORITHM="HS256"
 
 # Kakao OAuth 설정
-NODE_APP_KAKAO_REST_API_KEY=""
-NODE_APP_KAKAO_CLIENT_SECRET=""
+NODE_APP_KAKAO_REST_API_KEY="카카오 REST API 키"
+NODE_APP_KAKAO_CLIENT_SECRET="카카오 CLIENT SECRET"
 
 # AWS S3 설정
-NODE_APP_AWS_ACCESS_KEY=""
-NODE_APP_AWS_SECRET_KEY=""
-NODE_APP_AWS_BUCKET_NAME=""
-NODE_APP_AWS_REGION_NAME=""
-NODE_APP_AWS_PRESIGNED_URL_EXPIRES_SEC=
+NODE_APP_AWS_ACCESS_KEY="AWS access key"
+NODE_APP_AWS_SECRET_KEY="AWS secret key"
+NODE_APP_AWS_BUCKET_NAME="S3 bucket 이름"
+NODE_APP_AWS_REGION_NAME="AWS region"
+NODE_APP_AWS_PRESIGNED_URL_EXPIRES_SEC="presigned url 만료 시간(초)"
 
 # Kafka 설정
-NODE_APP_KAFKA_BROKERS=""
-NODE_APP_KAFKA_CLIENT_ID=""
-NODE_APP_KAFKA_GROUP_ID=""
-NODE_APP_KAFKA_SASL_USERNAME=""
-NODE_APP_KAFKA_SASL_PASSWORD=""
-NODE_APP_KAFKA_SASL_MECHANISM=""
-NODE_APP_KAFKA_SSL=""
+NODE_APP_KAFKA_BROKERS="kafka broker 주소"
+NODE_APP_KAFKA_CLIENT_ID="kafka client id"
+NODE_APP_KAFKA_GROUP_ID="kafka group id"
+NODE_APP_KAFKA_SASL_USERNAME="kafka username"
+NODE_APP_KAFKA_SASL_PASSWORD="kafka password"
+NODE_APP_KAFKA_SASL_MECHANISM="sasl mechanism"
+NODE_APP_KAFKA_SSL="true/false"
 
-# 화상 회의 (SFU) 설정
-NODE_APP_SFU_PUBLIC_IP=""
+# 화상회의(SFU) 설정
+NODE_APP_SFU_PUBLIC_IP="SFU public IP"
 
-# Tool Backend 협업 인증 설정
-NODE_APP_TICKET_PRIVATE_JWK=""
-NODE_APP_TICKET_PUBLIC_JWK=""
+# Tool Backend 협업 인증
+NODE_APP_TICKET_PRIVATE_JWK="private jwk"
+NODE_APP_TICKET_PUBLIC_JWK="public jwk"
 NODE_APP_TICKET_ISS="main_backend"
 NODE_APP_TICKET_AUD="tool_backend"
 
@@ -260,6 +255,7 @@ NODE_APP_TICKET_AUD="tool_backend"
 NODE_APP_PROMETHEUS_DEFAULT_PREFIX="main_backend_"
 NODE_APP_PROMETHEUS_SERVICE_LABEL="main-backend"
 NODE_APP_PROMETHEUS_SERVICE_ENV="local"
+
 ```
 
 </details>
@@ -272,65 +268,51 @@ NODE_APP_PROMETHEUS_SERVICE_ENV="local"
   </summary>
 
 ```bash
-# 기본 서버 설정
 NODE_PORT=8000
 NODE_HOST="0.0.0.0"
-
-# 실행 환경 (local | development | deployment)
 NODE_ENV="deployment"
 NODE_BACKEND_PREFIX="tool"
 
 # CORS 설정
-NODE_ALLOWED_ORIGIN=""
+NODE_ALLOWED_ORIGIN="http://223.130.146.175:3000"
 NODE_ALLOWED_METHODS="GET,POST,PUT,DELETE,PATCH"
 NODE_ALLOWED_HEADERS="Content-Type, Accept, Authorization"
 NODE_ALLOWED_CREDENTIALS="true"
 
 # Database 설정
-NODE_APP_DATABASE_HOST=""
-NODE_APP_DATABASE_PORT=3307
-NODE_APP_DATABASE_NAME=""
-NODE_APP_DATABASE_USER=""
-NODE_APP_DATABASE_PASSWORD=""
+NODE_APP_DATABASE_HOST="데이터베이스 host"
+NODE_APP_DATABASE_PORT="3306"
+NODE_APP_DATABASE_NAME="db"
+NODE_APP_DATABASE_USER="user"
+NODE_APP_DATABASE_PASSWORD="password"
 
 # Redis 설정
+NODE_APP_REDIS_URL="redis://localhost:6379"
+NODE_APP_REDIS_PASSWORD="레디스 비밀번호"
 
-# 예: redis://localhost:6379
-NODE_APP_REDIS_URL=""
-NODE_APP_REDIS_PASSWORD=""
-
-# Kafka 브로커 주소
-# 예: localhost:9092
-NODE_APP_KAFKA_BROKERS=""
-# Kafka Client ID
-NODE_APP_KAFKA_CLIENT_ID="tool_backend"
-# Kafka Consumer Group ID
-NODE_APP_KAFKA_GROUP_ID="tool-backend"
-# SASL 인증 정보
-NODE_APP_KAFKA_SASL_USERNAME=""
-NODE_APP_KAFKA_SASL_PASSWORD=""
-NODE_APP_KAFKA_SASL_MECHANISM=""
-
-# SSL 사용 여부
-NODE_APP_KAFKA_SSL="false"
+# Kafka 설정
+NODE_APP_KAFKA_BROKERS="kafka broker"
+NODE_APP_KAFKA_CLIENT_ID="client id"
+NODE_APP_KAFKA_GROUP_ID="group id"
+NODE_APP_KAFKA_SASL_USERNAME="username"
+NODE_APP_KAFKA_SASL_PASSWORD="password"
+NODE_APP_KAFKA_SASL_MECHANISM="mechanism"
+NODE_APP_KAFKA_SSL="true/false"
 
 # WebSocket 설정
 NODE_BACKEND_WEBSOCKET_PREFIX="/tool/ws"
 NODE_BACKEND_WEBSOCKET_WHITEBOARD="/whiteboard"
 NODE_BACKEND_WEBSOCKET_CODEEDITOR="/codeeditor"
 
-# JWK 검증 설정
-# main_backend 에서 발급한 Public JWK (JSON 문자열)
-NODE_APP_TICKET_PUBLIC_JWK=""
-# 토큰 발급자
-NODE_APP_TICKET_ISS="main_backend"
-# 토큰 대상자
+# JWK 검증
+NODE_APP_TICKET_PUBLIC_JWK="public jwk"
 NODE_APP_TICKET_AUD="tool_backend"
 
 # Prometheus 설정
 NODE_APP_PROMETHEUS_DEFAULT_PREFIX="tool_backend_"
 NODE_APP_PROMETHEUS_SERVICE_LABEL="tool-backend"
 NODE_APP_PROMETHEUS_SERVICE_ENV="local"
+
 ```
 
 </details>
@@ -360,9 +342,13 @@ cp .env.example .env
 
 ⚠️ 실제 서버 주소, DB 정보, 인증 키 값은 .env 파일에 직접 입력해야 합니다.
 
-<br/>
+### 3. 도커 실행
 
-### 3. 개발 모드 실행
+```bash
+docker compose up -d
+```
+
+### 4. 개발 모드 실행 (선택)
 
 Docker 없이 개별 서비스 단독 실행도 가능합니다.
 
@@ -387,6 +373,12 @@ cd rep/tool_backend
 pnpm install
 pnpm start:dev
 ```
+
+### 5. 서비스 접속
+
+브라우저에서 아래 주소로 접속하여 서비스를 이용할 수 있습니다.
+
+👉 [**http://localhost:3000**](http://localhost:3000/)
 
 <br/>
 
