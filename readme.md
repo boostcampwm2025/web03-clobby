@@ -272,7 +272,7 @@ NODE_ENV="deployment"
 NODE_BACKEND_PREFIX="tool"
 
 # CORS 설정
-NODE_ALLOWED_ORIGIN="http://223.130.146.175:3000"
+NODE_ALLOWED_ORIGIN="http://localhost:3000"
 NODE_ALLOWED_METHODS="GET,POST,PUT,DELETE,PATCH"
 NODE_ALLOWED_HEADERS="Content-Type, Accept, Authorization"
 NODE_ALLOWED_CREDENTIALS="true"
@@ -327,15 +327,13 @@ cp .env.example .env.local
 **main_backend**
 
 ```bash
-cd backend/main
-cp .env.example .env
+cp rep/main_backend/.env.example .env.main.backend
 ```
 
 **tool_backend**
 
 ```bash
-cd backend/tool
-cp .env.example .env
+cp rep/tool_backend/.env.example .env.tool.backend
 ```
 
 ⚠️ 실제 서버 주소, DB 정보, 인증 키 값은 .env 파일에 직접 입력해야 합니다.
@@ -406,6 +404,16 @@ pnpm start:dev
 
 - 작성자: Lisey (이채민)
 - [🔗 링크](https://github.com/boostcampwm2025/web03-devmeet/wiki/%5BFE%5D-next-image%EC%9D%98-%EB%B9%84%EB%8F%99%EA%B8%B0-%EB%A1%9C%EB%94%A9%EC%97%90-%EB%94%B0%EB%A5%B8-Layout-Shift%EC%99%80-%EC%B1%84%ED%8C%85-%EC%8A%A4%ED%81%AC%EB%A1%A4-%EB%8F%99%EA%B8%B0%ED%99%94-%EA%B0%9C%EC%84%A0)
+
+### [BE] 회의 단위 협업 툴 상태 공유 문제 해결 과정
+
+- 작성자: Logan (김동완)
+- [🔗 링크](https://github.com/boostcampwm2025/web03-devmeet/wiki/%5BBE%5D-%ED%9A%8C%EC%9D%98-%EB%8B%A8%EC%9C%84-%ED%98%91%EC%97%85-%ED%88%B4-%EC%83%81%ED%83%9C-%EA%B3%B5%EC%9C%A0-%EB%AC%B8%EC%A0%9C-%ED%95%B4%EA%B2%B0-%EA%B3%BC%EC%A0%95)
+
+### [BE] Yjs 기반 문서 동기화 문제 해결 과정
+
+- 작성자: Logan (김동완)
+- [🔗 링크](https://github.com/boostcampwm2025/web03-devmeet/wiki/%5BBE%5D-Yjs-%EA%B8%B0%EB%B0%98-%EB%AC%B8%EC%84%9C-%EB%8F%99%EA%B8%B0%ED%99%94-%EB%AC%B8%EC%A0%9C-%ED%95%B4%EA%B2%B0-%EA%B3%BC%EC%A0%95)
 
 <br/>
 
