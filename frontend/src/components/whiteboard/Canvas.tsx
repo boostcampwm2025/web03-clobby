@@ -49,6 +49,12 @@ export default function Canvas() {
   const selectedIds = useWhiteboardLocalStore((state) => state.selectedIds);
   const editingTextId = useWhiteboardLocalStore((state) => state.editingTextId);
   const selectOnly = useWhiteboardLocalStore((state) => state.selectOnly);
+  const toggleSelection = useWhiteboardLocalStore(
+    (state) => state.toggleSelection,
+  );
+  const addToSelection = useWhiteboardLocalStore(
+    (state) => state.addToSelection,
+  );
   const clearSelection = useWhiteboardLocalStore(
     (state) => state.clearSelection,
   );
@@ -244,13 +250,18 @@ export default function Canvas() {
     [items, editingTextId],
   );
 
+  const singleSelectedId = selectedIds.length === 1 ? selectedIds[0] : null;
   const selectedItem = useMemo(
-    () => items.find((item) => item.id === selectedIds[0]),
-    [items, selectedIds],
+    () =>
+      singleSelectedId
+        ? items.find((item) => item.id === singleSelectedId)
+        : null,
+    [items, singleSelectedId],
   );
 
   const isArrowOrLineSelected =
-    selectedItem?.type === 'arrow' || selectedItem?.type === 'line';
+    !!singleSelectedId &&
+    (selectedItem?.type === 'arrow' || selectedItem?.type === 'line');
 
   // 화살표/선 훅
   const {
@@ -314,6 +325,31 @@ export default function Canvas() {
     stageRef,
     enabled: cursorMode === 'select',
   });
+
+  const handleSelectItem = useCallback(
+    (id: string, e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
+      const nativeEvent = e?.evt as MouseEvent | TouchEvent | undefined;
+      const shiftKey =
+        !!nativeEvent && 'shiftKey' in nativeEvent && nativeEvent.shiftKey;
+      const ctrlKey =
+        !!nativeEvent && 'ctrlKey' in nativeEvent && nativeEvent.ctrlKey;
+      const metaKey =
+        !!nativeEvent && 'metaKey' in nativeEvent && nativeEvent.metaKey;
+
+      if (ctrlKey || metaKey) {
+        toggleSelection(id);
+        return;
+      }
+
+      if (shiftKey) {
+        addToSelection(id);
+        return;
+      }
+
+      selectOnly(id);
+    },
+    [addToSelection, selectOnly, toggleSelection],
+  );
 
   // 마우스 이벤트 통합 훅
   const {
@@ -492,7 +528,7 @@ export default function Canvas() {
 
               // 핸들 드래그 중인 화살표
               if (
-                displayItem.id === selectedIds[0] &&
+                displayItem.id === singleSelectedId &&
                 (displayItem.type === 'arrow' || displayItem.type === 'line') &&
                 draggingPoints &&
                 Array.isArray(draggingPoints)
@@ -507,8 +543,8 @@ export default function Canvas() {
                 <RenderItem
                   key={item.id}
                   item={displayItem}
-                  isSelected={item.id === selectedIds[0]}
-                  onSelect={selectOnly}
+                  isSelected={selectedIds.includes(item.id)}
+                  onSelect={handleSelectItem}
                   onChange={(newAttributes) =>
                     handleItemChange(item.id, newAttributes)
                   }
@@ -586,14 +622,14 @@ export default function Canvas() {
           {/* 다른 사용자의 선택 표시 */}
           <RemoteSelectionLayer
             myUserId={myUserId}
-            selectedId={selectedIds[0] ?? null}
+            selectedId={singleSelectedId}
             items={items}
             stageRef={stageRef}
           />
 
           {/* 내 Transformer */}
           <ItemTransformer
-            selectedId={selectedIds[0] ?? null}
+            selectedIds={selectedIds}
             items={items}
             stageRef={stageRef}
           />

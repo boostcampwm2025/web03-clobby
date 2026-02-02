@@ -20,7 +20,10 @@ export const useCanvasShortcuts = ({
   const editingTextId = useWhiteboardLocalStore((state) => state.editingTextId);
   const cursorMode = useWhiteboardLocalStore((state) => state.cursorMode);
   const setCursorMode = useWhiteboardLocalStore((state) => state.setCursorMode);
-  const { deleteItem } = useItemActions();
+  const clearSelection = useWhiteboardLocalStore(
+    (state) => state.clearSelection,
+  );
+  const { deleteItem, deleteItems } = useItemActions();
   const { undo, redo } = useWhiteboardHistory();
 
   const previousModeRef = useRef<CursorMode | null>(null);
@@ -82,18 +85,27 @@ export const useCanvasShortcuts = ({
         return;
       }
 
-      if (!selectedId || editingTextId) return;
+      if (selectedIds.length === 0 || editingTextId) return;
 
       // 삭제 단축기 (Delete / Backspace)
       if (e.key === 'Delete' || e.key === 'Backspace') {
         e.preventDefault();
 
-        if (isArrowOrLineSelected && selectedHandleIndex !== null) {
+        if (
+          selectedIds.length === 1 &&
+          isArrowOrLineSelected &&
+          selectedHandleIndex !== null
+        ) {
           const deleted = deleteControlPoint();
           if (deleted) return;
         }
 
-        deleteItem(selectedId);
+        if (selectedIds.length === 1 && selectedId) {
+          deleteItem(selectedId);
+        } else {
+          deleteItems(selectedIds);
+        }
+        clearSelection();
       }
     };
 
@@ -114,13 +126,16 @@ export const useCanvasShortcuts = ({
     };
   }, [
     selectedId,
+    selectedIds,
     editingTextId,
     cursorMode,
     setCursorMode,
     deleteItem,
+    deleteItems,
     isArrowOrLineSelected,
     selectedHandleIndex,
     deleteControlPoint,
+    clearSelection,
     undo,
     redo,
   ]);

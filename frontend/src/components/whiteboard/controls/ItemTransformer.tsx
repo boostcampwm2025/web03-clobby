@@ -6,22 +6,25 @@ import { Transformer } from 'react-konva';
 import type { WhiteboardItem } from '@/types/whiteboard';
 
 interface ItemTransformerProps {
-  selectedId: string | null;
+  selectedIds: string[];
   items: WhiteboardItem[];
   stageRef: React.RefObject<Konva.Stage | null>;
 }
 
 export default function ItemTransformer({
-  selectedId,
+  selectedIds,
   items,
   stageRef,
 }: ItemTransformerProps) {
   const transformerRef = useRef<Konva.Transformer | null>(null);
 
-  const selectedItem = items.find((item) => item.id === selectedId);
+  const selectedItems = items.filter((item) => selectedIds.includes(item.id));
+  const transformableItems = selectedItems.filter(
+    (item) => item.type !== 'arrow' && item.type !== 'line',
+  );
+  const isSingleSelection = transformableItems.length === 1;
+  const selectedItem = isSingleSelection ? transformableItems[0] : null;
   const isTextSelected = selectedItem?.type === 'text';
-  const isArrowOrLineSelected =
-    selectedItem?.type === 'arrow' || selectedItem?.type === 'line';
   const isDrawingSelected = selectedItem?.type === 'drawing';
 
   // Transformer 연결
@@ -29,20 +32,16 @@ export default function ItemTransformer({
     if (transformerRef.current && stageRef.current) {
       const stage = stageRef.current;
 
-      if (selectedId && !isArrowOrLineSelected) {
-        // 해당 ID 노드 확인
-        const selectedNode = stage.findOne('#' + selectedId);
-        if (selectedNode) {
-          transformerRef.current.nodes([selectedNode]);
-          transformerRef.current.getLayer()?.batchDraw();
-        } else {
-          transformerRef.current.nodes([]);
-        }
-      } else {
-        transformerRef.current.nodes([]);
-      }
+      const selectedNodes = transformableItems
+        .map((item) => stage.findOne('#' + item.id))
+        .filter((node): node is Konva.Node => !!node);
+
+      transformerRef.current.nodes(selectedNodes);
+      transformerRef.current.getLayer()?.batchDraw();
     }
-  }, [selectedId, items, stageRef, isArrowOrLineSelected]);
+  }, [items, stageRef, transformableItems]);
+
+  if (transformableItems.length === 0) return null;
 
   return (
     <Transformer
@@ -61,7 +60,7 @@ export default function ItemTransformer({
               'middle-right',
             ]
       }
-      rotateEnabled={!isDrawingSelected}
+      rotateEnabled={isSingleSelection ? !isDrawingSelected : false}
       anchorSize={10}
       anchorCornerRadius={5}
       anchorStrokeWidth={1.5}
@@ -82,8 +81,13 @@ export default function ItemTransformer({
         let minHeight = 30 * stageScale;
 
         // 도형에 텍스트가 있으면 텍스트 높이 고려
-        if (selectedItem?.type === 'shape' && selectedItem.text && stage) {
-          const shapeNode = stage.findOne('#' + selectedId) as Konva.Group;
+        if (
+          isSingleSelection &&
+          selectedItem?.type === 'shape' &&
+          selectedItem.text &&
+          stage
+        ) {
+          const shapeNode = stage.findOne('#' + selectedItem.id) as Konva.Group;
           if (shapeNode) {
             const textNode = shapeNode.findOne('Text') as Konva.Text;
             if (textNode) {
