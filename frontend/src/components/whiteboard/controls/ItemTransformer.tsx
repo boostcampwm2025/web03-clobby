@@ -210,12 +210,9 @@ export default function ItemTransformer({
           groupNode.scaleY(1);
           groupNode.position({ x: 0, y: 0 });
 
-          // 바인딩 해제
           updateItem(id, {
             points: adjustedPoints,
             rotation,
-            startBinding: null,
-            endBinding: null,
           });
           return;
         }
