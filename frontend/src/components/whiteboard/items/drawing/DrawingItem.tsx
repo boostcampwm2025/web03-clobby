@@ -86,7 +86,6 @@ export default function DrawingItem({
       }}
       onTransform={(e) => {
         if (!isInteractive) return;
-        if (isMultiSelected) return;
         const node = e.target;
 
         if (node.getClassName() !== 'Line') return;
@@ -107,7 +106,9 @@ export default function DrawingItem({
       }}
       onTransformEnd={(e) => {
         if (!isInteractive) return;
+        // 멀티 선택 시에는 ItemTransformer에서 일괄 처리
         if (isMultiSelected) return;
+
         const node = e.target;
 
         if (node.getClassName() !== 'Line') return;

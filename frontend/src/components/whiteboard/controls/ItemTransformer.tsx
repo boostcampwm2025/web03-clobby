@@ -90,7 +90,35 @@ export default function ItemTransformer({
 
         if (item.type === 'shape') {
           const newWidth = Math.max(5, (item.width ?? 0) * scaleX);
-          const newHeight = Math.max(5, (item.height ?? 0) * scaleY);
+          let newHeight = Math.max(5, (item.height ?? 0) * scaleY);
+
+          // 텍스트가 있으면 텍스트 높이에 맞춰 조절
+          if (item.text) {
+            const groupNode = node as Konva.Group;
+            const textNode = groupNode.findOne('Text') as Konva.Text;
+            if (textNode) {
+              const originalWidth = textNode.width();
+              const originalHeight = textNode.height();
+              const textWidth = newWidth * 0.8;
+
+              textNode.width(textWidth);
+              // @ts-expect-error 라이브러리 타입 정의에는 없지만 실제로 'auto' 값을 허용함
+              textNode.height('auto');
+
+              const requiredHeight = textNode.height() + 8;
+
+              // 원래 크기로 복원
+              textNode.width(originalWidth);
+              textNode.height(originalHeight);
+
+              // 텍스트를 모두 표시하기 위한 최소 높이
+              newHeight = Math.max(newHeight, requiredHeight);
+
+              // 텍스트 노드 스케일 리셋
+              textNode.scaleX(1);
+              textNode.scaleY(1);
+            }
+          }
 
           node.scaleX(1);
           node.scaleY(1);

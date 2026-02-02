@@ -74,7 +74,6 @@ export default function ShapeItem({
 
   const handleTransform = useCallback(
     (e: Konva.KonvaEventObject<Event>) => {
-      if (isMultiSelected) return;
       const group = e.target as Konva.Group;
       const groupScaleX = group.scaleX();
       const groupScaleY = group.scaleY();
@@ -86,9 +85,11 @@ export default function ShapeItem({
       const newY = group.y();
       const newRotation = group.rotation();
 
-      onTransformMove?.(newX, newY, newWidth, newHeight, newRotation);
+      if (!isMultiSelected) {
+        onTransformMove?.(newX, newY, newWidth, newHeight, newRotation);
+      }
 
-      // 2. 텍스트 자동 크기 조절 (있는 경우)
+      // 텍스트 자동 크기 조절 (있는 경우)
       if (!shapeItem.text) return;
 
       // 회전만 하는 경우 넘김(계산 안함)
@@ -127,6 +128,7 @@ export default function ShapeItem({
     (e: Konva.KonvaEventObject<Event>) => {
       setIsTransforming(false);
       if (isMultiSelected) return;
+
       const node = e.target as Konva.Group;
       const scaleX = node.scaleX();
       const scaleY = node.scaleY();
