@@ -14,6 +14,7 @@ interface CustomArrowProps {
   onSelect: (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => void;
   onChange: (newAttributes: Partial<WhiteboardItem>) => void;
   onDragStart?: () => void;
+  onDragMove?: (x: number, y: number) => void;
   onDragEnd?: () => void;
   onArrowDblClick?: (id: string) => void;
   isSelected: boolean;
@@ -24,6 +25,7 @@ export default function CustomArrow({
   onSelect,
   onChange,
   onDragStart,
+  onDragMove,
   onDragEnd,
   onArrowDblClick,
   isSelected,
@@ -123,6 +125,11 @@ export default function CustomArrow({
         if (!isInteractive) return;
         setIsDragging(true);
         onDragStart?.();
+      }}
+      onDragMove={(e) => {
+        if (!isInteractive) return;
+        const pos = e.target.position();
+        onDragMove?.(pos.x, pos.y);
       }}
       onDragEnd={(e) => {
         if (!isInteractive) return;

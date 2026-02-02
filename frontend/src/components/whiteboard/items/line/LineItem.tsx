@@ -17,6 +17,7 @@ interface LineItemProps {
   onMouseEnter: (e: Konva.KonvaEventObject<MouseEvent>) => void;
   onMouseLeave: (e: Konva.KonvaEventObject<MouseEvent>) => void;
   onDragStart?: () => void;
+  onDragMove?: (x: number, y: number) => void;
   onDragEnd?: () => void;
   onArrowDblClick?: (id: string) => void;
 }
@@ -31,6 +32,7 @@ export default function LineItem({
   onMouseEnter,
   onMouseLeave,
   onDragStart,
+  onDragMove,
   onDragEnd,
   onArrowDblClick,
 }: LineItemProps) {
@@ -70,6 +72,11 @@ export default function LineItem({
         if (!isInteractive) return;
         setIsDragging(true);
         onDragStart?.();
+      }}
+      onDragMove={(e) => {
+        if (!isInteractive) return;
+        const pos = e.target.position();
+        onDragMove?.(pos.x, pos.y);
       }}
       onDragEnd={(e) => {
         if (!isInteractive) return;

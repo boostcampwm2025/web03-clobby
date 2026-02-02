@@ -78,6 +78,7 @@ function RenderItem({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onDragStart={onDragStart}
+        onDragMove={(x, y) => onDragMove?.(item.id, x, y)}
         onDragEnd={onDragEnd}
       />
     );
@@ -92,6 +93,7 @@ function RenderItem({
         onSelect={(e) => onSelect(item.id, e)}
         onChange={onChange}
         onDragStart={onDragStart}
+        onDragMove={(x, y) => onDragMove?.(item.id, x, y)}
         onDragEnd={onDragEnd}
         onArrowDblClick={onArrowDblClick}
       />
@@ -111,6 +113,7 @@ function RenderItem({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onDragStart={onDragStart}
+        onDragMove={(x, y) => onDragMove?.(item.id, x, y)}
         onDragEnd={onDragEnd}
         onArrowDblClick={onArrowDblClick}
       />
@@ -130,6 +133,7 @@ function RenderItem({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onDragStart={onDragStart}
+        onDragMove={(x, y) => onDragMove?.(item.id, x, y)}
         onDragEnd={onDragEnd}
       />
     );
@@ -171,6 +175,7 @@ function RenderItem({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onDragStart={onDragStart}
+        onDragMove={(x, y) => onDragMove?.(item.id, x, y)}
         onDragEnd={onDragEnd}
       />
     );
@@ -189,6 +194,7 @@ function RenderItem({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onDragStart={onDragStart}
+        onDragMove={(x, y) => onDragMove?.(item.id, x, y)}
         onDragEnd={onDragEnd}
       />
     );

@@ -30,6 +30,7 @@ import { useCanvasShortcuts } from '@/hooks/useCanvasShortcuts';
 import { useArrowHandles } from '@/hooks/useArrowHandles';
 import { useCanvasMouseEvents } from '@/hooks/useCanvasMouseEvents';
 import { useSelectionBox } from '@/hooks/useSelectionBox';
+import { useMultiDrag } from '@/hooks/useMultiDrag';
 
 import RenderItem from '@/components/whiteboard/items/RenderItem';
 import TextArea from '@/components/whiteboard/items/text/TextArea';
@@ -84,6 +85,15 @@ export default function Canvas() {
     height?: number;
     rotation?: number;
   } | null>(null);
+
+  // 멀티 드래그 훅
+  const {
+    startMultiDrag,
+    updateMultiDrag,
+    finishMultiDrag,
+    isMultiDragging,
+    getMultiDragPosition,
+  } = useMultiDrag({ selectedIds, items });
 
   // Viewport culling을 위한 상태
   const [viewportRect, setViewportRect] = useState<{
@@ -381,6 +391,11 @@ export default function Canvas() {
 
   const handleItemChange = useCallback(
     (id: string, newAttributes: Partial<WhiteboardItem>) => {
+      // 멀티 드래그 중에는 개별 업데이트 넘김
+      if (isMultiDragging(id)) {
+        return;
+      }
+
       performTransaction(() => {
         updateItem(id, newAttributes);
 
@@ -397,13 +412,8 @@ export default function Canvas() {
         updateBoundArrows(id, updatedShape, items, updateItem);
       });
     },
-    [items, updateItem, performTransaction],
+    [items, updateItem, performTransaction, isMultiDragging],
   );
-
-  const handleDragMoveItem = useCallback((id: string, x: number, y: number) => {
-    setLocalDraggingId(id);
-    setLocalDraggingPos((prev) => (prev ? { ...prev, x, y } : { x, y }));
-  }, []);
 
   const handleTransformMoveItem = useCallback(
     (
@@ -420,11 +430,27 @@ export default function Canvas() {
     [],
   );
 
+  const handleDragMoveItem = useCallback(
+    (id: string, x: number, y: number) => {
+      setLocalDraggingId(id);
+
+      // 멀티 드래그 업데이트
+      const isMulti = updateMultiDrag(id, x, y);
+      if (!isMulti) {
+        setLocalDraggingPos((prev) => (prev ? { ...prev, x, y } : { x, y }));
+      }
+    },
+    [updateMultiDrag],
+  );
+
   const handleDragEndItem = useCallback(() => {
     setIsDraggingArrow(false);
     setLocalDraggingId(null);
     setLocalDraggingPos(null);
-  }, []);
+
+    // 멀티 드래그 종료
+    finishMultiDrag();
+  }, [finishMultiDrag]);
 
   // width={0} height={0}으로 canvas 렌더링 방지
   if (size.width === 0 || size.height === 0) {
@@ -496,9 +522,15 @@ export default function Canvas() {
                 : null;
 
             return visibleItems.map((item) => {
-              // 드래그 중인 아이템의 실시간 위치
               let displayItem = item;
-              if (localDraggingId === item.id && localDraggingPos) {
+              const multiDragPos = getMultiDragPosition(item.id);
+              if (multiDragPos && 'x' in item && 'y' in item) {
+                displayItem = {
+                  ...item,
+                  x: multiDragPos.x,
+                  y: multiDragPos.y,
+                } as WhiteboardItem;
+              } else if (localDraggingId === item.id && localDraggingPos) {
                 displayItem = {
                   ...item,
                   x: localDraggingPos.x,
@@ -560,6 +592,9 @@ export default function Canvas() {
                       setIsDraggingArrow(true);
                     }
                     setLocalDraggingId(item.id);
+
+                    startMultiDrag(item.id);
+
                     const geoItem = item as {
                       x: number;
                       y: number;

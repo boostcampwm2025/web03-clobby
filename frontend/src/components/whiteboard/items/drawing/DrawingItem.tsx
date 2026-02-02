@@ -18,6 +18,7 @@ interface DrawingItemProps {
   onMouseEnter: (e: Konva.KonvaEventObject<MouseEvent>) => void;
   onMouseLeave: (e: Konva.KonvaEventObject<MouseEvent>) => void;
   onDragStart?: () => void;
+  onDragMove?: (x: number, y: number) => void;
   onDragEnd?: () => void;
 }
 
@@ -31,6 +32,7 @@ export default function DrawingItem({
   onMouseEnter,
   onMouseLeave,
   onDragStart,
+  onDragMove,
   onDragEnd,
 }: DrawingItemProps) {
   const { isInteractive } = useItemInteraction();
@@ -66,6 +68,11 @@ export default function DrawingItem({
         if (!isInteractive) return;
         setIsDragging(true);
         onDragStart?.();
+      }}
+      onDragMove={(e) => {
+        if (!isInteractive) return;
+        const pos = e.target.position();
+        onDragMove?.(pos.x, pos.y);
       }}
       onDragEnd={(e) => {
         if (!isInteractive) return;

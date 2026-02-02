@@ -20,6 +20,7 @@ interface ImageItemProps {
   onMouseEnter: (e: Konva.KonvaEventObject<MouseEvent>) => void;
   onMouseLeave: (e: Konva.KonvaEventObject<MouseEvent>) => void;
   onDragStart?: () => void;
+  onDragMove?: (x: number, y: number) => void;
   onDragEnd?: () => void;
 }
 
@@ -33,6 +34,7 @@ export default function ImageItem({
   onMouseEnter,
   onMouseLeave,
   onDragStart,
+  onDragMove,
   onDragEnd,
 }: ImageItemProps) {
   // useImage(item.src, 'anonymous'); : CORS 문제 방지
@@ -102,11 +104,13 @@ export default function ImageItem({
     },
 
     // 이동
+    onDragMove: (e: Konva.KonvaEventObject<DragEvent>) => {
+      onDragMove?.(e.target.x(), e.target.y());
+    },
+
     onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) => {
       setIsDragging(false);
-      if (!isMultiSelected) {
-        onChange({ x: e.target.x(), y: e.target.y() });
-      }
+      onChange({ x: e.target.x(), y: e.target.y() });
       onDragEnd?.();
     },
 

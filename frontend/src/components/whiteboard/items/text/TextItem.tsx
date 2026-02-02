@@ -18,6 +18,7 @@ interface TextItemProps {
   onMouseEnter: (e: Konva.KonvaEventObject<MouseEvent>) => void;
   onMouseLeave: (e: Konva.KonvaEventObject<MouseEvent>) => void;
   onDragStart?: () => void;
+  onDragMove?: (x: number, y: number) => void;
   onDragEnd?: () => void;
 }
 
@@ -31,6 +32,7 @@ export default function TextItem({
   onMouseEnter,
   onMouseLeave,
   onDragStart,
+  onDragMove,
   onDragEnd,
 }: TextItemProps) {
   const setEditingTextId = useWhiteboardLocalStore(
@@ -77,6 +79,10 @@ export default function TextItem({
         if (!isInteractive) return;
         setIsDragging(true);
         onDragStart?.();
+      }}
+      onDragMove={(e) => {
+        if (!isInteractive) return;
+        onDragMove?.(e.target.x(), e.target.y());
       }}
       onDragEnd={(e) => {
         if (!isInteractive) return;

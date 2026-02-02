@@ -20,6 +20,7 @@ interface StackItemProps {
   onMouseEnter: (e: Konva.KonvaEventObject<MouseEvent>) => void;
   onMouseLeave: (e: Konva.KonvaEventObject<MouseEvent>) => void;
   onDragStart?: () => void;
+  onDragMove?: (x: number, y: number) => void;
   onDragEnd?: () => void;
 }
 
@@ -33,6 +34,7 @@ export default function StackItem({
   onMouseEnter,
   onMouseLeave,
   onDragStart,
+  onDragMove,
   onDragEnd,
 }: StackItemProps) {
   const [isDragging, setIsDragging] = useState(false);
@@ -81,14 +83,15 @@ export default function StackItem({
         setIsDragging(true);
         onDragStart?.();
       }}
+      onDragMove={(e) => {
+        onDragMove?.(e.target.x(), e.target.y());
+      }}
       onDragEnd={(e) => {
         setIsDragging(false);
-        if (!isMultiSelected) {
-          onChange({
-            x: e.target.x(),
-            y: e.target.y(),
-          });
-        }
+        onChange({
+          x: e.target.x(),
+          y: e.target.y(),
+        });
         onDragEnd?.();
       }}
       onTransformEnd={(e) => {
