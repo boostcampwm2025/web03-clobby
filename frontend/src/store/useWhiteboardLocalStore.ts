@@ -25,7 +25,7 @@ interface LocalState {
   currentDrawing: DrawingItem | null;
   drawingStroke: string;
   drawingSize: DrawingSize;
-  awarenessCallback: ((selectedId: string | null) => void) | null;
+  awarenessCallback: ((selectedIds: string[]) => void) | null;
   cursorCallback: ((cursor: { x: number; y: number } | null) => void) | null;
   stageRef: React.RefObject<Konva.Stage | null> | null;
   selectionBox: {
@@ -55,7 +55,7 @@ interface LocalActions {
   continueDrawing: (x: number, y: number) => void;
   finishDrawing: () => void;
   setAwarenessCallback: (
-    callback: ((selectedId: string | null) => void) | null,
+    callback: ((selectedIds: string[]) => void) | null,
   ) => void;
   setCursorCallback: (
     callback: ((cursor: { x: number; y: number } | null) => void) | null,
@@ -80,7 +80,7 @@ export const useWhiteboardLocalStore = create<LocalStore>((set, get) => ({
     set({ selectedIds: [id] });
     const callback = get().awarenessCallback;
     if (callback) {
-      callback(id);
+      callback([id]);
     }
   },
 
@@ -89,7 +89,7 @@ export const useWhiteboardLocalStore = create<LocalStore>((set, get) => ({
     set({ selectedIds: ids });
     const callback = get().awarenessCallback;
     if (callback) {
-      callback(ids[0] ?? null);
+      callback(ids);
     }
   },
 
@@ -103,7 +103,7 @@ export const useWhiteboardLocalStore = create<LocalStore>((set, get) => ({
     set({ selectedIds: newIds });
     const callback = get().awarenessCallback;
     if (callback) {
-      callback(newIds[0] ?? null);
+      callback(newIds);
     }
   },
 
@@ -116,7 +116,7 @@ export const useWhiteboardLocalStore = create<LocalStore>((set, get) => ({
     set({ selectedIds: newIds });
     const callback = get().awarenessCallback;
     if (callback) {
-      callback(newIds[0] ?? null);
+      callback(newIds);
     }
   },
 
@@ -128,7 +128,7 @@ export const useWhiteboardLocalStore = create<LocalStore>((set, get) => ({
     set({ selectedIds: newIds });
     const callback = get().awarenessCallback;
     if (callback) {
-      callback(newIds[0] ?? null);
+      callback(newIds);
     }
   },
 
@@ -137,7 +137,7 @@ export const useWhiteboardLocalStore = create<LocalStore>((set, get) => ({
     set({ selectedIds: [] });
     const callback = get().awarenessCallback;
     if (callback) {
-      callback(null);
+      callback([]);
     }
   },
 
@@ -326,10 +326,10 @@ export const useWhiteboardLocalStore = create<LocalStore>((set, get) => ({
     if (intersectedIds.length > 0) {
       set({ selectedIds: intersectedIds });
 
-      // Awareness 업데이트 (일단 첫 번째만)
+      // Awareness 업데이트
       const callback = state.awarenessCallback;
       if (callback) {
-        callback(intersectedIds[0]);
+        callback(intersectedIds);
       }
     }
 
