@@ -29,6 +29,7 @@ import { useCanvasInteraction } from '@/hooks/useCanvasInteraction';
 import { useCanvasShortcuts } from '@/hooks/useCanvasShortcuts';
 import { useArrowHandles } from '@/hooks/useArrowHandles';
 import { useCanvasMouseEvents } from '@/hooks/useCanvasMouseEvents';
+import { useSelectionBox } from '@/hooks/useSelectionBox';
 
 import RenderItem from '@/components/whiteboard/items/RenderItem';
 import TextArea from '@/components/whiteboard/items/text/TextArea';
@@ -36,6 +37,7 @@ import ShapeTextArea from '@/components/whiteboard/items/shape/ShapeTextArea';
 import ItemTransformer from '@/components/whiteboard/controls/ItemTransformer';
 import RemoteSelectionLayer from '@/components/whiteboard/remote/RemoteSelectionLayer';
 import ArrowHandles from '@/components/whiteboard/items/arrow/ArrowHandles';
+import SelectionBox from '@/components/whiteboard/SelectionBox';
 import Portal from '@/components/common/Portal';
 
 const GEOMETRY_KEYS = ['x', 'y', 'width', 'height', 'rotation'] as const;
@@ -305,6 +307,11 @@ export default function Canvas() {
     !editingTextId && !!selectedId,
   );
 
+  const { startSelection } = useSelectionBox({
+    stageRef,
+    enabled: cursorMode === 'select',
+  });
+
   // 마우스 이벤트 통합 훅
   const {
     handlePointerDown,
@@ -314,6 +321,7 @@ export default function Canvas() {
     currentDrawing,
   } = useCanvasMouseEvents({
     onDeselect: handleCheckDeselect,
+    onSelectionBoxStart: startSelection,
   });
 
   // 캔버스 드래그 가능 여부
@@ -568,6 +576,9 @@ export default function Canvas() {
               lineJoin="round"
             />
           )}
+
+          {/* 선택 박스 */}
+          <SelectionBox />
 
           {/* 다른 사용자의 선택 표시 */}
           <RemoteSelectionLayer

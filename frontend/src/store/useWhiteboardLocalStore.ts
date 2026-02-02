@@ -27,6 +27,13 @@ interface LocalState {
   awarenessCallback: ((selectedId: string | null) => void) | null;
   cursorCallback: ((cursor: { x: number; y: number } | null) => void) | null;
   stageRef: React.RefObject<Konva.Stage | null> | null;
+  selectionBox: {
+    visible: boolean;
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+  } | null;
 }
 
 interface LocalActions {
@@ -48,6 +55,9 @@ interface LocalActions {
     callback: ((cursor: { x: number; y: number } | null) => void) | null,
   ) => void;
   setStageRef: (ref: React.RefObject<Konva.Stage | null>) => void;
+  startSelectionBox: (x: number, y: number) => void;
+  updateSelectionBox: (x: number, y: number) => void;
+  finishSelectionBox: () => void;
 }
 
 type LocalStore = LocalState & LocalActions;
@@ -144,4 +154,39 @@ export const useWhiteboardLocalStore = create<LocalStore>((set, get) => ({
 
   // 그리기 완료
   finishDrawing: () => set({ currentDrawing: null }),
+
+  // 선택 박스 초기값
+  selectionBox: null,
+
+  // 선택 박스 시작
+  startSelectionBox: (x, y) => {
+    set({
+      selectionBox: {
+        visible: true,
+        x1: x,
+        y1: y,
+        x2: x,
+        y2: y,
+      },
+    });
+  },
+
+  // 선택 박스 업데이트
+  updateSelectionBox: (x, y) => {
+    const state = get();
+    if (!state.selectionBox) return;
+
+    set({
+      selectionBox: {
+        ...state.selectionBox,
+        x2: x,
+        y2: y,
+      },
+    });
+  },
+
+  // 선택 박스 완료
+  finishSelectionBox: () => {
+    set({ selectionBox: null });
+  },
 }));
