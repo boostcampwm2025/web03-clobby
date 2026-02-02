@@ -44,9 +44,17 @@ export class ResumeConsumersUsecase<T> {
       try {
         await consumer.resume();
 
-        if (consumer.appData.target === "main" && consumer.appData.type === "cam" && consumer.type === 'simulcast') {
-          consumer.setPriority(255);
-          await consumer.setPreferredLayers({ spatialLayer: 2, temporalLayer: 2 });
+        if (consumer.appData.type === 'cam' && consumer.type === 'simulcast') {
+          const isMain = consumer.appData.target === 'main';
+
+          consumer.setPriority(isMain ? 255 : 10);
+          await consumer.setPreferredLayers({
+            spatialLayer: isMain ? 2 : 1,
+          });
+        };
+
+        if (consumer.appData.type === 'screen_video') {
+          consumer.setPriority(300); // 가장 우선순위를 높게 해준다.
         };
       } catch (err) {
         this.logger.error(err);
