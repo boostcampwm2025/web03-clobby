@@ -12,7 +12,7 @@ interface DrawingItemProps {
   isDraggable: boolean;
   isListening: boolean;
   isSelected: boolean;
-  onSelect: () => void;
+  onSelect: (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => void;
   onChange: (changes: Partial<DrawingItemType>) => void;
   onMouseEnter: (e: Konva.KonvaEventObject<MouseEvent>) => void;
   onMouseLeave: (e: Konva.KonvaEventObject<MouseEvent>) => void;
@@ -54,8 +54,8 @@ export default function DrawingItem({
       lineCap="round"
       lineJoin="round"
       strokeScaleEnabled={true}
-      onMouseDown={() => isInteractive && onSelect()}
-      onTouchStart={() => isInteractive && onSelect()}
+      onMouseDown={(e) => isInteractive && onSelect(e)}
+      onTouchStart={(e) => isInteractive && onSelect(e)}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onDragStart={() => {

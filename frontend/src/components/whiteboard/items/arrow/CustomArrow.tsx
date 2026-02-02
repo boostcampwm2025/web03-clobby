@@ -11,7 +11,7 @@ import { usePointsAnimation } from '@/hooks/useItemAnimation';
 
 interface CustomArrowProps {
   item: ArrowItem;
-  onSelect: (id: string) => void;
+  onSelect: (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => void;
   onChange: (newAttributes: Partial<WhiteboardItem>) => void;
   onDragStart?: () => void;
   onDragEnd?: () => void;
@@ -107,8 +107,8 @@ export default function CustomArrow({
       name="arrow-group"
       draggable={isDraggable}
       listening={isListening}
-      onMouseDown={() => isInteractive && onSelect(item.id)}
-      onTouchStart={() => isInteractive && onSelect(item.id)}
+      onMouseDown={(e) => isInteractive && onSelect(e)}
+      onTouchStart={(e) => isInteractive && onSelect(e)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onDblClick={() => {

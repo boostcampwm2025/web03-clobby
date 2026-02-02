@@ -13,7 +13,7 @@ interface ShapeItemProps {
   isListening: boolean;
   isSelected: boolean;
 
-  onSelect: () => void;
+  onSelect: (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => void;
   onChange: (newAttrs: Partial<ShapeItemType>) => void;
   onDblClick?: () => void;
 

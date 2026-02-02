@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Konva from 'konva';
 import { useCursorStyle } from '@/hooks/useCursorStyle';
 import { useItemInteraction } from '@/hooks/useItemInteraction';
 import TextItem from '@/components/whiteboard/items/text/TextItem';
@@ -26,7 +27,10 @@ import type {
 interface RenderItemProps {
   item: WhiteboardItem;
   isSelected: boolean;
-  onSelect: (id: string) => void;
+  onSelect: (
+    id: string,
+    e: Konva.KonvaEventObject<MouseEvent | TouchEvent>,
+  ) => void;
   onChange: (newAttributes: Partial<WhiteboardItem>) => void;
   onDragStart?: () => void;
   onDragMove?: (id: string, x: number, y: number) => void;
@@ -69,7 +73,7 @@ function RenderItem({
         isDraggable={isDraggable}
         isListening={isListening}
         isSelected={isSelected}
-        onSelect={() => onSelect(item.id)}
+        onSelect={(e) => onSelect(item.id, e)}
         onChange={onChange}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -85,7 +89,7 @@ function RenderItem({
       <CustomArrow
         item={arrowItem}
         isSelected={isSelected}
-        onSelect={onSelect}
+        onSelect={(e) => onSelect(item.id, e)}
         onChange={onChange}
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
@@ -102,7 +106,7 @@ function RenderItem({
         isDraggable={isDraggable}
         isListening={isListening}
         isSelected={isSelected}
-        onSelect={() => onSelect(item.id)}
+        onSelect={(e) => onSelect(item.id, e)}
         onChange={onChange}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -121,7 +125,7 @@ function RenderItem({
         isDraggable={isDraggable}
         isListening={isListening}
         isSelected={isSelected}
-        onSelect={() => onSelect(item.id)}
+        onSelect={(e) => onSelect(item.id, e)}
         onChange={onChange}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -139,7 +143,7 @@ function RenderItem({
         isDraggable={isDraggable}
         isListening={isListening}
         isSelected={isSelected}
-        onSelect={() => onSelect(item.id)}
+        onSelect={(e) => onSelect(item.id, e)}
         onChange={onChange}
         onDblClick={() => onShapeDblClick?.(item.id)}
         onMouseEnter={handleMouseEnter}
@@ -162,7 +166,7 @@ function RenderItem({
         isDraggable={isDraggable}
         isListening={isListening}
         isSelected={isSelected}
-        onSelect={() => onSelect(item.id)}
+        onSelect={(e) => onSelect(item.id, e)}
         onChange={onChange}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -180,7 +184,7 @@ function RenderItem({
         isDraggable={isDraggable}
         isListening={isListening}
         isSelected={isSelected}
-        onSelect={() => onSelect(item.id)}
+        onSelect={(e) => onSelect(item.id, e)}
         onChange={onChange}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
