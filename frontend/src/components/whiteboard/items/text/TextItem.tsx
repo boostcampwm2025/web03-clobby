@@ -36,7 +36,10 @@ export default function TextItem({
   const setEditingTextId = useWhiteboardLocalStore(
     (state) => state.setEditingTextId,
   );
+  const selectedIds = useWhiteboardLocalStore((state) => state.selectedIds);
   const { isInteractive } = useItemInteraction();
+  const isMultiSelected =
+    selectedIds.length > 1 && selectedIds.includes(textItem.id);
 
   const [isDragging, setIsDragging] = useState(false);
 
@@ -78,14 +81,17 @@ export default function TextItem({
       onDragEnd={(e) => {
         if (!isInteractive) return;
         setIsDragging(false);
-        onChange({
-          x: e.target.x(),
-          y: e.target.y(),
-        });
+        if (!isMultiSelected) {
+          onChange({
+            x: e.target.x(),
+            y: e.target.y(),
+          });
+        }
         onDragEnd?.();
       }}
       onTransform={(e) => {
         if (!isInteractive) return;
+        if (isMultiSelected) return;
         const node = e.target;
         const scaleX = node.scaleX();
         const scaleY = node.scaleY();
@@ -99,6 +105,7 @@ export default function TextItem({
       }}
       onTransformEnd={(e) => {
         if (!isInteractive) return;
+        if (isMultiSelected) return;
         const node = e.target;
         const scaleX = node.scaleX();
         node.scaleX(1);

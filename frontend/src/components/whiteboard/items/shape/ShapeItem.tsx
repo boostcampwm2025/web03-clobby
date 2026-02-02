@@ -5,6 +5,7 @@ import Konva from 'konva';
 
 import { Rect, Ellipse, Line, Group, Text } from 'react-konva';
 import { ShapeItem as ShapeItemType } from '@/types/whiteboard';
+import { useWhiteboardLocalStore } from '@/store/useWhiteboardLocalStore';
 import { useItemAnimation } from '@/hooks/useItemAnimation';
 
 interface ShapeItemProps {
@@ -49,6 +50,9 @@ export default function ShapeItem({
 }: ShapeItemProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isTransforming, setIsTransforming] = useState(false);
+  const selectedIds = useWhiteboardLocalStore((state) => state.selectedIds);
+  const isMultiSelected =
+    selectedIds.length > 1 && selectedIds.includes(shapeItem.id);
 
   const width = shapeItem.width || 0;
   const height = shapeItem.height || 0;
@@ -70,6 +74,7 @@ export default function ShapeItem({
 
   const handleTransform = useCallback(
     (e: Konva.KonvaEventObject<Event>) => {
+      if (isMultiSelected) return;
       const group = e.target as Konva.Group;
       const groupScaleX = group.scaleX();
       const groupScaleY = group.scaleY();
@@ -109,12 +114,19 @@ export default function ShapeItem({
       textNode.x(offsetX);
       textNode.y(0);
     },
-    [shapeItem.text, shapeItem.width, shapeItem.height, onTransformMove],
+    [
+      shapeItem.text,
+      shapeItem.width,
+      shapeItem.height,
+      onTransformMove,
+      isMultiSelected,
+    ],
   );
 
   const handleTransformEnd = useCallback(
     (e: Konva.KonvaEventObject<Event>) => {
       setIsTransforming(false);
+      if (isMultiSelected) return;
       const node = e.target as Konva.Group;
       const scaleX = node.scaleX();
       const scaleY = node.scaleY();
@@ -162,7 +174,13 @@ export default function ShapeItem({
         rotation: node.rotation(),
       });
     },
-    [shapeItem.width, shapeItem.height, shapeItem.text, onChange],
+    [
+      shapeItem.width,
+      shapeItem.height,
+      shapeItem.text,
+      onChange,
+      isMultiSelected,
+    ],
   );
 
   // 공통 Drag 핸들러
@@ -173,17 +191,19 @@ export default function ShapeItem({
 
   const handleDragMove = useCallback(
     (e: Konva.KonvaEventObject<DragEvent>) => {
+      if (isMultiSelected) return;
       const newX = e.target.x();
       const newY = e.target.y();
 
       onDragMove?.(newX, newY);
     },
-    [onDragMove],
+    [onDragMove, isMultiSelected],
   );
 
   const handleDragEnd = useCallback(
     (e: Konva.KonvaEventObject<DragEvent>) => {
       setIsDragging(false);
+      if (isMultiSelected) return;
 
       const newX = e.target.x();
       const newY = e.target.y();
@@ -191,7 +211,7 @@ export default function ShapeItem({
       onChange({ x: newX, y: newY });
       onDragEnd?.();
     },
-    [onChange, onDragEnd],
+    [onChange, onDragEnd, isMultiSelected],
   );
 
   const w = shapeItem.width || 0;

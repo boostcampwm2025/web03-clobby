@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, useCallback } from 'react';
 import Konva from 'konva';
 import { Transformer } from 'react-konva';
 import type { WhiteboardItem } from '@/types/whiteboard';
+import { useItemActions } from '@/hooks/useItemActions';
 
 interface ItemTransformerProps {
   selectedIds: string[];
@@ -17,6 +18,15 @@ export default function ItemTransformer({
   stageRef,
 }: ItemTransformerProps) {
   const transformerRef = useRef<Konva.Transformer | null>(null);
+  const { updateItem, performTransaction } = useItemActions();
+
+  const itemById = useMemo(() => {
+    const map = new Map<string, WhiteboardItem>();
+    items.forEach((item) => {
+      map.set(item.id, item);
+    });
+    return map;
+  }, [items]);
 
   const selectedItems = items.filter((item) => selectedIds.includes(item.id));
   const transformableItems = selectedItems.filter(
@@ -55,6 +65,102 @@ export default function ItemTransformer({
     }
   }, [items, stageRef, transformableItems]);
 
+  const handleTransformEnd = useCallback(() => {
+    if (isSingleSelection) return;
+
+    const transformer = transformerRef.current;
+    if (!transformer) return;
+
+    const nodes = transformer.nodes();
+    if (!nodes.length) return;
+
+    performTransaction(() => {
+      nodes.forEach((node) => {
+        const id = node.id();
+        if (!id) return;
+
+        const item = itemById.get(id);
+        if (!item) return;
+
+        const scaleX = node.scaleX();
+        const scaleY = node.scaleY();
+        const rotation = node.rotation();
+        const x = node.x();
+        const y = node.y();
+
+        if (item.type === 'shape') {
+          const newWidth = Math.max(5, (item.width ?? 0) * scaleX);
+          const newHeight = Math.max(5, (item.height ?? 0) * scaleY);
+
+          node.scaleX(1);
+          node.scaleY(1);
+
+          updateItem(id, {
+            x,
+            y,
+            width: newWidth,
+            height: newHeight,
+            rotation,
+          });
+          return;
+        }
+
+        if (item.type === 'image' || item.type === 'stack') {
+          const newWidth = Math.max(5, (item.width ?? 0) * scaleX);
+          const newHeight = Math.max(5, (item.height ?? 0) * scaleY);
+
+          node.scaleX(1);
+          node.scaleY(1);
+
+          updateItem(id, {
+            x,
+            y,
+            width: newWidth,
+            height: newHeight,
+            rotation,
+          });
+          return;
+        }
+
+        if (item.type === 'text') {
+          const newWidth = Math.max(5, node.width() * scaleX);
+
+          node.scaleX(1);
+          node.scaleY(1);
+
+          updateItem(id, {
+            x,
+            y,
+            width: newWidth,
+            rotation,
+          });
+          return;
+        }
+
+        if (item.type === 'drawing') {
+          const lineNode = node as Konva.Line;
+          const currentPoints = lineNode.points();
+          const scaledPoints = currentPoints.map((p, i) =>
+            i % 2 === 0 ? p * scaleX : p * scaleY,
+          );
+          const pos = lineNode.position();
+          const adjustedPoints = scaledPoints.map((p, i) =>
+            i % 2 === 0 ? p + pos.x : p + pos.y,
+          );
+
+          lineNode.scaleX(1);
+          lineNode.scaleY(1);
+          lineNode.position({ x: 0, y: 0 });
+
+          updateItem(id, {
+            points: adjustedPoints,
+            rotation,
+          });
+        }
+      });
+    });
+  }, [isSingleSelection, itemById, performTransaction, updateItem]);
+
   if (transformableItems.length === 0) return null;
 
   return (
@@ -72,6 +178,7 @@ export default function ItemTransformer({
       rotationSnaps={[0, 90, 180, 270]}
       rotationSnapTolerance={10}
       keepRatio={!isSingleSelection}
+      onTransformEnd={handleTransformEnd}
       boundBoxFunc={(oldBox, newBox) => {
         // 최소 크기 제한
         const stage = stageRef.current;

@@ -5,6 +5,7 @@ import { Line } from 'react-konva';
 import Konva from 'konva';
 import { useItemInteraction } from '@/hooks/useItemInteraction';
 import { usePointsAnimation } from '@/hooks/useItemAnimation';
+import { useWhiteboardLocalStore } from '@/store/useWhiteboardLocalStore';
 import type { DrawingItem as DrawingItemType } from '@/types/whiteboard';
 
 interface DrawingItemProps {
@@ -35,6 +36,9 @@ export default function DrawingItem({
   const { isInteractive } = useItemInteraction();
 
   const [isDragging, setIsDragging] = useState(false);
+  const selectedIds = useWhiteboardLocalStore((state) => state.selectedIds);
+  const isMultiSelected =
+    selectedIds.length > 1 && selectedIds.includes(drawingItem.id);
 
   const ref = usePointsAnimation({
     points: drawingItem.points,
@@ -66,20 +70,23 @@ export default function DrawingItem({
       onDragEnd={(e) => {
         if (!isInteractive) return;
         setIsDragging(false);
-        const pos = e.target.position();
-        const newPoints = drawingItem.points.map((p, i) =>
-          i % 2 === 0 ? p + pos.x : p + pos.y,
-        );
+        if (!isMultiSelected) {
+          const pos = e.target.position();
+          const newPoints = drawingItem.points.map((p, i) =>
+            i % 2 === 0 ? p + pos.x : p + pos.y,
+          );
 
-        e.target.position({ x: 0, y: 0 });
+          e.target.position({ x: 0, y: 0 });
 
-        onChange({
-          points: newPoints,
-        });
+          onChange({
+            points: newPoints,
+          });
+        }
         onDragEnd?.();
       }}
       onTransform={(e) => {
         if (!isInteractive) return;
+        if (isMultiSelected) return;
         const node = e.target;
 
         if (node.getClassName() !== 'Line') return;
@@ -100,6 +107,7 @@ export default function DrawingItem({
       }}
       onTransformEnd={(e) => {
         if (!isInteractive) return;
+        if (isMultiSelected) return;
         const node = e.target;
 
         if (node.getClassName() !== 'Line') return;

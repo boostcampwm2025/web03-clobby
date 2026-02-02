@@ -8,6 +8,7 @@ import useImage from 'use-image';
 
 import { ImageItem as ImageItemType } from '@/types/whiteboard';
 import { useItemAnimation } from '@/hooks/useItemAnimation';
+import { useWhiteboardLocalStore } from '@/store/useWhiteboardLocalStore';
 
 interface ImageItemProps {
   imageItem: ImageItemType;
@@ -46,6 +47,9 @@ export default function ImageItem({
   // 로딩 완료시 imageBitmap변수에 이미지 객체를 담고 컴포넌트 렌더링 시 화면에 표시
   const [imageBitmap] = useImage(imageItem.src, 'anonymous');
   const [isDragging, setIsDragging] = useState(false);
+  const selectedIds = useWhiteboardLocalStore((state) => state.selectedIds);
+  const isMultiSelected =
+    selectedIds.length > 1 && selectedIds.includes(imageItem.id);
 
   // 애니메이션 훅
   const imageRef = useItemAnimation({
@@ -100,12 +104,15 @@ export default function ImageItem({
     // 이동
     onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) => {
       setIsDragging(false);
-      onChange({ x: e.target.x(), y: e.target.y() });
+      if (!isMultiSelected) {
+        onChange({ x: e.target.x(), y: e.target.y() });
+      }
       onDragEnd?.();
     },
 
     // 크기 조절 및 회전
     onTransformEnd: (e: Konva.KonvaEventObject<Event>) => {
+      if (isMultiSelected) return;
       const node = e.target;
       const scaleX = node.scaleX();
       const scaleY = node.scaleY();

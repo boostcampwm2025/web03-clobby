@@ -8,6 +8,7 @@ import useImage from 'use-image';
 
 import { StackItem as StackItemType } from '@/types/whiteboard';
 import { useItemAnimation } from '@/hooks/useItemAnimation';
+import { useWhiteboardLocalStore } from '@/store/useWhiteboardLocalStore';
 
 interface StackItemProps {
   stackItem: StackItemType;
@@ -35,6 +36,9 @@ export default function StackItem({
   onDragEnd,
 }: StackItemProps) {
   const [isDragging, setIsDragging] = useState(false);
+  const selectedIds = useWhiteboardLocalStore((state) => state.selectedIds);
+  const isMultiSelected =
+    selectedIds.length > 1 && selectedIds.includes(stackItem.id);
 
   // 이미지 로드 (CORS 이슈 방지를 위해 anonymous 설정)
   const [image, status] = useImage(stackItem.src, 'anonymous');
@@ -79,13 +83,16 @@ export default function StackItem({
       }}
       onDragEnd={(e) => {
         setIsDragging(false);
-        onChange({
-          x: e.target.x(),
-          y: e.target.y(),
-        });
+        if (!isMultiSelected) {
+          onChange({
+            x: e.target.x(),
+            y: e.target.y(),
+          });
+        }
         onDragEnd?.();
       }}
       onTransformEnd={(e) => {
+        if (isMultiSelected) return;
         const node = e.target;
         const scaleX = node.scaleX();
         const scaleY = node.scaleY();
