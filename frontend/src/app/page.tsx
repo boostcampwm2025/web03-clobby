@@ -48,7 +48,7 @@ export default function Home() {
 
       <Header />
 
-      <main className="relative mt-16 flex w-full flex-1 items-center justify-center px-4 text-white">
+      <main className="relative mt-16 flex w-full flex-1 items-center justify-center px-6 text-white">
         <div className="flex h-full w-full max-w-6xl items-center py-12 max-lg:flex-col max-lg:gap-16 lg:gap-24">
           <motion.section
             className="flex w-full flex-col items-center justify-center text-center lg:items-start lg:text-left"
