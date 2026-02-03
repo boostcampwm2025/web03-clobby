@@ -88,7 +88,7 @@ export default function Sidebar() {
 
   // 선택된 아이템의 타입 결정
   const getSelectionType = (item: typeof selectedItem): SelectionType => {
-    if (!item) return null;
+    if (!item || selectedIds.length > 1) return null;
     switch (item.type) {
       case 'shape':
         return 'shape';
