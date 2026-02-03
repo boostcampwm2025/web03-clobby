@@ -1,7 +1,7 @@
 import { validateMeetingForm } from '@/utils/validate';
 import { MeetingForm } from '@/types/forms';
 
-describe('validate', () => {
+describe('회의 생성 Form Validation 테스트', () => {
   const baseForm: MeetingForm = {
     max_participants: 5,
     title: '테스트 회의',
