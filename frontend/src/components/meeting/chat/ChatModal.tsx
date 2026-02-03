@@ -47,7 +47,7 @@ export default function ChatModal() {
     profileImg: profilePath as string,
   });
 
-  const { uploadFile, uploading, percent } = useFileUpload(socket);
+  const { uploadFile, progressMap, uploadingMap } = useFileUpload(socket);
 
   const { handleScroll, scrollToBottom, isAtBottomRef } =
     useChatScroll(scrollRef);
@@ -160,26 +160,24 @@ export default function ChatModal() {
 
       const uploadPromises = filesToUpload.map(async (item) => {
         try {
-          const res = await uploadFile(item.file);
+          const res = await uploadFile(item.file, item.id);
+
           if (res) {
             // 서버 응답 데이터를 채팅 메시지 객체로 변환
             const newMessage = mapRecvPayloadToChatMessage(res);
             useChatStore.getState().addMessage(newMessage);
+
             clearFilePreview(item); // 성공하면 메모리 해제
-            return item.id;
+
+            // 여기서 펜딩애들 제거
+            setPendingFiles((prev) => prev.filter((f) => f.id !== item.id));
           }
         } catch (err) {
           console.error(`${item.file.name} 업로드에 실패했습니다.`);
-          return null;
         }
       });
 
-      const results = await Promise.all(uploadPromises);
-      const successfulIds = results.filter((id) => id !== null);
-
-      setPendingFiles((prev) =>
-        prev.filter((f) => !successfulIds.includes(f.id)),
-      );
+      await Promise.all(uploadPromises);
     }
   };
 
@@ -227,6 +225,8 @@ export default function ChatModal() {
       addFilesToPending(files);
     }
   };
+
+  const isUploading = Object.values(uploadingMap).some(Boolean);
 
   return (
     <aside className="meeting-side-modal z-6">
@@ -320,15 +320,15 @@ export default function ChatModal() {
                   )}
 
                   {/* 업로드 진행률 표시 */}
-                  {uploading && idx === 0 && (
+                  {uploadingMap[f.id] && (
                     <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60">
                       <span className="mb-1 text-[10px] font-bold text-white">
-                        {percent}%
+                        {progressMap[f.id]}%
                       </span>
                       <div className="h-1 w-12 overflow-hidden rounded-full bg-neutral-600">
                         <div
                           className="h-full bg-blue-500 transition-all duration-300"
-                          style={{ width: `${percent}%` }}
+                          style={{ width: `${progressMap[f.id]}%` }}
                         />
                       </div>
                     </div>
@@ -372,8 +372,8 @@ export default function ChatModal() {
 
             <button
               type="button"
-              disabled={uploading}
-              className="rounded-sm p-1 hover:bg-neutral-600"
+              disabled={isUploading}
+              className="rounded-sm p-1 hover:bg-neutral-600 disabled:cursor-not-allowed disabled:opacity-40"
               onClick={() => {
                 if (fileInputRef.current) {
                   fileInputRef.current.accept = '*/*';
