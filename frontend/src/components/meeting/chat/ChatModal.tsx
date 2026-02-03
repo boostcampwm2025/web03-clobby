@@ -7,7 +7,7 @@ import { useChatStore } from '@/store/useChatStore';
 import { useMeetingSocketStore } from '@/store/useMeetingSocketStore';
 import { useMeetingStore } from '@/store/useMeetingStore';
 import { useUserStore } from '@/store/useUserStore';
-import { mapRecvPayloadToChatMessage } from '@/utils/chat';
+import { isSameMinute, mapRecvPayloadToChatMessage } from '@/utils/chat';
 import { formatFileSize } from '@/utils/formatter';
 import Image from 'next/image';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -253,15 +253,11 @@ export default function ChatModal() {
         {messages.map((chat, idx) => {
           const prevMsg = messages[idx - 1];
 
-          const isDifferentUser =
-            !prevMsg || prevMsg.nickname !== chat.nickname;
-          const isTimeDiff = prevMsg
-            ? new Date(chat.createdAt).getTime() -
-                new Date(prevMsg.createdAt).getTime() >
-              60000
-            : true;
+          const isDifferentUser = !prevMsg || prevMsg.userId !== chat.userId;
+          const isDifferentTime =
+            !prevMsg || !isSameMinute(chat.createdAt, prevMsg.createdAt);
 
-          const showProfile = isDifferentUser || isTimeDiff;
+          const showProfile = isDifferentUser || isDifferentTime;
 
           return (
             <ChatListItem
