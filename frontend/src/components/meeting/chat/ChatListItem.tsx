@@ -29,6 +29,8 @@ export function ChatListItem({
     }
   }, [isFile, fileId, fileName, downloadFile]);
 
+  const isSvg = isFile && content.filename?.toLowerCase().endsWith('.svg');
+
   return (
     <div className={`flex w-full gap-3 px-4 ${showProfile ? 'mt-4' : 'mt-1'}`}>
       <div className="w-8 shrink-0">
@@ -71,14 +73,25 @@ export function ChatListItem({
 
         {isFile && content.category === 'image' && (
           <span className="group relative rounded-sm bg-neutral-600 p-2">
-            <Image
-              width={400}
-              height={300}
-              className="h-auto w-full object-contain"
-              src={content.fileUrl as string}
-              alt={content.filename}
-              onLoad={onImageLoad}
-            />
+            {isSvg ? (
+              <img
+                width={400}
+                height={300}
+                src={content.fileUrl}
+                alt={content.filename}
+                className="h-auto w-full object-contain"
+                onLoad={onImageLoad}
+              />
+            ) : (
+              <Image
+                width={400}
+                height={300}
+                className="h-auto w-full object-contain"
+                src={content.fileUrl as string}
+                alt={content.filename}
+                onLoad={onImageLoad}
+              />
+            )}
 
             <button
               type="button"
