@@ -112,3 +112,8 @@ export interface MemberListItemProps {
   profileImg: string | null;
   reverseDropdown?: boolean;
 }
+
+export type MeetingInfo = MeetingInfoResponse & {
+  meetingId: string;
+  isHosted?: boolean;
+};
