@@ -27,8 +27,6 @@ const INITIAL_MEETING_INFO: MeetingInfo = {
   meetingId: '',
 };
 
-const VISIBLE_COUNT = 5;
-
 type MeetingInfo = MeetingInfoResponse & {
   meetingId: string;
   isHosted?: boolean;
@@ -62,7 +60,11 @@ interface MeetingActions {
   newAddMember: (member: MeetingMemberInfo) => void;
   removeMember: (userId: string) => void;
   setScreenSharer: (sharer: { id: string; nickname: string } | null) => void;
-  setSpeaking: (userId: string, isSpeaking: boolean) => void;
+  setSpeaking: (
+    userId: string,
+    isSpeaking: boolean,
+    visibleCount: number,
+  ) => void;
   togglePin: (userId: string) => void;
   setMeetingInfo: (info: Partial<MeetingInfo>) => void;
   setSpeakerId: (speakerId: string) => void;
@@ -159,7 +161,7 @@ export const useMeetingStore = create<MeetingState & MeetingActions>((set) => ({
         orderedMemberIds: nextOrderedIds,
       };
     }),
-  newAddMember : (member) =>
+  newAddMember: (member) =>
     set((state) => {
       if (!member?.user_id) return state;
 
@@ -187,8 +189,7 @@ export const useMeetingStore = create<MeetingState & MeetingActions>((set) => ({
         },
         orderedMemberIds: nextOrderedIds,
       };
-    }
-  ),
+    }),
   removeMember: (userId) =>
     set((state) => {
       const nextMembers = { ...state.members };
@@ -209,11 +210,10 @@ export const useMeetingStore = create<MeetingState & MeetingActions>((set) => ({
       };
     }),
   setScreenSharer: (sharer) => set(() => ({ screenSharer: sharer })),
-  setSpeaking: (userId, isSpeaking) =>
+  setSpeaking: (userId, isSpeaking, visibleCount) =>
     set((state) => {
       const lastSpeakerUpdate = isSpeaking ? { lastSpeakerId: userId } : {};
 
-      // 말하기를 멈췄을 때나, 고정된 유저는 계산에서 제외
       if (!isSpeaking && state.pinnedMemberIds.includes(userId)) {
         return {
           speakingMembers: { ...state.speakingMembers, [userId]: isSpeaking },
@@ -221,10 +221,10 @@ export const useMeetingStore = create<MeetingState & MeetingActions>((set) => ({
       }
 
       const currentIndex = state.orderedMemberIds.indexOf(userId);
+      const firstPageMemberCapacity = visibleCount - 1;
       let nextOrderedIds = state.orderedMemberIds;
 
-      // 발언한 사람이 첫 페이지에 존재하는지 확인
-      if (isSpeaking && currentIndex > VISIBLE_COUNT - 1) {
+      if (isSpeaking && currentIndex > firstPageMemberCapacity - 1) {
         const otherIds = state.orderedMemberIds.filter(
           (id) => !state.pinnedMemberIds.includes(id) && id !== userId,
         );
