@@ -38,7 +38,7 @@ describe('<MainVideo />', () => {
     });
   });
 
-  test('1순위: 핀 고정된 멤버가 있고 데이터가 유효하면 그를 보여준다', () => {
+  it('1순위: 핀 고정된 멤버가 있고 데이터가 유효하면 그를 보여준다', () => {
     // Given
     const userA = createMember('user-A', 'Pinned User');
     const userB = createMember('user-B', 'Speaker User');
@@ -57,7 +57,7 @@ describe('<MainVideo />', () => {
     expect(screen.getByText('Member: Pinned User')).toBeInTheDocument();
   });
 
-  test('2순위: 핀 고정이 없고, 최근 발언자가 있으면 그를 보여준다', () => {
+  it('2순위: 핀 고정이 없고, 최근 발언자가 있으면 그를 보여준다', () => {
     // Given
     const userB = createMember('user-B', 'Speaker User');
     const userC = createMember('user-C', 'Normal User');
@@ -76,7 +76,7 @@ describe('<MainVideo />', () => {
     expect(screen.getByText('Member: Speaker User')).toBeInTheDocument();
   });
 
-  test('3순위: 핀/발언자가 없으면 목록의 첫 번째 멤버를 보여준다', () => {
+  it('3순위: 핀/발언자가 없으면 목록의 첫 번째 멤버를 보여준다', () => {
     // Given
     const userC = createMember('user-C', 'First Member');
 
@@ -94,7 +94,7 @@ describe('<MainVideo />', () => {
     expect(screen.getByText('Member: First Member')).toBeInTheDocument();
   });
 
-  test('예외: 모든 조건이 없으면 MyVideo를 보여준다', () => {
+  it('예외: 모든 조건이 없으면 MyVideo를 보여준다', () => {
     // Given
     useMeetingStore.setState({
       pinnedMemberIds: [],
@@ -110,7 +110,7 @@ describe('<MainVideo />', () => {
     expect(screen.getByTestId('my-video')).toBeInTheDocument();
   });
 
-  test('Edge Case: 핀 고정 ID가 존재하지만 실제 멤버 데이터가 없는 경우(퇴장 등), 다음 순위(발언자)로 넘어간다', () => {
+  it('Edge Case: 핀 고정 ID가 존재하지만 실제 멤버 데이터가 없는 경우(퇴장 등), 다음 순위(발언자)로 넘어간다', () => {
     // Given
     const userB = createMember('user-B', 'Speaker User');
 
