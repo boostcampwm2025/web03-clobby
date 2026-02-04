@@ -15,7 +15,7 @@ export class ResumeConsumersUsecase<T> {
 
   constructor(
     private readonly consumerRepo: ConsumerRepositoryPort,
-    private readonly consumerTimerRepo : ConsumerTimerRepositoryPort,
+    private readonly consumerTimerRepo: ConsumerTimerRepositoryPort,
     { selectConsumerInfosFromCache }: ResumeConsumersUsecaseProps<T>,
   ) {
     this.selectConsumerInfosFromCache = selectConsumerInfosFromCache;
@@ -49,7 +49,7 @@ export class ResumeConsumersUsecase<T> {
           await consumer.setPriority(10);
           await consumer.setPreferredLayers({ spatialLayer: 2 });
           await consumer.requestKeyFrame();
-        };
+        }
 
         // screen일 경우에
         if (consumer.appData.type === 'screen_video') {
@@ -57,8 +57,8 @@ export class ResumeConsumersUsecase<T> {
 
           this.consumerTimerRepo.clear(consumer_id);
 
-          if ( consumer.type === 'simulcast' ) {
-            // simulcast인 경우 초반 뭉게짐을 좀 개선해주는 것이 좋을 수 있다. 
+          if (consumer.type === 'simulcast') {
+            // simulcast인 경우 초반 뭉게짐을 좀 개선해주는 것이 좋을 수 있다.
             await consumer.setPreferredLayers({ spatialLayer: 0 });
             await consumer.requestKeyFrame();
 
@@ -68,8 +68,8 @@ export class ResumeConsumersUsecase<T> {
                 const c = this.consumerRepo.get(consumer_id);
                 if (!c || c.closed || c.paused) return;
                 if (c.appData?.type !== 'screen_video' || c.type !== 'simulcast') return;
-                
-                // 화면 업그레이드 
+
+                // 화면 업그레이드
                 await c.setPreferredLayers({ spatialLayer: 1 });
                 await c.requestKeyFrame();
               } catch (e) {
@@ -77,16 +77,16 @@ export class ResumeConsumersUsecase<T> {
               } finally {
                 if (this.consumerTimerRepo.get(consumer_id) === t) {
                   this.consumerTimerRepo.delete(consumer_id);
-                };
-              };
-            }, 200); 
+                }
+              }
+            }, 200);
 
             this.consumerTimerRepo.set(consumer_id, t);
             return;
-          } 
+          }
 
           await consumer.requestKeyFrame();
-        };
+        }
       } catch (err) {
         this.logger.error(err);
       }

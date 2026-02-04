@@ -1,5 +1,3 @@
-
-
 export interface ConsumerTimerRepositoryPort {
   get(consumer_id: string): NodeJS.Timeout | undefined;
   set(consumer_id: string, timer: NodeJS.Timeout): void;

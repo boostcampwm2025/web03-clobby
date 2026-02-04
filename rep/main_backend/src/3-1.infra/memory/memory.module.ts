@@ -24,7 +24,7 @@ import { TransportRepository } from './sfu/transport-repo';
     TransportRepository,
     ProducerRepository,
     ConsumerRepository,
-    ConsumerTimerRepository
+    ConsumerTimerRepository,
   ],
 })
 export class MemoryModule {}

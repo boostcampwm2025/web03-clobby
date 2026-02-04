@@ -207,10 +207,12 @@ import {
       provide: ResumeConsumerUsecase,
       useFactory: (
         consumerRepo: ConsumerRepositoryPort,
-        consumerTimerRepo : ConsumerTimerRepositoryPort,
+        consumerTimerRepo: ConsumerTimerRepositoryPort,
         selectConsumerInfoFromCache: SelectConsumerInfoFromRedis,
       ) => {
-        return new ResumeConsumerUsecase(consumerRepo, consumerTimerRepo, { selectConsumerInfoFromCache });
+        return new ResumeConsumerUsecase(consumerRepo, consumerTimerRepo, {
+          selectConsumerInfoFromCache,
+        });
       },
       inject: [ConsumerRepository, ConsumerTimerRepository, SelectConsumerInfoFromRedis],
     },
@@ -259,10 +261,12 @@ import {
       provide: ResumeConsumersUsecase,
       useFactory: (
         consumerRepo: ConsumerRepositoryPort,
-        consumerTimerRepo : ConsumerTimerRepositoryPort,
+        consumerTimerRepo: ConsumerTimerRepositoryPort,
         selectConsumerInfosFromCache: SelectConsumerInfosFromRedis,
       ) => {
-        return new ResumeConsumersUsecase(consumerRepo, consumerTimerRepo, { selectConsumerInfosFromCache });
+        return new ResumeConsumersUsecase(consumerRepo, consumerTimerRepo, {
+          selectConsumerInfosFromCache,
+        });
       },
       inject: [ConsumerRepository, ConsumerTimerRepository, SelectConsumerInfosFromRedis],
     },

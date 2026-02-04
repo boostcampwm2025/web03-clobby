@@ -370,7 +370,7 @@ export class SignalingWebsocketService {
   // 특정 produce를 활성화 하고 싶을때
   async resumeProduce(
     client: Socket,
-    validate: resumeProducerValidate,    
+    validate: resumeProducerValidate,
   ): Promise<CreateProduceResult & { nickname: string; is_paused: boolean }> {
     const room_id: string = client.data.room_id;
     const payload: SocketPayload = client.data.user;
@@ -387,9 +387,9 @@ export class SignalingWebsocketService {
       user_id: payload.user_id,
       nickname: payload.nickname,
       is_paused: true,
-      is_restart : validate.kind === 'video' ? true : false
+      is_restart: validate.kind === 'video' ? true : false,
     };
-  };
+  }
 
   // 특정 produce를 끄겠다는 것
   async pauseProduce(
@@ -411,7 +411,7 @@ export class SignalingWebsocketService {
       user_id: payload.user_id,
       nickname: payload.nickname,
       is_paused: true,
-      is_restart : false
+      is_restart: false,
     };
   }
 
