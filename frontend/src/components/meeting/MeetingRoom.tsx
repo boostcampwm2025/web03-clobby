@@ -170,6 +170,7 @@ export default function MeetingRoom() {
               type: info.type,
               nickname: info.nickname,
               is_paused: false,
+              is_restart : false,
             };
 
             try {
@@ -261,6 +262,7 @@ export default function MeetingRoom() {
         nickname: producerNickname,
         is_paused: isPaused,
         producer_id: producerId,
+        is_restart
       } = producerInfo;
 
       const existingConsumer =
@@ -284,6 +286,9 @@ export default function MeetingRoom() {
 
         const stream = new MediaStream([existingConsumer.track]);
         setMemberStream(userId, producerType, stream);
+        if ( is_restart && producerType === "cam" ) {
+          // 유저가 cam을 켰을때 addMember에 들어갈 요소 추가
+        };
       } else {
         try {
           const { consumer, stream } = await consumeOne(producerInfo);

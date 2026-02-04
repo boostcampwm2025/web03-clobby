@@ -8,11 +8,11 @@ export default function MainVideo() {
     // 1. 고정한 사람 중 첫 번째
     const firstPinnedId = state.pinnedMemberIds[0];
     if (firstPinnedId && state.members[firstPinnedId]) return firstPinnedId;
-    // 2. 가장 최근에 발언한 사람
-    if (state.lastSpeakerId && state.members[state.lastSpeakerId]) {
-      return state.lastSpeakerId;
-    }
-    // 3. 목록의 첫 번째 유저
+    // // 2. 가장 최근에 발언한 사람
+    // if (state.lastSpeakerId && state.members[state.lastSpeakerId]) {
+    //   return state.lastSpeakerId;
+    // }
+    // 2. 목록의 첫 번째 유저
     const firstOrderedId = state.orderedMemberIds[0];
     if (firstOrderedId && state.members[firstOrderedId]) return firstOrderedId;
 
