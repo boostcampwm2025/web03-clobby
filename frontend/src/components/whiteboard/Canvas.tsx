@@ -26,11 +26,11 @@ import { getViewportRect, filterVisibleItems } from '@/utils/viewport';
 import { useElementSize } from '@/hooks/useElementSize';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import { useCanvasInteraction } from '@/hooks/useCanvasInteraction';
-import { useCanvasShortcuts } from '@/hooks/useCanvasShortcuts';
 import { useArrowHandles } from '@/hooks/useArrowHandles';
 import { useCanvasMouseEvents } from '@/hooks/useCanvasMouseEvents';
 import { useSelectionBox } from '@/hooks/useSelectionBox';
 import { useMultiDrag } from '@/hooks/useMultiDrag';
+import { usePinchZoom } from '@/hooks/usePinchZoom';
 
 import RenderItem from '@/components/whiteboard/items/RenderItem';
 import TextArea from '@/components/whiteboard/items/text/TextArea';
@@ -284,7 +284,6 @@ export default function Canvas() {
     handleArrowEndDrag,
     handleHandleDragEnd,
     handleArrowDblClick,
-    deleteControlPoint,
     draggingPoints,
     snapIndicator,
   } = useArrowHandles({
@@ -332,7 +331,7 @@ export default function Canvas() {
     !editingTextId && selectedIds.length > 0,
   );
 
-  const { startSelection } = useSelectionBox({
+  const { startSelection, cancelSelection } = useSelectionBox({
     stageRef,
     enabled: cursorMode === 'select',
   });
@@ -367,22 +366,70 @@ export default function Canvas() {
   );
 
   // 마우스 이벤트 통합 훅
-  const { handlePointerDown, handlePointerMove, currentDrawing } =
-    useCanvasMouseEvents({
-      onDeselect: handleCheckDeselect,
-      onSelectionBoxStart: startSelection,
-    });
+  const {
+    handlePointerDown,
+    handlePointerMove,
+    currentDrawing,
+    cancelDrawing,
+    cancelErasing,
+  } = useCanvasMouseEvents({
+    onDeselect: handleCheckDeselect,
+    onSelectionBoxStart: startSelection,
+  });
 
-  // 캔버스 드래그 가능 여부
-  const isDraggable = useWhiteboardLocalStore(
-    (state) => state.cursorMode === 'move',
+  // 핀치 줌 훅
+  const {
+    isActive: isPinching,
+    handleTouchStart: handlePinchStart,
+    handleTouchMove: handlePinchMove,
+    handleTouchEnd: handlePinchEnd,
+  } = usePinchZoom({
+    stageRef,
+    onScaleChange: setStageScale,
+    onPositionChange: setStagePos,
+    onPinchStart: () => {
+      // 핀치 시작 시 그리기/지우개/선택박스 취소
+      cancelDrawing();
+      cancelErasing();
+      cancelSelection();
+      // 아이템 선택 해제
+      clearSelection();
+    },
+  });
+
+  // 캔버스 드래그 가능 여부 (핀치 줌 중에는 비활성화함)
+  const isDraggable =
+    useWhiteboardLocalStore((state) => state.cursorMode === 'move') &&
+    !isPinching;
+
+  const handleTouchStart = useCallback(
+    (e: Konva.KonvaEventObject<TouchEvent>) => {
+      if (e.evt.touches.length === 2) {
+        handlePinchStart(e.evt);
+      } else {
+        handlePointerDown(e);
+      }
+    },
+    [handlePinchStart, handlePointerDown],
   );
 
-  useCanvasShortcuts({
-    isArrowOrLineSelected,
-    selectedHandleIndex,
-    deleteControlPoint,
-  });
+  const handleTouchMove = useCallback(
+    (e: Konva.KonvaEventObject<TouchEvent>) => {
+      if (e.evt.touches.length === 2) {
+        handlePinchMove(e.evt);
+      } else {
+        handlePointerMove(e);
+      }
+    },
+    [handlePinchMove, handlePointerMove],
+  );
+
+  const handleTouchEnd = useCallback(
+    (e: Konva.KonvaEventObject<TouchEvent>) => {
+      handlePinchEnd(e.evt);
+    },
+    [handlePinchEnd],
+  );
 
   const handleItemChange = useCallback(
     (id: string, newAttributes: Partial<WhiteboardItem>) => {
@@ -507,8 +554,9 @@ export default function Canvas() {
         }}
         onMouseDown={handlePointerDown}
         onMouseMove={handlePointerMove}
-        onTouchStart={handlePointerDown}
-        onTouchMove={handlePointerMove}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         <Layer
           clipX={0}

@@ -160,7 +160,13 @@ export function useSelectionBox({ stageRef, enabled }: UseSelectionBoxProps) {
     [startSelectionBox],
   );
 
+  const cancelSelection = useCallback(() => {
+    isDrawingRef.current = false;
+    useWhiteboardLocalStore.setState({ selectionBox: null });
+  }, []);
+
   return {
     startSelection,
+    cancelSelection,
   };
 }

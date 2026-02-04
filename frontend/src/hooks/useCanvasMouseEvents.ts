@@ -28,8 +28,8 @@ export function useCanvasMouseEvents({
   const cursorMode = useWhiteboardLocalStore((state) => state.cursorMode);
   const lastCursorUpdateRef = useRef(0);
 
-  const { handleDrawingStart, currentDrawing } = useDrawing();
-  const { handleEraserStart } = useEraser();
+  const { handleDrawingStart, currentDrawing, cancelDrawing } = useDrawing();
+  const { handleEraserStart, cancelErasing } = useEraser();
 
   // 커서 위치 업데이트 (스로틀링 30ms)
   const updateCursor = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
@@ -81,5 +81,7 @@ export function useCanvasMouseEvents({
     handlePointerDown,
     handlePointerMove,
     currentDrawing,
+    cancelDrawing,
+    cancelErasing,
   };
 }
