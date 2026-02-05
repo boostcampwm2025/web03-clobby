@@ -40,7 +40,7 @@ export default function AudioView({
   useEffect(() => {
     setSpeaking(userId, isSpeaking, membersPerPage);
     return () => setSpeaking(userId, false, membersPerPage);
-  }, [isSpeaking, userId, setSpeaking, membersPerPage]);
+  }, [isSpeaking, userId, setSpeaking]);
 
   return <audio ref={audioRef} autoPlay playsInline muted={false} />;
 }
