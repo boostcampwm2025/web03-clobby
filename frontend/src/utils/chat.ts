@@ -32,6 +32,8 @@ export const sliceFile = (file: File, partSize: number) => {
   return parts;
 };
 
+// S3 storage에 presigned URL로 파일(blob)을 업로드하고
+// 업로드 결과로 ETag를 받아오는 함수
 export async function putToPresignedUrl({
   upload_url,
   blob,

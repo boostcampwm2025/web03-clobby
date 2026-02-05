@@ -74,6 +74,7 @@ export function ChatListItem({
         {isFile && content.category === 'image' && (
           <span className="group relative rounded-sm bg-neutral-600 p-2">
             {isSvg ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 width={400}
                 height={300}
