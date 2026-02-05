@@ -57,7 +57,6 @@ interface MeetingActions {
   setMedia: (media: Partial<MediaState>) => void;
   setMembers: (members: MeetingMemberInfo[]) => void;
   addMember: (member: MeetingMemberInfo) => void;
-  newAddMember: (member: MeetingMemberInfo) => void;
   removeMember: (userId: string) => void;
   setScreenSharer: (sharer: { id: string; nickname: string } | null) => void;
   setSpeaking: (
@@ -131,6 +130,8 @@ export const useMeetingStore = create<MeetingState & MeetingActions>((set) => ({
     }),
   addMember: (member) =>
     set((state) => {
+      if (!member?.user_id) return state;
+
       const userId = member.user_id;
       const existingStream = state.memberStreams[member.user_id] || {};
 
@@ -142,35 +143,6 @@ export const useMeetingStore = create<MeetingState & MeetingActions>((set) => ({
 
       const remainingIds = state.orderedMemberIds.filter(
         (id) => !state.pinnedMemberIds.includes(id) && id !== userId,
-      );
-
-      const nextOrderedIds = [
-        ...state.pinnedMemberIds,
-        userId,
-        ...remainingIds,
-      ];
-
-      return {
-        members: {
-          ...state.members,
-          [userId]: member,
-        },
-        memberStreams: {
-          ...state.memberStreams,
-          [userId]: existingStream,
-        },
-        orderedMemberIds: nextOrderedIds,
-      };
-    }),
-  newAddMember: (member) =>
-    set((state) => {
-      if (!member?.user_id) return state;
-
-      const userId = member.user_id;
-      const existingStream = state.memberStreams[userId] || {};
-
-      const remainingIds = state.orderedMemberIds.filter(
-        (id) => id !== userId && !state.pinnedMemberIds.includes(id),
       );
 
       const nextOrderedIds = [
