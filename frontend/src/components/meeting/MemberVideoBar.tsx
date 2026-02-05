@@ -5,13 +5,13 @@ import MyVideo from '@/components/meeting/MyVideo';
 import MemberVideo from '@/components/meeting/MemberVideo';
 import { useMeetingSocketStore } from '@/store/useMeetingSocketStore';
 import { useMeetingStore } from '@/store/useMeetingStore';
-import { ConsumerInfo } from '@/types/meeting';
+import { ConsumerInfo, ProducerInfo } from '@/types/meeting';
 import {
   getConsumerInstances,
   getMembersPerPage,
   getVideoConsumerIds,
 } from '@/utils/meeting';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useWindowSize } from '@/hooks/useWindowSize';
 
 export default function MemberVideoBar() {
@@ -29,6 +29,7 @@ export default function MemberVideoBar() {
     orderedMemberIds,
     pinnedMemberIds,
     lastSpeakerId,
+    moveToFront,
   } = useMeetingStore();
 
   const { socket, recvTransport, device, addConsumers } =
@@ -177,6 +178,74 @@ export default function MemberVideoBar() {
     removeMemberStream,
     addConsumers,
   ]);
+
+  const checkAndMoveToFront = useCallback(
+    (userId: string) => {
+      // 현재 정렬된 멤버 목록에서 1페이지에 들어가는 멤버들의 ID를 추출
+      // (orderedMemberIds는 전체 순서이므로, 0부터 firstPageMemberCount까지가 1페이지 멤버임)
+      const firstPageMemberIds = orderedMemberIds.slice(
+        0,
+        firstPageMemberCount,
+      );
+
+      // 이미 1페이지에 존재한다면(포함되어 있다면) 이동하지 않음
+      if (firstPageMemberIds.includes(userId)) {
+        return;
+      }
+
+      // 1페이지에 없다면 앞으로 이동
+      moveToFront(userId);
+    },
+    [orderedMemberIds, firstPageMemberCount, moveToFront],
+  );
+
+  useEffect(() => {
+    if (!socket || !recvTransport || !device) return;
+
+    const onCameraProduced = async (producerInfo: ProducerInfo) => {
+      const { user_id: userId, producer_id: producerId, type } = producerInfo;
+
+      // 기존 컨슈머가 있는지 확인 (Resume 처리)
+      const consumers = useMeetingSocketStore.getState().consumers;
+      const existingConsumer = consumers[producerId];
+
+      if (existingConsumer) {
+        // 이미 연결된 적이 있다면 Resume 요청
+        try {
+          await socket.emitWithAck('signaling:ws:resume', {
+            consumer_id: existingConsumer.id,
+          });
+
+          // 스트림 다시 연결
+          setMemberStream(
+            userId,
+            type,
+            new MediaStream([existingConsumer.track]),
+          );
+        } catch (error) {
+          console.error('Resume failed:', error);
+        }
+      }
+
+      if (type === 'cam') {
+        checkAndMoveToFront(userId);
+      }
+    };
+
+    const onAlertProduced = (producerInfo: ProducerInfo) => {
+      if (producerInfo.type === 'cam') {
+        checkAndMoveToFront(producerInfo.user_id);
+      }
+    };
+
+    socket.on('room:camera_on', onCameraProduced);
+    socket.on('room:alert_produced', onAlertProduced);
+
+    return () => {
+      socket.off('room:camera_on', onCameraProduced);
+      socket.off('room:alert_produced', onAlertProduced);
+    };
+  }, [socket, recvTransport, device, setMemberStream, checkAndMoveToFront]);
 
   const onPrevClick = () => {
     if (!hasPrevPage) return;
