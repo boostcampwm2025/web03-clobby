@@ -168,8 +168,8 @@ export const useProduce = () => {
       stream = await navigator.mediaDevices.getDisplayMedia({
         video: {
           frameRate: { ideal: 30, max: 30 },
-          width:  { ideal: 1280 }, // 화면 공유쪽 테스팅 진행
-          height: { ideal: 720 },
+          width:  { ideal: 1920 }, // 화면 공유쪽 테스팅 진행
+          height: { ideal: 1080 },
         }, 
         audio: true,
       });
