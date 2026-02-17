@@ -1,35 +1,30 @@
-import { RefObject, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
-export const useChatScroll = (
-  containerRef: RefObject<HTMLDivElement | null>,
-) => {
+export const useChatScroll = () => {
   const [isAtBottom, setIsAtBottom] = useState(true);
+  const ref = useRef<HTMLDivElement>(null);
+
   const THRESHOLD = 150;
 
-  const checkIsNearBottom = () => {
-    const el = containerRef.current;
-    if (!el) return true;
-
-    return el.scrollHeight - el.scrollTop - el.clientHeight < THRESHOLD;
-  };
-
-  const handleScroll = () => {
-    const next = checkIsNearBottom();
-    setIsAtBottom((prev) => (prev === next ? prev : next));
-  };
-
-  const scrollToBottom = (isMyMessage = false) => {
-    const el = containerRef.current;
+  const scrollToBottom = useCallback((behavior: ScrollBehavior) => {
+    const el = ref.current;
     if (!el) return;
 
     el.scrollTo({
       top: el.scrollHeight,
-      behavior: isMyMessage ? 'auto' : 'smooth',
+      behavior,
     });
+  }, []);
 
-    // 메시지 전송 시 바로 아래로 이동했으므로 상태도 갱신
-    setIsAtBottom(true);
-  };
+  const handleScroll = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
 
-  return { handleScroll, scrollToBottom, isAtBottom };
+    const atBottom =
+      el.scrollHeight - el.scrollTop - el.clientHeight < THRESHOLD;
+
+    setIsAtBottom(atBottom);
+  }, []);
+
+  return { ref, isAtBottom, scrollToBottom, handleScroll };
 };
