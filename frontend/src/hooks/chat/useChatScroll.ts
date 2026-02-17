@@ -1,9 +1,9 @@
-import { RefObject, useRef } from 'react';
+import { RefObject, useState } from 'react';
 
 export const useChatScroll = (
   containerRef: RefObject<HTMLDivElement | null>,
 ) => {
-  const isAtBottomRef = useRef(true);
+  const [isAtBottom, setIsAtBottom] = useState(true);
   const THRESHOLD = 150;
 
   const checkIsNearBottom = () => {
@@ -14,7 +14,8 @@ export const useChatScroll = (
   };
 
   const handleScroll = () => {
-    isAtBottomRef.current = checkIsNearBottom();
+    const next = checkIsNearBottom();
+    setIsAtBottom((prev) => (prev === next ? prev : next));
   };
 
   const scrollToBottom = (isMyMessage = false) => {
@@ -25,7 +26,10 @@ export const useChatScroll = (
       top: el.scrollHeight,
       behavior: isMyMessage ? 'auto' : 'smooth',
     });
+
+    // 메시지 전송 시 바로 아래로 이동했으므로 상태도 갱신
+    setIsAtBottom(true);
   };
 
-  return { handleScroll, scrollToBottom, isAtBottomRef };
+  return { handleScroll, scrollToBottom, isAtBottom };
 };
