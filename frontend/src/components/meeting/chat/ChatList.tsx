@@ -2,15 +2,15 @@ import { useChatStore } from '@/store/useChatStore';
 import { useUserStore } from '@/store/useUserStore';
 import { isSameMinute } from '@/utils/chat';
 import { ChatListItem } from './ChatListItem';
-import { useEffect, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 import { useChatScroll } from '@/hooks/chat/useChatScroll';
 
 type Props = {
   scrollRef: React.RefObject<HTMLDivElement | null>;
 };
 
-export default function ChatList({ scrollRef }: Props) {
-  const { userId } = useUserStore();
+function ChatList({ scrollRef }: Props) {
+  const userId = useUserStore((s) => s.userId);
 
   const isFirstRender = useRef(true);
 
@@ -59,13 +59,9 @@ export default function ChatList({ scrollRef }: Props) {
   //   [isAtBottomRef, scrollToBottom],
   // );
 
-  return (
-    <section
-      ref={scrollRef}
-      onScroll={handleScroll}
-      className="chat-scrollbar flex-1 overflow-y-auto scroll-smooth pb-4"
-    >
-      {messages.map((chat, idx) => {
+  const chatItems = useMemo(
+    () =>
+      messages.map((chat, idx) => {
         const prevMsg = messages[idx - 1];
 
         const isDifferentUser = !prevMsg || prevMsg.userId !== chat.userId;
@@ -75,14 +71,19 @@ export default function ChatList({ scrollRef }: Props) {
         const showProfile = isDifferentUser || isDifferentTime;
 
         return (
-          <ChatListItem
-            key={chat.id}
-            {...chat}
-            showProfile={showProfile}
-            // onImageLoad={() => handleImageLoad(chat.userId === userId)}
-          />
+          <ChatListItem key={chat.id} {...chat} showProfile={showProfile} />
         );
-      })}
+      }),
+    [messages],
+  );
+
+  return (
+    <section
+      ref={scrollRef}
+      onScroll={handleScroll}
+      className="chat-scrollbar flex-1 overflow-y-auto scroll-smooth pb-4"
+    >
+      {chatItems}
 
       {showScrollBtn && (
         <button
@@ -98,3 +99,5 @@ export default function ChatList({ scrollRef }: Props) {
     </section>
   );
 }
+
+export default memo(ChatList);
