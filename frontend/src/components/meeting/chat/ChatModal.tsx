@@ -1,17 +1,14 @@
 import { CloseIcon } from '@/assets/icons/common';
 import { FileIcon, SendIcon } from '@/assets/icons/meeting';
 import ToastMessage from '@/components/common/ToastMessage';
-import { useChatSender } from '@/hooks/chat/useChatSender';
-import { useFileUpload } from '@/hooks/chat/useFileUpload';
-import { useChatStore } from '@/store/useChatStore';
 import { useMeetingSocketStore } from '@/store/useMeetingSocketStore';
 import { useMeetingStore } from '@/store/useMeetingStore';
 import { useUserStore } from '@/store/useUserStore';
-import { mapRecvPayloadToChatMessage } from '@/utils/chat';
 import { formatFileSize } from '@/utils/formatter';
 import Image from 'next/image';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import ChatList from './ChatList';
+import { memo, useEffect, useRef } from 'react';
+import { useChatForm } from '@/hooks/chat/useChatForm';
+import ChatContainer from './ChatContainer';
 
 type PendingFile = {
   file: File;
@@ -20,141 +17,40 @@ type PendingFile = {
   mediaType: 'image' | 'video' | 'file';
 };
 
-const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
-
 function ChatModal() {
-  console.count('ChatModal render');
-
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const sizeErrorTimerRef = useRef<NodeJS.Timeout | null>(null);
   const pendingFilesRef = useRef<PendingFile[]>([]);
 
   const setIsOpen = useMeetingStore((s) => s.setIsOpen);
-
-  const [hasValue, setHasValue] = useState(false);
-  const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
-  const [showSizeError, setShowSizeError] = useState(false);
 
   const userId = useUserStore((s) => s.userId);
   const nickname = useUserStore((s) => s.nickname);
   const profilePath = useUserStore((s) => s.profilePath);
   const socket = useMeetingSocketStore((s) => s.socket);
 
-  const { sendMessage: sendTextMessage } = useChatSender({
-    socket,
-    userId,
-    nickname,
-    profileImg: profilePath as string,
-  });
-
-  const { uploadFile, progressMap, uploadingMap } = useFileUpload(socket);
-
-  const addFilesToPending = useCallback((files: File[]) => {
-    if (files.length === 0) return;
-
-    const oversizedFiles = files.filter((f) => f.size > MAX_FILE_SIZE);
-    if (oversizedFiles.length > 0) {
-      setShowSizeError(true);
-      if (sizeErrorTimerRef.current) {
-        clearTimeout(sizeErrorTimerRef.current);
-      }
-      sizeErrorTimerRef.current = setTimeout(
-        () => setShowSizeError(false),
-        3000,
-      );
-    }
-
-    const validFiles = files.filter((f) => f.size <= MAX_FILE_SIZE);
-    if (validFiles.length === 0) return;
-
-    const newFiles = validFiles.map((file) => {
-      const isImage = file.type.startsWith('image/');
-      const isVideo = file.type.startsWith('video/');
-
-      let mediaType: PendingFile['mediaType'] = 'file';
-      if (isImage) mediaType = 'image';
-      else if (isVideo) mediaType = 'video';
-
-      return {
-        file,
-        mediaType,
-        id: crypto.randomUUID(),
-        // 미리보기 URL 생성
-        preview: isImage || isVideo ? URL.createObjectURL(file) : undefined,
-      };
-    });
-
-    setPendingFiles((prev) => [...prev, ...newFiles]);
-  }, []);
+  const {
+    textareaRef,
+    sizeErrorTimerRef,
+    pendingFiles,
+    showSizeError,
+    isUploading,
+    hasValue,
+    addFiles,
+    removeFile,
+    handleSubmit,
+    setHasValue,
+    progressMap,
+    uploadingMap,
+  } = useChatForm(socket, userId, nickname, profilePath as string);
 
   // 파일 선택 핸들러
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
-    addFilesToPending(selectedFiles);
+    addFiles(selectedFiles);
     e.target.value = '';
   };
 
-  // 파일 삭제 및 메모리 해제용
-  const clearFilePreview = (file: PendingFile) => {
-    if (file.preview) {
-      URL.revokeObjectURL(file.preview);
-    }
-  };
-
-  const removePendingFiles = (id: string) => {
-    setPendingFiles((prev) => {
-      const target = prev.find((f) => f.id === id);
-      if (target) clearFilePreview(target);
-      return prev.filter((f) => f.id !== id);
-    });
-  };
-
   const onCloseClick = () => setIsOpen('isChatOpen', false);
-
-  // 이후 form 관련 라이브러리 사용 시 수정 필요
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const textValue = textareaRef.current?.value.trim();
-    if (!textValue && pendingFiles.length === 0) return;
-
-    if (textValue) {
-      sendTextMessage(textValue);
-
-      if (textareaRef.current) {
-        textareaRef.current.value = '';
-        textareaRef.current.style.height = 'auto'; // 전송하고 높이 초기화
-        setHasValue(false);
-      }
-    }
-
-    if (pendingFiles.length > 0) {
-      const filesToUpload = [...pendingFiles];
-
-      const uploadPromises = filesToUpload.map(async (item) => {
-        try {
-          const res = await uploadFile(item.file, item.id);
-
-          if (res) {
-            // 서버 응답 데이터를 채팅 메시지 객체로 변환
-            const newMessage = mapRecvPayloadToChatMessage(res);
-            useChatStore.getState().addMessage(newMessage);
-
-            clearFilePreview(item); // 성공하면 메모리 해제
-
-            // 여기서 펜딩애들 제거
-            setPendingFiles((prev) => prev.filter((f) => f.id !== item.id));
-          }
-        } catch {
-          console.error(`${item.file.name} 업로드에 실패했습니다.`);
-        }
-      });
-
-      await Promise.all(uploadPromises);
-    }
-  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.nativeEvent.isComposing) return;
@@ -209,14 +105,9 @@ function ChatModal() {
 
     if (files.length > 0) {
       e.preventDefault(); // 이미지가 textarea에 base64로 들어가는 것 방지
-      addFilesToPending(files);
+      addFiles(files);
     }
   };
-
-  const isUploading = useMemo(
-    () => Object.values(uploadingMap).some(Boolean),
-    [uploadingMap],
-  );
 
   return (
     <aside className="meeting-side-modal z-6">
@@ -235,12 +126,12 @@ function ChatModal() {
       </div>
 
       {/* 채팅 내역 */}
-      <ChatList scrollRef={scrollRef} />
+      <ChatContainer />
 
       {/* 채팅 입력 부분 */}
       <form
         className="flex flex-col border-t border-neutral-600"
-        onSubmit={onSubmit}
+        onSubmit={handleSubmit}
       >
         {/* 파일 업로드 현황 */}
         {pendingFiles.length > 0 && (
@@ -306,7 +197,7 @@ function ChatModal() {
                   {/* 삭제 버튼 */}
                   <button
                     type="button"
-                    onClick={() => removePendingFiles(f.id)}
+                    onClick={() => removeFile(f.id)}
                     className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-neutral-500 text-neutral-200 opacity-0 transition-opacity group-hover:opacity-100"
                   >
                     <CloseIcon className="h-3 w-3" />
